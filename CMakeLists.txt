@@ -32,3 +32,7 @@ file(GLOB TESTS test/*.cpp)
 add_executable(protopuf_test ${TESTS})
 target_include_directories(protopuf_test PUBLIC include)
 target_link_libraries(protopuf_test gtest_main)
+
+include(GoogleTest)
+enable_testing()
+gtest_add_tests(TARGET protopuf_test)
