@@ -22,3 +22,19 @@ GTEST_TEST(array_coder, decode) {
     EXPECT_EQ(n, 7);
     EXPECT_EQ(con, v);
 }
+
+GTEST_TEST(string_coder, encode) {
+    array<byte, 10> e{3_b, 0x61_b, 0x62_b, 0x63_b};
+    array<byte, 10> a{};
+    auto n = string_coder::encode("abc"s, a);
+    EXPECT_EQ(n, 4);
+    EXPECT_EQ(a, e);
+}
+
+GTEST_TEST(string_coder, decode) {
+    auto e = "abc"s;
+    array<byte, 10> a{3_b, 0x61_b, 0x62_b, 0x63_b};
+    auto [v, n] = string_coder::decode(a);
+    EXPECT_EQ(n, 4);
+    EXPECT_EQ(v, e);
+}

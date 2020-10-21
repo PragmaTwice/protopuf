@@ -8,7 +8,7 @@
 
 namespace pp {
 
-    template <coder C, typename R = std::vector<typename C::value_type>>
+    template <coder C, std::ranges::sized_range R = std::vector<typename C::value_type>>
     struct array_coder {
         using value_type = R;
 
@@ -42,6 +42,11 @@ namespace pp {
             return {con, n};
         }
     };
+
+    template <integral T>
+    struct basic_string_coder : array_coder<integer_coder<T>, std::basic_string<T>> {};
+
+    struct string_coder : basic_string_coder<std::string::value_type> {};
 
 }
 
