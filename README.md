@@ -1,5 +1,6 @@
 # ![puffer](asset/puffer.png) Protocol Puffers
 [![Github Actions](https://github.com/PragmaTwice/protopuf/workflows/BuildAndTest/badge.svg)](https://github.com/PragmaTwice/protopuf/actions)
+
 *What is this?*
 
 ## Requirements
