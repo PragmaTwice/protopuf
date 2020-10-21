@@ -14,13 +14,14 @@ int main() {
     cout << -1 << " " << a.get_underlying() << " " << a.get() << "\n";
     cout << bytes_to_int(span(b)) << " " << bytes_to_int(span(c)) << "\n";
     array<byte, 10> d{};
-    varint<int>::encode((unsigned)-1, d);
+    varint_coder<int>::encode((unsigned)-1, d);
     cout << hex << (int)d[0] << " " << (int)d[1]  << " " << (int)d[2] << " " << (int)d[3] << " " << (int)d[4] << "\n";
-    cout << dec << varint<int>::decode(span(d)) << "\n";
-    varint<sint_zigzag<2>>::encode(sint_zigzag<2>(300), d);
+    cout << dec << varint_coder<int>::decode(span(d)).first << "\n";
+    varint_coder<sint_zigzag<2>>::encode(sint_zigzag<2>(300), d);
     cout << hex << (int)d[0] << " " << (int)d[1] << "\n";
-    cout << dec << varint<sint_zigzag<2>>::decode(span(d)).get() << "\n";
-    varint<int>::encode(unsigned(300), d);
+    cout << dec << varint_coder<sint_zigzag<2>>::decode(span(d)).first.get() << "\n";
+    varint_coder<int>::encode(unsigned(300), d);
     cout << hex << (int)d[0] << " " << (int)d[1] << "\n";
-    cout << dec << varint<int>::decode(span(d)) << "\n";
+    cout << dec << varint_coder<int>::decode(span(d)).first << "\n";
+    cout << coder < integer_coder<unsigned>> << "\n";
 }

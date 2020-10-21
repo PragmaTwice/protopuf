@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <span>
 #include <cstddef>
+#include <coder.h>
 
 namespace pp {
     template <std::size_t N>
@@ -102,6 +103,42 @@ namespace pp {
 
         return a;
     }
+
+    // fixed integer encoder/decoder
+    template <typename>
+    class integer_coder;
+
+    template <std::unsigned_integral T>
+    class integer_coder<T> {
+    public:
+        using value_type = T;
+
+        static constexpr std::size_t N = sizeof(T);
+
+        static constexpr std::size_t encode(T i, std::span<std::byte> bytes) {
+            int_to_bytes<N>(i, bytes.subspan<0, N>());
+            return N;
+        }
+
+        static constexpr decode_result<T> decode(std::span<std::byte> bytes) {
+            return {bytes_to_int<N>(bytes.subspan<0, N>()), N};
+        }
+    };
+
+    template <std::signed_integral T>
+    class integer_coder<T> {
+    public:
+        using value_type = T;
+
+        static constexpr std::size_t encode(T i, std::span<std::byte> bytes) {
+            return integer_coder<std::make_unsigned_t<T>>::encode(i, bytes);
+        }
+
+        static constexpr decode_result<T> decode(std::span<std::byte> bytes) {
+            return integer_coder<std::make_unsigned_t<T>>::decode(bytes);
+        }
+    };
+
 }
 
 #endif //PROTOPUF_INT_H

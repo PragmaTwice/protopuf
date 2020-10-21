@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <int.h>
+#include <varint.h>
 
 namespace pp {
 
@@ -63,6 +64,43 @@ namespace pp {
 
     template <std::size_t N>
     struct is_integral<sint_zigzag<N>> : std::true_type {};
+
+    template <std::size_t N>
+    class integer_coder<sint_zigzag<N>> {
+        using T = sint_zigzag<N>;
+
+    public:
+        using value_type = T;
+
+        static constexpr std::size_t encode(T i, std::span<std::byte> bytes) {
+            return integer_coder<uint<N>>::encode(i.get_underlying(), bytes);
+        }
+
+        static constexpr decode_result<T> decode(std::span<std::byte> bytes) {
+            auto p = integer_coder<uint<N>> ::decode(bytes);
+            return {T::from_uint(p.first), p.second};
+        }
+    };
+
+
+    template<std::size_t N>
+    class varint_coder<sint_zigzag<N>> {
+        using T = sint_zigzag<N>;
+
+    public:
+        using value_type = T;
+
+        varint_coder() = delete;
+
+        static constexpr std::size_t encode(T n, std::span<std::byte> s) {
+            return varint_coder<uint<N>>::encode(n.get_underlying(), s);
+        }
+
+        static constexpr decode_result<T> decode(std::span<std::byte> s) {
+            auto p = varint_coder<uint<N>>::decode(s);
+            return {T::from_uint(p.first), p.second};
+        }
+    };
 }
 
 #endif //PROTOPUF_ZIGZAG_H
