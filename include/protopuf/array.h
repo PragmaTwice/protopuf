@@ -48,6 +48,8 @@ namespace pp {
 
     struct string_coder : basic_string_coder<std::string::value_type> {};
 
+    struct bytes_coder : array_coder<integer_coder<uint<1>>> {};
+
 }
 
 #endif //PROTOPUF_ARRAY_H
