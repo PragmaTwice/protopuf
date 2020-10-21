@@ -37,6 +37,10 @@ namespace pp {
             return to_sint(v);
         }
 
+        constexpr explicit operator sint<N>() const {
+            return get();
+        }
+
         static constexpr sint_zigzag from_uint(underlying_type in) {
             sint_zigzag s;
             s.v = in;
@@ -48,17 +52,25 @@ namespace pp {
         }
 
         constexpr void dump_to(std::span<std::byte, N> out) const {
-            int_to_bytes(v, out);
+            int_to_bytes<N>(v, out);
         }
 
         constexpr std::array<std::byte, N> dump() const {
-            return int_to_bytes(v);
+            return int_to_bytes<N>(v);
         }
 
         template <std::size_t M> requires (M <= N)
         constexpr sint_zigzag& operator=(const sint_zigzag<M>& i) {
             v = i.v;
             return *this;
+        }
+
+        constexpr bool operator==(const sint_zigzag& x) const {
+            return v == x.v;
+        }
+
+        constexpr bool operator!=(const sint_zigzag& x) const {
+            return !(*this == x);
         }
     };
 
