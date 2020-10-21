@@ -1,10 +1,10 @@
 #ifndef PROTOPUF_VARINT_H
 #define PROTOPUF_VARINT_H
 
-#include <int.h>
-#include <byte.h>
 #include <concepts>
-#include <coder.h>
+#include "int.h"
+#include "byte.h"
+#include "coder.h"
 
 namespace pp {
 

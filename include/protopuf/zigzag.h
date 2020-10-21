@@ -2,8 +2,8 @@
 #define PROTOPUF_ZIGZAG_H
 
 #include <cstddef>
-#include <int.h>
-#include <varint.h>
+#include "int.h"
+#include "varint.h"
 
 namespace pp {
 
