@@ -28,6 +28,7 @@ namespace pp {
             } while(n != 0);
 
             *(iter - 1) &= 0b0111'1111_b;
+
             return iter - s.begin();
         }
 
@@ -36,11 +37,11 @@ namespace pp {
 
             auto iter = s.begin();
             std::size_t i = 0;
-            do {
+            while((*iter >> 7) == 1_b) {
                 n |= static_cast<T>(*iter & 0b0111'1111_b) << 7*i;
                 ++iter, ++i;
-            } while((*iter >> 7) == 1_b);
-            n |= static_cast<T>(*iter) << 7*i;
+            }
+            n |= static_cast<T>(*iter++) << 7 * i;
 
             return {n, iter - s.begin()};
         }

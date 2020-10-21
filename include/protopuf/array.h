@@ -7,7 +7,8 @@
 #include "varint.h"
 
 namespace pp {
-    template <coder C, std::ranges::sized_range R = std::vector<typename C::value_type>>
+
+    template <coder C, typename R = std::vector<typename C::value_type>>
     struct array_coder {
         using value_type = R;
 
@@ -25,7 +26,23 @@ namespace pp {
 
             return n;
         }
+
+        static constexpr decode_result<R> decode(bytes b) {
+            auto [len, n] = varint_coder<uint<8>>::decode(b);
+            b = b.subspan(n);
+            R con;
+
+            while(len--) {
+                auto [v, m] = C::decode(b);
+                *std::inserter(con, con.end()) = v;
+                b = b.subspan(m);
+                n += m;
+            }
+
+            return {con, n};
+        }
     };
+
 }
 
 #endif //PROTOPUF_ARRAY_H

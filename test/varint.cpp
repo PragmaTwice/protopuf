@@ -48,5 +48,13 @@ GTEST_TEST(varint, decode) {
 
     a = {0x80_b, 1_b};
     p = varint_coder<pp::uint<1>>::decode(span(a));
-    EXPECT_EQ(p, decode_result<pp::uint<1>>(128, 1));
+    EXPECT_EQ(p, decode_result<pp::uint<1>>(128, 2));
+
+    a = {1_b};
+    auto p2 = varint_coder<pp::uint<8>>::decode(span(a));
+    EXPECT_EQ(p2, decode_result<pp::uint<8>>(1, 1));
+
+    a = {4_b};
+    p2 = varint_coder<pp::uint<8>>::decode(span(a));
+    EXPECT_EQ(p2, decode_result<pp::uint<8>>(4, 1));
 }
