@@ -4,5 +4,7 @@
 
 ## Requirements
 
-- a compiler and a standard library implementation with C++20 support (only GCC 10 and its libstdc++ now)
-- CMake
+- a compiler and a standard library implementation with C++20 support 
+    - only GCC 10 and its libstdc++ now
+- GoogleTest (optional)
+- CMake 3
