@@ -16,7 +16,7 @@ jobs:
       - name: install gcc
         run: sudo apt install gcc-10
       - name: generate build script
-        run: CXX=/usr/bin/gcc-10 cmake .
+        run: CXX=/usr/bin/g++-10 cmake .
       - name: build project
         run: make all
       - name: run unit testing
