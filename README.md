@@ -2,6 +2,7 @@
 [![Github Actions](https://github.com/PragmaTwice/protopuf/workflows/BuildAndTest/badge.svg)](https://github.com/PragmaTwice/protopuf/actions)
 
 *What is this?*
+
 A little, highly templated, and protobuf-compatible serialization/deserialization library.
 
 ## Requirements
