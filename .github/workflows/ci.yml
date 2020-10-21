@@ -1,0 +1,23 @@
+name: BuildAndTest
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - 'asset/**'
+      - 'LICENSE'
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: install gcc
+        run: sudo apt install gcc-10
+      - name: generate build script
+        run: CXX=/usr/bin/gcc-10 cmake .
+      - name: build project
+        run: make all
+      - name: run unit testing
+        run: make test
