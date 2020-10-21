@@ -20,24 +20,26 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr std::size_t encode(T n, std::span<std::byte> s) {
+        static constexpr std::size_t encode(T n, bytes s) {
             auto iter = s.begin();
-            for (; std::byte(n) != 0_b; n >>= 7, ++iter) {
+            do {
                 *iter = 0b1000'0000_b | std::byte(n);
-            }
-            *(iter - 1) &= 0b0111'1111_b;
+                n >>= 7, ++iter;
+            } while(n != 0);
 
+            *(iter - 1) &= 0b0111'1111_b;
             return iter - s.begin();
         }
 
-        static constexpr decode_result<T> decode(std::span<std::byte> s) {
+        static constexpr decode_result<T> decode(bytes s) {
             T n = 0;
 
             auto iter = s.begin();
             std::size_t i = 0;
-            for(; (*iter >> 7) == 1_b; ++iter, ++i) {
+            do {
                 n |= static_cast<T>(*iter & 0b0111'1111_b) << 7*i;
-            }
+                ++iter, ++i;
+            } while((*iter >> 7) == 1_b);
             n |= static_cast<T>(*iter) << 7*i;
 
             return {n, iter - s.begin()};
@@ -51,11 +53,11 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr std::size_t encode(T n, std::span<std::byte> s) {
+        static constexpr std::size_t encode(T n, bytes s) {
             return varint_coder<std::make_unsigned_t<T>>::encode(n, s);
         }
 
-        static constexpr decode_result<T> decode(std::span<std::byte> s) {
+        static constexpr decode_result<T> decode(bytes s) {
             return varint_coder<std::make_unsigned_t<T>>::decode(s);
         }
     };

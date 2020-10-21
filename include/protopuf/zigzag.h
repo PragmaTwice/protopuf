@@ -84,11 +84,13 @@ namespace pp {
     public:
         using value_type = T;
 
-        static constexpr std::size_t encode(T i, std::span<std::byte> bytes) {
+        integer_coder() = delete;
+
+        static constexpr std::size_t encode(T i, bytes bytes) {
             return integer_coder<uint<N>>::encode(i.get_underlying(), bytes);
         }
 
-        static constexpr decode_result<T> decode(std::span<std::byte> bytes) {
+        static constexpr decode_result<T> decode(bytes bytes) {
             auto p = integer_coder<uint<N>> ::decode(bytes);
             return {T::from_uint(p.first), p.second};
         }
@@ -104,11 +106,11 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr std::size_t encode(T n, std::span<std::byte> s) {
+        static constexpr std::size_t encode(T n, bytes s) {
             return varint_coder<uint<N>>::encode(n.get_underlying(), s);
         }
 
-        static constexpr decode_result<T> decode(std::span<std::byte> s) {
+        static constexpr decode_result<T> decode(bytes s) {
             auto p = varint_coder<uint<N>>::decode(s);
             return {T::from_uint(p.first), p.second};
         }

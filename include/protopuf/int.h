@@ -2,9 +2,9 @@
 #define PROTOPUF_INT_H
 
 #include <cstdint>
-#include <span>
 #include <cstddef>
 #include "coder.h"
+#include "byte.h"
 
 namespace pp {
     template <std::size_t N>
@@ -75,22 +75,22 @@ namespace pp {
     // 1. *(uint<N> *)bytes.data() // but it generates a UB while N > 1
     // 2. std::bit_cast(std::to_array(bytes)) // but libstdc++ has not implemented bit_cast yet
     template <std::size_t N>
-    constexpr uint<N> bytes_to_int(std::span<std::byte, N> bytes) {
+    constexpr uint<N> bytes_to_int(sized_bytes<N> bytes) {
         return bytes_to_int(bytes.template subspan<0, N/2>()) | bytes_to_int(bytes.template subspan<N/2>()) << N*4;
     }
     template <>
-    constexpr uint<1> bytes_to_int(std::span<std::byte, 1> bytes) {
+    constexpr uint<1> bytes_to_int(sized_bytes<1> bytes) {
         return static_cast<uint<1>>(bytes.front());
     }
 
     // same as above
     template <std::size_t N>
-    constexpr void int_to_bytes(uint<N> i, std::span<std::byte, N> bytes) {
+    constexpr void int_to_bytes(uint<N> i, sized_bytes<N> bytes) {
         int_to_bytes<N/2>(i, bytes.template subspan<0, N/2>());
         int_to_bytes<N/2>(i >> N*4, bytes.template subspan<N/2>());
     }
     template <>
-    constexpr void int_to_bytes(uint<1> i, std::span<std::byte, 1> bytes) {
+    constexpr void int_to_bytes(uint<1> i, sized_bytes<1> bytes) {
         bytes.front() = static_cast<std::byte>(i);
     }
 
@@ -113,14 +113,16 @@ namespace pp {
     public:
         using value_type = T;
 
+        integer_coder() = delete;
+
         static constexpr std::size_t N = sizeof(T);
 
-        static constexpr std::size_t encode(T i, std::span<std::byte> bytes) {
+        static constexpr std::size_t encode(T i, bytes bytes) {
             int_to_bytes<N>(i, bytes.subspan<0, N>());
             return N;
         }
 
-        static constexpr decode_result<T> decode(std::span<std::byte> bytes) {
+        static constexpr decode_result<T> decode(bytes bytes) {
             return {bytes_to_int<N>(bytes.subspan<0, N>()), N};
         }
     };
@@ -130,11 +132,13 @@ namespace pp {
     public:
         using value_type = T;
 
-        static constexpr std::size_t encode(T i, std::span<std::byte> bytes) {
+        integer_coder() = delete;
+
+        static constexpr std::size_t encode(T i, bytes bytes) {
             return integer_coder<std::make_unsigned_t<T>>::encode(i, bytes);
         }
 
-        static constexpr decode_result<T> decode(std::span<std::byte> bytes) {
+        static constexpr decode_result<T> decode(bytes bytes) {
             return integer_coder<std::make_unsigned_t<T>>::decode(bytes);
         }
     };
