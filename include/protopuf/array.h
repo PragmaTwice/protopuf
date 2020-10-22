@@ -22,32 +22,26 @@ namespace pp {
 
         array_coder() = delete;
 
-        static constexpr std::size_t encode(const R& con, bytes b) {
-            auto n = varint_coder<uint<8>>::encode(std::ranges::size(con), b);
-            b = b.subspan(n);
+        static constexpr bytes encode(const R& con, bytes b) {
+            b = varint_coder<uint<8>>::encode(std::ranges::size(con), b);
 
             for(const auto& i : con) {
-                auto m = C::encode(i, b);
-                b = b.subspan(m);
-                n += m;
+                b = C::encode(i, b);
             }
 
-            return n;
+            return b;
         }
 
         static constexpr decode_result<R> decode(bytes b) {
-            auto [len, n] = varint_coder<uint<8>>::decode(b);
-            b = b.subspan(n);
+            uint<8> len = 0;
+            std::tie(len, b) = varint_coder<uint<8>>::decode(b);
             R con;
 
             while(len--) {
-                auto [v, m] = C::decode(b);
-                *std::inserter(con, con.end()) = v;
-                b = b.subspan(m);
-                n += m;
+                std::tie(*std::inserter(con, con.end()), b) = C::decode(b);
             }
 
-            return {con, n};
+            return {con, b};
         }
     };
 

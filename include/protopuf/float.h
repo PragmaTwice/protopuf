@@ -25,7 +25,7 @@ namespace pp {
     public:
         float_coder() = delete;
 
-        static constexpr std::size_t encode(T v, bytes b) {
+        static constexpr bytes encode(T v, bytes b) {
             return integer_coder<underlying_type>::encode(underlying_cast(v), b);
         }
 

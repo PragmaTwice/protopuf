@@ -126,13 +126,13 @@ namespace pp {
 
         static constexpr std::size_t N = sizeof(T);
 
-        static constexpr std::size_t encode(T i, bytes bytes) {
-            int_to_bytes<N>(i, bytes.subspan<0, N>());
-            return N;
+        static constexpr bytes encode(T i, bytes b) {
+            int_to_bytes<N>(i, b.subspan<0, N>());
+            return b.subspan<N>();
         }
 
-        static constexpr decode_result<T> decode(bytes bytes) {
-            return {bytes_to_int<N>(bytes.subspan<0, N>()), N};
+        static constexpr decode_result<T> decode(bytes b) {
+            return {bytes_to_int<N>(b.subspan<0, N>()), b.subspan<N>()};
         }
     };
 
@@ -143,12 +143,12 @@ namespace pp {
 
         integer_coder() = delete;
 
-        static constexpr std::size_t encode(T i, bytes bytes) {
-            return integer_coder<std::make_unsigned_t<T>>::encode(i, bytes);
+        static constexpr bytes encode(T i, bytes b) {
+            return integer_coder<std::make_unsigned_t<T>>::encode(i, b);
         }
 
-        static constexpr decode_result<T> decode(bytes bytes) {
-            return integer_coder<std::make_unsigned_t<T>>::decode(bytes);
+        static constexpr decode_result<T> decode(bytes b) {
+            return integer_coder<std::make_unsigned_t<T>>::decode(b);
         }
     };
 

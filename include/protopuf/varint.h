@@ -20,7 +20,7 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr std::size_t encode(T n, bytes s) {
+        static constexpr bytes encode(T n, bytes s) {
             auto iter = s.begin();
             do {
                 *iter = 0b1000'0000_b | std::byte(n);
@@ -29,7 +29,7 @@ namespace pp {
 
             *(iter - 1) &= 0b0111'1111_b;
 
-            return iter - s.begin();
+            return {iter, s.end()};
         }
 
         static constexpr decode_result<T> decode(bytes s) {
@@ -43,7 +43,7 @@ namespace pp {
             }
             n |= static_cast<T>(*iter++) << 7 * i;
 
-            return {n, iter - s.begin()};
+            return {n, {iter, s.end()}};
         }
     };
 
@@ -54,7 +54,7 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr std::size_t encode(T n, bytes s) {
+        static constexpr bytes encode(T n, bytes s) {
             return varint_coder<std::make_unsigned_t<T>>::encode(n, s);
         }
 

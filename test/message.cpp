@@ -35,7 +35,7 @@ GTEST_TEST(message_coder, encode) {
     message<varint_field<1, int>> m{150};
     array<byte, 10> a{};
     auto n = message_coder<decltype(m)>::encode(m, a);
-    EXPECT_EQ(n, 3);
+    EXPECT_EQ(n.begin() - bytes(a).begin(), 3);
     EXPECT_EQ(a, (array<byte, 10>{0x08_b, 0x96_b, 0x01_b}));
 }
 

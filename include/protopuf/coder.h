@@ -7,12 +7,12 @@
 namespace pp {
 
     template<typename T>
-    using decode_result = std::pair<T, std::size_t>;
+    using decode_result = std::pair<T, bytes>;
 
     template<typename T>
     concept encoder = requires(typename T::value_type v, bytes s) {
         typename T::value_type;
-        { T::encode(v, s) } -> std::same_as<std::size_t>;
+        { T::encode(v, s) } -> std::same_as<bytes>;
     };
 
     template<typename T>

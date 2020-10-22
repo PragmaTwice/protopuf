@@ -86,7 +86,7 @@ namespace pp {
 
         integer_coder() = delete;
 
-        static constexpr std::size_t encode(T i, bytes bytes) {
+        static constexpr bytes encode(T i, bytes bytes) {
             return integer_coder<uint<N>>::encode(i.get_underlying(), bytes);
         }
 
@@ -106,7 +106,7 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr std::size_t encode(T n, bytes s) {
+        static constexpr bytes encode(T n, bytes s) {
             return varint_coder<uint<N>>::encode(n.get_underlying(), s);
         }
 

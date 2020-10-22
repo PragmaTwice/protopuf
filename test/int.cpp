@@ -46,30 +46,28 @@ GTEST_TEST(integer_coder, encode) {
     array<byte, 1024> a{};
     span<byte> s = a;
 
-    size_t n1 = integer_coder<pp::uint<1>>::encode(u1, s);
-    s = s.subspan(n1);
-    size_t n2 = integer_coder<pp::uint<2>>::encode(u2, s);
-    s = s.subspan(n2);
-    size_t n3 = integer_coder<pp::uint<4>>::encode(u3, s);
-    s = s.subspan(n3);
+    s = integer_coder<pp::uint<1>>::encode(u1, s);
+    s = integer_coder<pp::uint<2>>::encode(u2, s);
+    s = integer_coder<pp::uint<4>>::encode(u3, s);
 
     span b = span(a).subspan<0,7>();
 
-    EXPECT_TRUE(equal(a.begin(), a.end(), b.begin()));
+    EXPECT_TRUE(equal(b.begin(), b.end(), a4.begin()));
 }
 
 GTEST_TEST(integer_coder, decode) {
     span<byte> s = a4;
 
-    auto [b1, n1] = integer_coder<pp::uint<1>>::decode(s);
-    s = s.subspan(n1);
+
+    pp::uint<1> b1;
+    tie(b1, s) = integer_coder<pp::uint<1>>::decode(s);
     EXPECT_EQ(u1, b1);
-    auto [b2, n2] = integer_coder<pp::uint<2>>::decode(s);
-    s = s.subspan(n2);
+    pp::uint<2> b2;
+    tie(b2, s) = integer_coder<pp::uint<2>>::decode(s);
     EXPECT_EQ(u2, b2);
-    auto [b3, n3] = integer_coder<pp::uint<4>>::decode(s);
-    s = s.subspan(n3);
-    EXPECT_EQ(u2, b2);
+    pp::uint<4> b3;
+    tie(b3, s) = integer_coder<pp::uint<4>>::decode(s);
+    EXPECT_EQ(u3, b3);
 }
 
 GTEST_TEST(integer_coder, signed) {

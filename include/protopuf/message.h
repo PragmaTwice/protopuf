@@ -189,32 +189,24 @@ namespace pp {
 
         message_coder() = delete;
 
-        static constexpr std::size_t encode(const T& msg, bytes b) {
-            std::size_t n = 0;
-
-            msg.for_each([&n, &b]<field_c F> (const F& f) {
+        static constexpr bytes encode(const T& msg, bytes b) {
+            msg.for_each([&b]<field_c F> (const F& f) {
                 if(empty_field(f)) {
                     return;
                 }
 
-                int m = varint_coder<uint<4>>::encode(F::key, b);
-                b = b.subspan(m);
-                n += m;
+                b = varint_coder<uint<4>>::encode(F::key, b);
 
                 if constexpr (F::attr == singular) {
-                    m = F::coder::encode(f.value(), b);
-                    b = b.subspan(m);
-                    n += m;
+                    b = F::coder::encode(f.value(), b);
                 } else {
                     for(const auto &i : f) {
-                        m = F::coder::encode(i, b);
-                        b = b.subspan(m);
-                        n += m;
+                        b = F::coder::encode(i, b);
                     }
                 }
             });
 
-            return n;
+            return b;
         }
 
         static constexpr decode_result<T> decode(bytes b) {
