@@ -30,3 +30,11 @@ GTEST_TEST(message, function) {
     EXPECT_EQ(m4.get_base<0>(), (vector{1.f,1.2f,1.23f}));
 
 }
+
+GTEST_TEST(message_coder, encode) {
+    message<varint_field<1, int>> m{150};
+    array<byte, 10> a{};
+    auto n = message_coder<decltype(m)>::encode(m, a);
+    EXPECT_EQ(n, 3);
+    EXPECT_EQ(a, (array<byte, 10>{0x08_b, 0x96_b, 0x01_b}));
+}

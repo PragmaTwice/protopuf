@@ -111,6 +111,15 @@ namespace pp {
     template <uint<4> I, field_c... C>
     using field_selector = typename field_selector_impl<I, C...>::type;
 
+    template <field_c T>
+    constexpr bool empty_field(const T& v) {
+        if constexpr (T::attr == singular) {
+            return !v.has_value();
+        } else {
+            return v.empty();
+        }
+    };
+
     template <field_c ... T>
     struct message : private T... {
 
@@ -153,6 +162,16 @@ namespace pp {
             return !(*this == other);
         }
 
+        template <typename F> requires (std::invocable<F, T> && ...)
+        constexpr void for_each(F&& f) const {
+            (std::forward<F>(f)(static_cast<const T&>(*this)), ...);
+        }
+
+        template <typename F> requires (std::invocable<F, T> && ...)
+        constexpr void for_each(F&& f) {
+            (std::forward<F>(f)(static_cast<T&>(*this)), ...);
+        }
+
     };
 
     template <typename>
@@ -171,7 +190,31 @@ namespace pp {
         message_coder() = delete;
 
         static constexpr std::size_t encode(const T& msg, bytes b) {
-            return 0;
+            std::size_t n = 0;
+
+            msg.for_each([&n, &b]<field_c F> (const F& f) {
+                if(empty_field(f)) {
+                    return;
+                }
+
+                int m = varint_coder<uint<4>>::encode(F::key, b);
+                b = b.subspan(m);
+                n += m;
+
+                if constexpr (F::attr == singular) {
+                    m = F::coder::encode(f.value(), b);
+                    b = b.subspan(m);
+                    n += m;
+                } else {
+                    for(const auto &i : f) {
+                        m = F::coder::encode(i, b);
+                        b = b.subspan(m);
+                        n += m;
+                    }
+                }
+            });
+
+            return n;
         }
 
         static constexpr decode_result<T> decode(bytes b) {
