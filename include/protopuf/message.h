@@ -73,13 +73,13 @@ namespace pp {
     using float_field = field<N, float_coder<T>, A, Container>;
 
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
-    using array_field = field<N, array_coder<T, Container>, A, Container>;
+    using array_field = field<N, array_coder<T>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular>
-    using basic_string_field = field<N, basic_string_coder<T>, A, std::basic_string<T>>;
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<std::basic_string<T>>>
+    using basic_string_field = field<N, basic_string_coder<T>, A, Container>;
 
-    template <uint<4> N, attribute A = singular>
-    using string_field = field<N, string_coder, A, std::string>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<std::string>>
+    using string_field = field<N, string_coder, A, Container>;
 
     template <uint<4> N, attribute A = singular>
     using bytes_field = field<N, bytes_coder, A>;
@@ -194,7 +194,7 @@ namespace pp {
     public:
         message_decode_map() : std::unordered_map<uint<4>, std::function<bytes(T&, bytes)>> {
                 {F::key, [](T& m, bytes b){
-                    auto [v, np] = F::coder::decode(b);
+                    const auto &[v, np] = F::coder::decode(b);
 
                     auto &f = m.template get<F::number>();
                     if constexpr (F::attr == singular) {
@@ -220,12 +220,13 @@ namespace pp {
                     return;
                 }
 
-                b = varint_coder<uint<4>>::encode(F::key, b);
 
                 if constexpr (F::attr == singular) {
+                    b = varint_coder<uint<4>>::encode(F::key, b);
                     b = F::coder::encode(f.value(), b);
                 } else {
                     for(const auto &i : f) {
+                        b = varint_coder<uint<4>>::encode(F::key, b);
                         b = F::coder::encode(i, b);
                     }
                 }
@@ -241,7 +242,7 @@ namespace pp {
 
             auto iter = decode_map.end();
             while(true) {
-                auto [n, nb] = varint_coder<uint<4>>::decode(b);
+                const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
 
                 iter = decode_map.find(n);
                 if (iter != decode_map.end()) {
