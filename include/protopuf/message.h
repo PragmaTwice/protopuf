@@ -133,7 +133,10 @@ namespace pp {
         }
 
         constexpr bool operator==(const message & other) const {
-            return ((static_cast<const T&>(*this) == static_cast<const T&>(other)) && ...);
+            return ((
+                    static_cast<const typename T::base_type&>(static_cast<const T&>(*this)) ==
+                    static_cast<const typename T::base_type&>(static_cast<const T&>(other))
+                    ) && ...);
         }
 
         constexpr bool operator!=(const message & other) const {
