@@ -38,3 +38,11 @@ GTEST_TEST(message_coder, encode) {
     EXPECT_EQ(n, 3);
     EXPECT_EQ(a, (array<byte, 10>{0x08_b, 0x96_b, 0x01_b}));
 }
+
+//GTEST_TEST(message_coder, decode) {
+//    message<varint_field<1, int>> m;
+//    array<byte, 10> a{0x08_b, 0x96_b, 0x01_b};
+//    auto [v, n] = message_coder<decltype(m)>::decode(a);
+//    EXPECT_EQ(n, 3);
+//    EXPECT_EQ(v.get<1>(), 150);
+//}
