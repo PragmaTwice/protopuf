@@ -52,11 +52,11 @@ namespace pp {
     };
 
     template <integral T>
-    struct basic_string_coder : array_coder<integer_coder<T>, std::basic_string<T>> {};
+    using basic_string_coder = array_coder<integer_coder<T>, std::basic_string<T>>;
 
-    struct string_coder : basic_string_coder<std::string::value_type> {};
+    using string_coder = basic_string_coder<std::string::value_type>;
 
-    struct bytes_coder : array_coder<integer_coder<uint<1>>> {};
+    using bytes_coder = array_coder<integer_coder<uint<1>>>;
 
 }
 

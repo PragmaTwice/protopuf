@@ -35,20 +35,20 @@ namespace pp {
         repeated
     };
 
-    template <attribute, typename T, template<typename...> typename>
+    template <attribute, typename T, typename>
     struct field_container_impl {
         using type = std::optional<T>;
     };
 
-    template <typename T, template<typename> typename C>
+    template <typename T, typename C>
     struct field_container_impl<repeated, T, C> {
-        using type = C<T>;
+        using type = C;
     };
 
-    template <attribute A, typename T, template<typename...> typename Container = std::vector>
+    template <attribute A, typename T, insertable_sized_range Container = std::vector<T>>
     using field_container = typename field_container_impl<A, T, Container>::type;
 
-    template <uint<4> N, coder C, attribute A = singular, template<typename...> typename Container = std::vector>
+    template <uint<4> N, coder C, attribute A = singular, insertable_sized_range Container = std::vector<typename C::value_type>>
     struct field : field_container<A, typename C::value_type, Container>{
         static constexpr uint<4> number = N;
 
@@ -63,31 +63,31 @@ namespace pp {
         using base_type::base_type;
     };
 
-    template <uint<4> N, typename T, attribute A = singular, template<typename...> typename Container = std::vector>
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using integer_field = field<N, integer_coder<T>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, template<typename...> typename Container = std::vector>
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using varint_field = field<N, varint_coder<T>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, template<typename...> typename Container = std::vector>
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using float_field = field<N, float_coder<T>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, template<typename...> typename Container = std::vector>
-    using array_field = field<N, array_coder<T>, A, Container>;
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using array_field = field<N, array_coder<T, Container>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, template<typename...> typename Container = std::vector>
-    using basic_string_field = field<N, basic_string_coder<T>, A, Container>;
+    template <uint<4> N, typename T, attribute A = singular>
+    using basic_string_field = field<N, basic_string_coder<T>, A, std::basic_string<T>>;
 
-    template <uint<4> N, attribute A = singular, template<typename...> typename Container = std::vector>
-    using string_field = field<N, string_coder, A, Container>;
+    template <uint<4> N, attribute A = singular>
+    using string_field = field<N, string_coder, A, std::string>;
 
-    template <uint<4> N, attribute A = singular, template<typename...> typename Container = std::vector>
-    using bytes_field = field<N, bytes_coder, A, Container>;
+    template <uint<4> N, attribute A = singular>
+    using bytes_field = field<N, bytes_coder, A>;
 
     template <typename>
     constexpr bool is_field = false;
 
-    template <uint<4> N, coder C, attribute A, template<typename...> typename Container>
+    template <uint<4> N, coder C, attribute A, typename Container>
     constexpr bool is_field <field<N, C, A, Container>> = true;
 
     template <typename T>
@@ -132,6 +132,16 @@ namespace pp {
             return static_cast<field_selector<N, T...>&>(*this);
         }
 
+        template <uint<4> N>
+        constexpr decltype(auto) get_base() const {
+            return static_cast<const typename field_selector<N, T...>::base_type&>(get<N>());
+        }
+
+        template <uint<4> N>
+        constexpr decltype(auto) get_base() {
+            return static_cast<typename field_selector<N, T...>::base_type&>(get<N>());
+        }
+
         constexpr bool operator==(const message & other) const {
             return ((
                     static_cast<const typename T::base_type&>(static_cast<const T&>(*this)) ==
@@ -143,6 +153,30 @@ namespace pp {
             return !(*this == other);
         }
 
+    };
+
+    template <typename>
+    constexpr bool is_message = false;
+
+    template <typename ...T>
+    constexpr bool is_message <message<T...>> = true;
+
+    template <typename T>
+    concept message_c = is_message<T>;
+
+    template <message_c T>
+    struct message_coder {
+        using value_type = T;
+
+        message_coder() = delete;
+
+        static constexpr std::size_t encode(const T& msg, bytes b) {
+            return 0;
+        }
+
+        static constexpr decode_result<T> decode(bytes b) {
+            return {{}, 0};
+        }
     };
 }
 
