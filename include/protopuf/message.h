@@ -45,10 +45,10 @@ namespace pp {
         using type = C;
     };
 
-    template <attribute A, typename T, insertable_sized_range Container = std::vector<T>>
+    template <attribute A, typename T, std::ranges::sized_range Container = std::vector<T>>
     using field_container = typename field_container_impl<A, T, Container>::type;
 
-    template <uint<4> N, coder C, attribute A = singular, insertable_sized_range Container = std::vector<typename C::value_type>>
+    template <uint<4> N, coder C, attribute A = singular, std::ranges::sized_range Container = std::vector<typename C::value_type>>
     struct field : field_container<A, typename C::value_type, Container>{
         static constexpr uint<4> number = N;
 
@@ -183,6 +183,31 @@ namespace pp {
     template <typename T>
     concept message_c = is_message<T>;
 
+    template <message_c>
+    struct message_decode_map;
+
+    template <field_c... F>
+    struct message_decode_map<message<F...>> : std::unordered_map<uint<4>, std::function<bytes(message<F...>&, bytes)>> {
+    private:
+        using T = message<F...>;
+
+    public:
+        message_decode_map() : std::unordered_map<uint<4>, std::function<bytes(T&, bytes)>> {
+                {F::key, [](T& m, bytes b){
+                    auto [v, np] = F::coder::decode(b);
+
+                    auto &f = m.template get<F::number>();
+                    if constexpr (F::attr == singular) {
+                        f = v;
+                    } else {
+                        *std::inserter(f, f.end()) = v;
+                    }
+
+                    return np;
+                }}...
+        } {}
+    };
+
     template <message_c T>
     struct message_coder {
         using value_type = T;
@@ -209,8 +234,25 @@ namespace pp {
             return b;
         }
 
+        static inline const message_decode_map<T> decode_map;
+
         static constexpr decode_result<T> decode(bytes b) {
-            return {{}, 0};
+            T v;
+
+            auto iter = decode_map.end();
+            while(true) {
+                auto [n, nb] = varint_coder<uint<4>>::decode(b);
+
+                iter = decode_map.find(n);
+                if (iter != decode_map.end()) {
+                    b = nb;
+                    b = iter->second(v, b);
+                } else {
+                    break;
+                }
+            }
+
+            return {v, b};
         }
     };
 }
