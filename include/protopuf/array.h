@@ -8,6 +8,14 @@
 
 namespace pp {
 
+    template <typename T>
+    concept insertable_range = std::ranges::range<T> && requires (T t) {
+        sizeof(std::inserter(t, t.end()));
+    };
+
+    template <typename T>
+    concept insertable_sized_range = insertable_range<T> && std::ranges::sized_range<T>;
+
     template <coder C, std::ranges::sized_range R = std::vector<typename C::value_type>>
     struct array_coder {
         using value_type = R;

@@ -71,6 +71,15 @@ namespace pp {
     template <typename T>
     concept integral = is_integral_v<T>;
 
+    template <typename T, std::size_t N>
+    concept sized_integral = integral<T> && sizeof(T) == N;
+
+    template <typename T>
+    concept integral32 = sized_integral<T, 4>;
+
+    template <typename T>
+    concept integral64 = sized_integral<T, 8>;
+
     // direct way to implement `bytes_to_int` is:
     // 1. *(uint<N> *)bytes.data() // but it generates a UB while N > 1
     // 2. std::bit_cast(std::to_array(bytes)) // but libstdc++ has not implemented bit_cast yet
