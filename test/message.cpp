@@ -148,4 +148,18 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
         EXPECT_FLOAT_EQ(v.get<4>().value(), 6.78f);
         EXPECT_EQ(v.get<100>(), sint_zigzag<4>(90));
     }
+
+    {
+        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
+        array<byte, 50> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
+                          0x70_b, 0x81_b,0x82_b,0x83_b,0x84_b,0x85_b,0x86_b,0x87_b,0x88_b,0x09_b,
+                          0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
+                          0x62_b, 0x07_b, 0x00_b, 0xff_b, 0x00_b, 0xff_b,0x00_b, 0xff_b, 0x00_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
+        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        EXPECT_EQ(begin_diff(n, a), 43);
+        EXPECT_EQ(v.get<1>(), 12);
+        EXPECT_EQ(v.get<2>(), "345");
+        EXPECT_FLOAT_EQ(v.get<4>().value(), 6.78f);
+        EXPECT_EQ(v.get<100>(), sint_zigzag<4>(90));
+    }
 }
