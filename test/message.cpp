@@ -63,6 +63,15 @@ GTEST_TEST(message_coder, encode) {
                                            0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b}));
     }
 
+    {
+        message<array_field<2, varint_coder<pp::uint<8>>>, string_field<20>> m{vector<pp::uint<8>>{1,123,456789,0}, "hello"};
+        array<byte, 30> a{};
+        auto n = message_coder<decltype(m)>::encode(m, a);
+        EXPECT_EQ(begin_diff(n, a), 16);
+        EXPECT_EQ(a, (array<byte, 30>{0x12_b, 0x06_b, 0x01_b, 0x7b_b, 0xd5_b, 0xf0_b, 0x1b_b, 0x00_b, 0xa2_b, 0x01_b,
+                                          0x05_b, 0x68_b, 0x65_b, 0x6c_b, 0x6c_b, 0x6f_b}));
+    }
+
 }
 
 GTEST_TEST(message_coder, decode) {
@@ -118,6 +127,16 @@ GTEST_TEST(message_coder, decode) {
         EXPECT_EQ(begin_diff(n, a), 25);
         EXPECT_EQ(v.get_base<10>(), (vector {2, 3, 1}));
         EXPECT_EQ(v.get_base<5>(), (vector {1.2f, 3.4e5f}));
+    }
+
+    {
+        message<array_field<2, varint_coder<pp::uint<8>>>, string_field<20>> m;
+        array<byte, 30> a{0x12_b, 0x06_b, 0x01_b, 0x7b_b, 0xd5_b, 0xf0_b, 0x1b_b, 0x00_b, 0xa2_b, 0x01_b,
+                          0x05_b, 0x68_b, 0x65_b, 0x6c_b, 0x6c_b, 0x6f_b};
+        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        EXPECT_EQ(begin_diff(n, a), 16);
+        EXPECT_EQ(v.get_base<2>(), (vector<pp::uint<8>>{1,123,456789,0}));
+        EXPECT_EQ(v.get<20>(), "hello");
     }
 }
 

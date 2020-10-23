@@ -71,7 +71,7 @@ namespace pp {
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using float_field = field<N, float_coder<T>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<typename T::value_type>>
     using array_field = field<N, array_coder<T>, A, Container>;
 
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<std::basic_string<T>>>
@@ -80,8 +80,8 @@ namespace pp {
     template <uint<4> N, attribute A = singular, typename Container = std::vector<std::string>>
     using string_field = field<N, string_coder, A, Container>;
 
-    template <uint<4> N, attribute A = singular>
-    using bytes_field = field<N, bytes_coder, A>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<bytes>>>
+    using bytes_field = field<N, bytes_coder, A, Container>;
 
     template <typename>
     constexpr bool is_field = false;
