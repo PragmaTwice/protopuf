@@ -6,7 +6,7 @@
 
 namespace pp {
 
-    inline std::byte operator "" _b(unsigned long long int i) {
+    inline constexpr std::byte operator "" _b(unsigned long long int i) {
         return std::byte(i);
     }
 
@@ -15,7 +15,7 @@ namespace pp {
 
     using bytes = std::span<std::byte>;
 
-    inline std::size_t begin_diff(bytes a, bytes b) {
+    inline constexpr std::size_t begin_diff(bytes a, bytes b) {
         return a.begin() - b.begin();
     }
 
