@@ -139,6 +139,7 @@ namespace pp {
     };
 
     using message_skip_map = message_skip_map_impl<0, 1, 2, 5>;
+    inline const message_skip_map skip_map;
 
     template <message_c T>
     struct message_coder {
@@ -168,12 +169,10 @@ namespace pp {
         }
 
         static inline const message_decode_map<T> decode_map;
-        static inline const message_skip_map skip_map;
 
         static constexpr decode_result<T> decode(bytes b) {
             T v;
 
-            auto iter = decode_map.end();
             while(b.end() > b.begin()) {
                 const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
 
@@ -181,7 +180,7 @@ namespace pp {
                     break;
                 }
 
-                iter = decode_map.find(n);
+                auto iter = decode_map.find(n);
                 if (iter != decode_map.end()) {
                     b = iter->second(v, nb);
                 } else {
@@ -192,6 +191,82 @@ namespace pp {
             return {v, b};
         }
     };
+
+    template <message_c T>
+    struct skipper<message_coder<T>> {
+        using value_type = T;
+
+        static constexpr std::size_t encode_skip(const T& msg) {
+            std::size_t n = 0;
+            msg.for_each([&n]<field_c F> (const F& f) {
+                if(empty_field(f)) {
+                    return;
+                }
+
+
+                if constexpr (F::attr == singular) {
+                    n += skipper<varint_coder<uint<4>>>::encode_skip(F::key);
+                    n += skipper<typename F::coder>::encode_skip(f.value());
+                } else {
+                    for(const auto &i : f) {
+                        n += skipper<varint_coder<uint<4>>>::encode_skip(F::key);
+                        n += skipper<typename F::coder>::encode_skip(f.value());
+                    }
+                }
+            });
+
+            return n;
+        }
+    };
+
+    template <message_c T>
+    struct embedded_message_coder {
+        using value_type = T;
+
+        embedded_message_coder() = delete;
+
+        static constexpr bytes encode(const T& msg, bytes b) {
+            auto n = skipper<message_coder<T>>::encode_skip(msg);
+
+            b = varint_coder<uint<8>>::encode(n, b);
+            b = message_coder<T>::encode(msg, b);
+
+            return b;
+        }
+
+        static inline const message_decode_map<T> decode_map;
+
+        static constexpr decode_result<T> decode(bytes b) {
+            T v;
+
+            std::size_t len = 0;
+            std::tie(len, b) = varint_coder<uint<8>>::decode(b);
+
+            auto origin_b = b;
+            while(begin_diff(b, origin_b) < len) {
+                const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
+
+                if(to_field_number(n) == 0) {
+                    break;
+                }
+
+                auto iter = decode_map.find(n);
+                if (iter != decode_map.end()) {
+                    b = iter->second(v, nb);
+                } else {
+                    b = skip_map.at(to_wire_key(n))(nb);
+                }
+            }
+
+            return {v, b};
+        }
+    };
+
+    template <typename T>
+    struct wire_type_impl<embedded_message_coder<T>> : std::integral_constant<uint<1>, 2> {};
+
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using message_field = field<N, embedded_message_coder<T>, A, Container>;
 }
 
 #endif //PROTOPUF_MESSAGE_H
