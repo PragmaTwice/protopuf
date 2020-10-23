@@ -3,7 +3,7 @@
 
 *What is this?*
 
-A little, highly templated, and protobuf-compatible serialization/deserialization library
+A little, highly templated, and protobuf-compatible serialization/deserialization library written in C++20
 
 ## Requirements
 
