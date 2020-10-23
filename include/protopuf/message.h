@@ -70,31 +70,6 @@ namespace pp {
     template <typename T>
     concept message_c = is_message<T>;
 
-    template <message_c>
-    struct message_decode_map;
-
-    template <field_c... F>
-    struct message_decode_map<message<F...>> : std::unordered_map<uint<4>, std::function<bytes(message<F...>&, bytes)>> {
-    private:
-        using T = message<F...>;
-
-    public:
-        message_decode_map() : std::unordered_map<uint<4>, std::function<bytes(T&, bytes)>> {
-                {F::key, [](T& m, bytes b){
-                    const auto &[v, np] = F::coder::decode(b);
-
-                    auto &f = m.template get<F::number>();
-                    if constexpr (F::attr == singular) {
-                        f = v;
-                    } else {
-                        *std::inserter(f, f.end()) = v;
-                    }
-
-                    return np;
-                }}...
-        } {}
-    };
-
     inline constexpr uint<1> to_wire_key(uint<4> field_key) {
         return field_key & 0b111u;
     }
@@ -141,6 +116,48 @@ namespace pp {
     using message_skip_map = message_skip_map_impl<0, 1, 2, 5>;
     inline const message_skip_map skip_map;
 
+    template <message_c>
+    struct message_decode_map;
+
+    template <field_c... F>
+    struct message_decode_map<message<F...>> : std::unordered_map<uint<4>, std::function<bytes(message<F...>&, bytes)>> {
+    private:
+        using T = message<F...>;
+
+    public:
+        message_decode_map() : std::unordered_map<uint<4>, std::function<bytes(T&, bytes)>> {
+                {F::key, [](T& m, bytes b){
+                    const auto &[v, np] = F::coder::decode(b);
+
+                    auto &f = m.template get<F::number>();
+                    if constexpr (F::attr == singular) {
+                        f = v;
+                    } else {
+                        *std::inserter(f, f.end()) = v;
+                    }
+
+                    return np;
+                }}...
+        } {}
+
+        constexpr std::pair<bytes, bool> decode(T& v, bytes b) const {
+            const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
+
+            if(to_field_number(n) == 0) {
+                return {b, false};
+            }
+
+            auto iter = this->find(n);
+            if (iter != this->end()) {
+                b = iter->second(v, nb);
+            } else {
+                b = skip_map.at(to_wire_key(n))(nb);
+            }
+
+            return {b, true};
+        }
+    };
+
     template <message_c T>
     inline const message_decode_map<T> decode_map;
 
@@ -175,18 +192,10 @@ namespace pp {
             T v;
 
             while(b.end() > b.begin()) {
-                const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
+                bool next = true;
+                std::tie(b, next) = decode_map<T>.decode(v, b);
 
-                if(to_field_number(n) == 0) {
-                    break;
-                }
-
-                auto iter = decode_map<T>.find(n);
-                if (iter != decode_map<T>.end()) {
-                    b = iter->second(v, nb);
-                } else {
-                    b = skip_map.at(to_wire_key(n))(nb);
-                }
+                if(!next) break;
             }
 
             return {v, b};
@@ -243,18 +252,10 @@ namespace pp {
 
             auto origin_b = b;
             while(begin_diff(b, origin_b) < len) {
-                const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
+                bool next = true;
+                std::tie(b, next) = decode_map<T>.decode(v, b);
 
-                if(to_field_number(n) == 0) {
-                    break;
-                }
-
-                auto iter = decode_map<T>.find(n);
-                if (iter != decode_map<T>.end()) {
-                    b = iter->second(v, nb);
-                } else {
-                    b = skip_map.at(to_wire_key(n))(nb);
-                }
+                if(!next) break;
             }
 
             return {v, b};
