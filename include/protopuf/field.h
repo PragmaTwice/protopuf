@@ -51,7 +51,7 @@ namespace pp {
     struct field : field_container<A, typename C::value_type, Container>{
         static constexpr uint<4> number = N;
 
-        static constexpr uint<4> key = (N << 3) | wire_type<C>;
+        static constexpr uint<4> key = (N << 3u) | wire_type<C>;
 
         using coder = C;
 

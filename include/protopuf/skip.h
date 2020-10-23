@@ -54,7 +54,6 @@ namespace pp {
         static constexpr bytes decode_skip(bytes b) {
             auto iter = b.begin();
             while((*iter++ >> 7) == 1_b) {}
-            iter++;
 
             return {iter, b.end()};
         }

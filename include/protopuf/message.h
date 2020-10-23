@@ -95,6 +95,51 @@ namespace pp {
         } {}
     };
 
+    inline constexpr uint<1> to_wire_key(uint<4> field_key) {
+        return field_key & 0b111u;
+    }
+
+    inline constexpr uint<4> to_field_number(uint<4> field_key) {
+        return field_key >> 3u;
+    }
+
+    template <uint<1>>
+    struct wire_skip_impl;
+
+    template <>
+    struct wire_skip_impl<0> {
+        using type = skipper<varint_coder<uint<8>>>;
+    };
+
+    template <>
+    struct wire_skip_impl<1> {
+        using type = skipper<integer_coder<uint<8>>>;
+    };
+
+    template <>
+    struct wire_skip_impl<2> {
+        using type = skipper<string_coder>;
+    };
+
+    template <>
+    struct wire_skip_impl<5> {
+        using type = skipper<integer_coder<uint<4>>>;
+    };
+
+    template <uint<1> N>
+    using wire_skip = typename wire_skip_impl<N>::type;
+
+    template <uint<1>... I>
+    struct message_skip_map_impl : std::unordered_map<uint<4>, std::function<bytes(bytes)>> {
+        message_skip_map_impl() : std::unordered_map<uint<4>, std::function<bytes(bytes)>> {
+                {I, [](bytes b){
+                    return wire_skip<I>::decode_skip(b);
+                }}...
+        } {}
+    };
+
+    using message_skip_map = message_skip_map_impl<0, 1, 2, 5>;
+
     template <message_c T>
     struct message_coder {
         using value_type = T;
@@ -123,20 +168,24 @@ namespace pp {
         }
 
         static inline const message_decode_map<T> decode_map;
+        static inline const message_skip_map skip_map;
 
         static constexpr decode_result<T> decode(bytes b) {
             T v;
 
             auto iter = decode_map.end();
-            while(true) {
+            while(b.end() > b.begin()) {
                 const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
+
+                if(to_field_number(n) == 0) {
+                    break;
+                }
 
                 iter = decode_map.find(n);
                 if (iter != decode_map.end()) {
-                    b = nb;
-                    b = iter->second(v, b);
+                    b = iter->second(v, nb);
                 } else {
-                    break;
+                    b = skip_map.at(to_wire_key(n))(nb);
                 }
             }
 

@@ -54,13 +54,13 @@ GTEST_TEST(message_coder, encode) {
     }
 
     {
-        message<integer_field<1, int, repeated>, float_field<0, float, repeated>> m{{1,2,3}, {1.2,3.4e5}};
+        message<integer_field<10, int, repeated>, float_field<5, float, repeated>> m{{1,2,3}, {1.2,3.4e5}};
         array<byte, 30> a{};
         auto n = message_coder<decltype(m)>::encode(m, a);
         EXPECT_EQ(begin_diff(n, a), 25);
-        EXPECT_EQ(a, (array<byte, 30>{0x0d_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
-                                           0x0d_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x05_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
-                                           0x05_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b}));
+        EXPECT_EQ(a, (array<byte, 30>{0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
+                                           0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
+                                           0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b}));
     }
 
 }
@@ -99,13 +99,53 @@ GTEST_TEST(message_coder, decode) {
     }
 
     {
-        message<integer_field<1, int, repeated>, float_field<0, float, repeated>> m;
-        array<byte, 30>a {0x0d_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
-                          0x0d_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x05_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
-                          0x05_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b};
+        message<integer_field<10, int, repeated>, float_field<5, float, repeated>> m;
+        array<byte, 30>a {0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
+                          0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
+                          0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b};
         auto [v, n] = message_coder<decltype(m)>::decode(a);
         EXPECT_EQ(begin_diff(n, a), 25);
-        EXPECT_EQ(v.get_base<1>(), (vector {1, 2, 3}));
-        EXPECT_EQ(v.get_base<0>(), (vector {1.2f, 3.4e5f}));
+        EXPECT_EQ(v.get_base<10>(), (vector {1, 2, 3}));
+        EXPECT_EQ(v.get_base<5>(), (vector {1.2f, 3.4e5f}));
+    }
+
+    {
+        message<integer_field<10, int, repeated>, float_field<5, float, repeated>> m;
+        array<byte, 30>a {0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
+                          0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
+                          0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b,0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b };
+        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        EXPECT_EQ(begin_diff(n, a), 25);
+        EXPECT_EQ(v.get_base<10>(), (vector {2, 3, 1}));
+        EXPECT_EQ(v.get_base<5>(), (vector {1.2f, 3.4e5f}));
+    }
+}
+
+GTEST_TEST(message_coder, decode_with_unknown_fields) {
+    {
+        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
+        array<byte, 30> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
+                          0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
+                          0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
+        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        EXPECT_EQ(begin_diff(n, a), 24);
+        EXPECT_EQ(v.get<1>(), 12);
+        EXPECT_EQ(v.get<2>(), "345");
+        EXPECT_FLOAT_EQ(v.get<4>().value(), 6.78f);
+        EXPECT_EQ(v.get<100>(), sint_zigzag<4>(90));
+    }
+
+    {
+        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
+        array<byte, 40> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
+                          0x70_b, 0x81_b,0x82_b,0x83_b,0x84_b,0x85_b,0x86_b,0x87_b,0x88_b,0x09_b,
+                          0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
+                          0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
+        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        EXPECT_EQ(begin_diff(n, a), 34);
+        EXPECT_EQ(v.get<1>(), 12);
+        EXPECT_EQ(v.get<2>(), "345");
+        EXPECT_FLOAT_EQ(v.get<4>().value(), 6.78f);
+        EXPECT_EQ(v.get<100>(), sint_zigzag<4>(90));
     }
 }
