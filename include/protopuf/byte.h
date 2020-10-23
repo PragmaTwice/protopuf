@@ -15,6 +15,10 @@ namespace pp {
 
     using bytes = std::span<std::byte>;
 
+    inline std::size_t begin_diff(bytes a, bytes b) {
+        return a.begin() - b.begin();
+    }
+
 }
 
 #endif //PROTOPUF_BYTE_H
