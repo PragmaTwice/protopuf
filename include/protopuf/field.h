@@ -9,25 +9,28 @@
 namespace pp {
 
     template <coder T>
-    constexpr uint<1> wire_type = -1;
+    struct wire_type_impl;
 
     template <typename T>  requires integral32<T> || integral64<T>
-    constexpr uint<1> wire_type<varint_coder<T>> = 0;
+    struct wire_type_impl<varint_coder<T>> : std::integral_constant<uint<1>, 0> {};
 
     template <integral64 T>
-    constexpr uint<1> wire_type<integer_coder<T>> = 1;
+    struct wire_type_impl<integer_coder<T>> : std::integral_constant<uint<1>, 1> {};
 
     template <floating_point64 T>
-    constexpr uint<1> wire_type<float_coder<T>> = 1;
+    struct wire_type_impl<float_coder<T>> : std::integral_constant<uint<1>, 1> {};
 
     template <typename T, typename C>
-    constexpr uint<1> wire_type<array_coder<T, C>> = 2;
+    struct wire_type_impl<array_coder<T, C>> : std::integral_constant<uint<1>, 2> {};
 
     template <integral32 T>
-    constexpr uint<1> wire_type<integer_coder<T>> = 5;
+    struct wire_type_impl<integer_coder<T>> : std::integral_constant<uint<1>, 5> {};
 
     template <floating_point32 T>
-    constexpr uint<1> wire_type<float_coder<T>> = 5;
+    struct wire_type_impl<float_coder<T>> : std::integral_constant<uint<1>, 5> {};
+
+    template <typename T>
+    constexpr uint<1> wire_type = wire_type_impl<T>::value;
 
     enum attribute {
         singular,

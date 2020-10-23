@@ -173,7 +173,8 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
         array<byte, 50> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
                           0x70_b, 0x81_b,0x82_b,0x83_b,0x84_b,0x85_b,0x86_b,0x87_b,0x88_b,0x09_b,
                           0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
-                          0x62_b, 0x07_b, 0x00_b, 0xff_b, 0x00_b, 0xff_b,0x00_b, 0xff_b, 0x00_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
+                          0x62_b, 0x07_b, 0x00_b, 0xff_b, 0x00_b, 0xff_b,0x00_b, 0xff_b, 0x00_b,
+                          0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
         auto [v, n] = message_coder<decltype(m)>::decode(a);
         EXPECT_EQ(begin_diff(n, a), 43);
         EXPECT_EQ(v.get<1>(), 12);
@@ -182,3 +183,12 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
         EXPECT_EQ(v.get<100>(), sint_zigzag<4>(90));
     }
 }
+
+//GTEST_TEST(message_coder, nested_encode) {
+//    message<integer_field<1, int>> m{150};
+//    message<field<3, message_coder<decltype(m)>>> m2(m);
+//    array<byte, 10> a{};
+//    auto n = message_coder<decltype(m2)>::encode(m2, a);
+//    EXPECT_EQ(begin_diff(n, a), 5);
+//    EXPECT_EQ(a, (array<byte, 10>{0x1a_b, 0x03_b, 0x08_b, 0x96_b, 0x01_b}));
+//}
