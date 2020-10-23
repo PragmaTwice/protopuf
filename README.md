@@ -11,3 +11,9 @@ A little, highly templated, and protobuf-compatible serialization/deserializatio
     - only GCC 10 and its libstdc++ now
 - GoogleTest (optional)
 - CMake 3
+
+## Features
+
+- Data structures are described using type in C++ instead of DSLs like the Protocol Buffer Language (`.proto`)
+- Fully compatible with encoding of the Protocol Buffers, capable of mutual serialization/deserialization
+- Extensive compile-time operations aimed to improving run-time performance
