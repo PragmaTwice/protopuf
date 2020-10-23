@@ -142,6 +142,9 @@ namespace pp {
     inline const message_skip_map skip_map;
 
     template <message_c T>
+    inline const message_decode_map<T> decode_map;
+
+    template <message_c T>
     struct message_coder {
         using value_type = T;
 
@@ -168,8 +171,6 @@ namespace pp {
             return b;
         }
 
-        static inline const message_decode_map<T> decode_map;
-
         static constexpr decode_result<T> decode(bytes b) {
             T v;
 
@@ -180,8 +181,8 @@ namespace pp {
                     break;
                 }
 
-                auto iter = decode_map.find(n);
-                if (iter != decode_map.end()) {
+                auto iter = decode_map<T>.find(n);
+                if (iter != decode_map<T>.end()) {
                     b = iter->second(v, nb);
                 } else {
                     b = skip_map.at(to_wire_key(n))(nb);
@@ -234,8 +235,6 @@ namespace pp {
             return b;
         }
 
-        static inline const message_decode_map<T> decode_map;
-
         static constexpr decode_result<T> decode(bytes b) {
             T v;
 
@@ -250,8 +249,8 @@ namespace pp {
                     break;
                 }
 
-                auto iter = decode_map.find(n);
-                if (iter != decode_map.end()) {
+                auto iter = decode_map<T>.find(n);
+                if (iter != decode_map<T>.end()) {
                     b = iter->second(v, nb);
                 } else {
                     b = skip_map.at(to_wire_key(n))(nb);
