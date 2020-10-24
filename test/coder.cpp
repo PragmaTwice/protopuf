@@ -41,4 +41,8 @@ GTEST_TEST(static, coder) {
     static_assert(coder<message_coder<message<integer_field<1, int>, float_field<3, float>>>>);
     static_assert(coder<message_coder<message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>>>>);
     static_assert(coder<message_coder<message<integer_field<1, int, repeated>, float_field<0, float, repeated>>>>);
+
+    static_assert(coder<embedded_message_coder<message<integer_field<1, int>, float_field<3, float>>>>);
+    static_assert(coder<embedded_message_coder<message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>>>>);
+    static_assert(coder<embedded_message_coder<message<integer_field<1, int, repeated>, float_field<0, float, repeated>>>>);
 }
