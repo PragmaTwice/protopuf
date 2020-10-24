@@ -234,4 +234,20 @@ GTEST_TEST(message_coder, nested_decode) {
         EXPECT_EQ(v.get_base<3>()[1], (decltype(m1){22, "bob"}));
         EXPECT_EQ(v.get_base<3>()[2], (decltype(m1){444456, "tom"}));
     }
+
+    {
+        message<varint_field<1, int>, string_field<3>> m1;
+        message<message_field<3, decltype(m1), repeated>, string_field<8>> m;
+        array<byte, 50> a{0x1a_b, 0x0a_b, 0x08_b, 0x96_b, 0x01_b, 0x1a_b, 0x05_b, 0x61_b, 0x6c_b, 0x69_b,0x63_b, 0x65_b,
+                          0x42_b, 0x09_b, 0x63_b, 0x6c_b, 0x61_b, 0x73_b, 0x73_b, 0x20_b,0x31_b, 0x30_b, 0x32_b,
+                          0x1a_b, 0x07_b, 0x08_b, 0x16_b, 0x1a_b, 0x03_b, 0x62_b, 0x6f_b,0x62_b,
+                          0x1a_b, 0x09_b, 0x1a_b, 0x03_b, 0x74_b, 0x6f_b, 0x6d_b, 0x08_b, 0xa8_b, 0x90_b, 0x1b_b };
+        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        EXPECT_EQ(begin_diff(n, a), 43);
+        EXPECT_EQ(v.get<8>(), "class 102");
+        EXPECT_EQ(v.get_base<3>()[0].get<1>(), 150);
+        EXPECT_EQ(v.get_base<3>()[0].get<3>(), "alice");
+        EXPECT_EQ(v.get_base<3>()[1], (decltype(m1){22, "bob"}));
+        EXPECT_EQ(v.get_base<3>()[2], (decltype(m1){444456, "tom"}));
+    }
 }
