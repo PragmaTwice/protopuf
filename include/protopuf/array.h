@@ -55,6 +55,7 @@ namespace pp {
 
     template <coder C, typename R>
     struct skipper<array_coder<C, R>> {
+        using coder = array_coder<C, R>;
         using value_type = R;
 
         static constexpr std::size_t encode_skip(const R &con) {
