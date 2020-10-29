@@ -223,7 +223,7 @@ GTEST_TEST(message_coder, nested_encode) {
         // deserialization
         auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
         EXPECT_EQ(yourClass.get<8>(), "class 101");
-        EXPECT_EQ(yourClass.get<3>()[3].get<3>(), "twice");
+        EXPECT_EQ(yourClass.get<3>()[2].get<3>(), "twice");
         EXPECT_EQ(yourClass, myClass);
         EXPECT_EQ(begin_diff(bufferEnd, bufferEnd2), 0);
     }

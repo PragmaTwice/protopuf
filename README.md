@@ -52,7 +52,7 @@ assert(begin_diff(bufferEnd, buffer) == 45);
 // deserialization
 auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
 assert(yourClass.get<8>() == "class 101");
-assert(yourClass.get<3>()[3].get<3>() == "twice");
+assert(yourClass.get<3>()[2].get<3>() == "twice");
 assert(yourClass == myClass);
 assert(begin_diff(bufferEnd, bufferEnd2) == 0);
 ```
