@@ -216,7 +216,7 @@ GTEST_TEST(message_coder, nested_encode) {
         Class myClass {"class 101", {tom, jerry}};
         myClass.get<3>().push_back(twice);
 
-        array<byte, 64> buffer;
+        array<byte, 64> buffer{};
         auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
         EXPECT_EQ(begin_diff(bufferEnd, buffer), 45);
 
@@ -225,7 +225,7 @@ GTEST_TEST(message_coder, nested_encode) {
         EXPECT_EQ(yourClass.get<8>(), "class 101");
         EXPECT_EQ(yourClass.get<3>()[2].get<3>(), "twice");
         EXPECT_EQ(yourClass, myClass);
-        EXPECT_EQ(begin_diff(bufferEnd, bufferEnd2), 0);
+        EXPECT_EQ(begin_diff(bufferEnd2, bufferEnd), 0);
     }
 }
 
