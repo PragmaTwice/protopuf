@@ -32,6 +32,8 @@ GTEST_TEST(skipper, static) {
 
     static_assert(skipper_c<skipper<float_coder<floating<4>>>>);
     static_assert(skipper_c<skipper<float_coder<floating<8>>>>);
+
+    static_assert(skipper_c<skipper<bool_coder>>);
 }
 
 GTEST_TEST(skipper, encode) {

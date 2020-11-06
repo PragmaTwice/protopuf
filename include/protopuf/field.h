@@ -5,6 +5,8 @@
 #include "float.h"
 #include "array.h"
 #include "zigzag.h"
+#include "varint.h"
+#include "bool.h"
 
 namespace pp {
 
@@ -28,6 +30,9 @@ namespace pp {
 
     template <floating_point32 T>
     struct wire_type_impl<float_coder<T>> : std::integral_constant<uint<1>, 5> {};
+
+    template <>
+    struct wire_type_impl<bool_coder> : std::integral_constant<uint<1>, 0> {};
 
     template <typename T>
     constexpr uint<1> wire_type = wire_type_impl<T>::value;
@@ -121,6 +126,9 @@ namespace pp {
 
     template <uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<bytes>>>
     using bytes_field = field<N, bytes_coder, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<bool>>
+    using bool_field = field<N, bool_coder, A, Container>;
 
     template <typename>
     constexpr bool is_field = false;

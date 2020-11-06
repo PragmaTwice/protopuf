@@ -6,6 +6,7 @@
 #include "varint.h"
 #include "zigzag.h"
 #include "float.h"
+#include "bool.h"
 
 namespace pp {
 
@@ -108,7 +109,20 @@ namespace pp {
         }
     };
 
+    template <>
+    struct skipper<bool_coder> {
+    public:
+        using coder = bool_coder;
+        using value_type = bool;
 
+        static constexpr std::size_t encode_skip(bool v) {
+            return skipper<integer_coder<uint<1>>>::encode_skip(v);
+        }
+
+        static constexpr bytes decode_skip(bytes b) {
+            return skipper<integer_coder<uint<1>>>::decode_skip(b);
+        }
+    };
 
 }
 
