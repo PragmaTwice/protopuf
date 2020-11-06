@@ -7,6 +7,7 @@
 #include "zigzag.h"
 #include "float.h"
 #include "bool.h"
+#include "enum.h"
 
 namespace pp {
 
@@ -121,6 +122,21 @@ namespace pp {
 
         static constexpr bytes decode_skip(bytes b) {
             return skipper<integer_coder<uint<1>>>::decode_skip(b);
+        }
+    };
+
+    template <typename T>
+    struct skipper<enum_coder<T>> {
+    public:
+        using coder = enum_coder<T>;
+        using value_type = T;
+
+        static constexpr std::size_t encode_skip(T v) {
+            return skipper<varint_coder<std::underlying_type_t<T>>>::encode_skip(static_cast<std::underlying_type_t<T>>(v));
+        }
+
+        static constexpr bytes decode_skip(bytes b) {
+            return skipper<integer_coder<std::underlying_type_t<T>>>::decode_skip(b);
         }
     };
 

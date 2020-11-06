@@ -35,6 +35,9 @@ namespace pp {
     struct wire_type_impl<bool_coder> : std::integral_constant<uint<1>, 0> {};
 
     template <typename T>
+    struct wire_type_impl<enum_coder<T>> : std::integral_constant<uint<1>, 0> {};
+
+    template <typename T>
     constexpr uint<1> wire_type = wire_type_impl<T>::value;
 
     enum attribute {
@@ -129,6 +132,9 @@ namespace pp {
 
     template <uint<4> N, attribute A = singular, typename Container = std::vector<bool>>
     using bool_field = field<N, bool_coder, A, Container>;
+
+    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using enum_field = field<N, enum_coder<T>, A, Container>;
 
     template <typename>
     constexpr bool is_field = false;

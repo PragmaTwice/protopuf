@@ -47,4 +47,7 @@ GTEST_TEST(static, coder) {
     static_assert(coder<embedded_message_coder<message<integer_field<1, int, repeated>, floating_field<0, float, repeated>>>>);
 
     static_assert(coder<bool_coder>);
+
+    enum E{};
+    static_assert(coder<enum_coder<E>>);
 }
