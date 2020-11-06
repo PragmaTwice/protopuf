@@ -63,7 +63,7 @@ More examples can be found in our test cases (`/test/message.cpp`).
 ## Supported Field Types
 Category|	Supported Types
 --------|------------------
-Varint  | int32, int64, uint32, uint64, sint32, sint64, bool
+Varint  | int32, int64, uint32, uint64, sint32, sint64, bool, enum
 64-bit  | fixed64, sfixed64, double
 Length-delimited| string, bytes, embedded messages, packed repeated fields
 32-bit 	| fixed32, sfixed32, float
