@@ -110,7 +110,7 @@ namespace pp {
     template <uint<4> N, attribute A = singular, typename Container = std::vector<floating<8>>>
     using double_field = floating_field<N, floating<8>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<typename T::value_type>>
+    template <uint<4> N, coder T, attribute A = singular, typename Container = std::vector<typename T::value_type>>
     using array_field = field<N, array_coder<T>, A, Container>;
 
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<std::basic_string<T>>>
