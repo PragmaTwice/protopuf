@@ -68,11 +68,47 @@ namespace pp {
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using integer_field = field<N, integer_coder<T>, A, Container>;
 
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<4>>>
+    using fixed32_field = integer_field<N, uint<4>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<4>>>
+    using sfixed32_field = integer_field<N, sint<4>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<8>>>
+    using fixed64_field = integer_field<N, uint<8>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<8>>>
+    using sfixed64_field = integer_field<N, sint<8>, A, Container>;
+
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using varint_field = field<N, varint_coder<T>, A, Container>;
 
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<4>>>
+    using int32_field = varint_field<N, sint<4>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<4>>>
+    using uint32_field = varint_field<N, uint<4>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint_zigzag<4>>>
+    using sint32_field = varint_field<N, sint_zigzag<4>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<8>>>
+    using int64_field = varint_field<N, sint<8>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<8>>>
+    using uint64_field = varint_field<N, uint<8>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint_zigzag<8>>>
+    using sint64_field = varint_field<N, sint_zigzag<8>, A, Container>;
+
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
-    using float_field = field<N, float_coder<T>, A, Container>;
+    using floating_field = field<N, float_coder<T>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<floating<4>>>
+    using float_field = floating_field<N, floating<4>, A, Container>;
+
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<floating<8>>>
+    using double_field = floating_field<N, floating<8>, A, Container>;
 
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<typename T::value_type>>
     using array_field = field<N, array_coder<T>, A, Container>;

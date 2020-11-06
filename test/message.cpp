@@ -6,7 +6,7 @@ using namespace pp;
 using namespace std;
 
 GTEST_TEST(message, function) {
-    message<integer_field<1, int>, float_field<3, float>> m{12, 1.23};
+    message<integer_field<1, int>, floating_field<3, float>> m{12, 1.23};
     static_assert(m.size == 2);
 
     EXPECT_EQ(m.get<1>(), 12);
@@ -15,7 +15,7 @@ GTEST_TEST(message, function) {
     auto m2 = m;
     EXPECT_EQ(m2, m);
 
-    message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m3{
+    message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>> m3{
         12, "345", 6.78, sint_zigzag<4>(90)
     };
     static_assert(m3.size == 4);
@@ -25,7 +25,7 @@ GTEST_TEST(message, function) {
     EXPECT_FLOAT_EQ(m3.get<4>().value(), 6.78);
     EXPECT_EQ(m3.get<100>(), sint_zigzag<4>(90));
 
-    message<integer_field<1, int, repeated>, float_field<0, float, repeated>> m4{{1,2,3}, {1.,1.2,1.23}};
+    message<integer_field<1, int, repeated>, floating_field<0, float, repeated>> m4{{1, 2, 3}, {1., 1.2, 1.23}};
     static_assert(m4.size == 2);
 
     EXPECT_EQ(m4.get_base<1>(), (vector{1,2,3}));
@@ -43,7 +43,7 @@ GTEST_TEST(message_coder, encode) {
     }
 
     {
-        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m{
+        message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>> m{
                 12, "345", 6.78f, sint_zigzag<4>(90)
         };
         array<byte, 20> a{};
@@ -54,7 +54,7 @@ GTEST_TEST(message_coder, encode) {
     }
 
     {
-        message<integer_field<10, int, repeated>, float_field<5, float, repeated>> m{{1,2,3}, {1.2,3.4e5}};
+        message<integer_field<10, int, repeated>, floating_field<5, float, repeated>> m{{1, 2, 3}, {1.2, 3.4e5}};
         array<byte, 30> a{};
         auto n = message_coder<decltype(m)>::encode(m, a);
         EXPECT_EQ(begin_diff(n, a), 25);
@@ -84,7 +84,7 @@ GTEST_TEST(message_coder, decode) {
     }
 
     {
-        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
+        message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
         array<byte, 20> a{0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b, 0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,
                          0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
         auto [v, n] = message_coder<decltype(m)>::decode(a);
@@ -96,7 +96,7 @@ GTEST_TEST(message_coder, decode) {
     }
 
     {
-        message<string_field<2>, varint_field<100, sint_zigzag<4>>, integer_field<1, int>, float_field<4, float>> m;
+        message<string_field<2>, varint_field<100, sint_zigzag<4>>, integer_field<1, int>, floating_field<4, float>> m;
         array<byte, 20> a{0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b, 0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,
                           0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
         auto [v, n] = message_coder<decltype(m)>::decode(a);
@@ -108,7 +108,7 @@ GTEST_TEST(message_coder, decode) {
     }
 
     {
-        message<integer_field<10, int, repeated>, float_field<5, float, repeated>> m;
+        message<integer_field<10, int, repeated>, floating_field<5, float, repeated>> m;
         array<byte, 30>a {0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
                           0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
                           0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b};
@@ -119,7 +119,7 @@ GTEST_TEST(message_coder, decode) {
     }
 
     {
-        message<integer_field<10, int, repeated>, float_field<5, float, repeated>> m;
+        message<integer_field<10, int, repeated>, floating_field<5, float, repeated>> m;
         array<byte, 30>a {0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
                           0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
                           0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b,0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b };
@@ -142,7 +142,7 @@ GTEST_TEST(message_coder, decode) {
 
 GTEST_TEST(message_coder, decode_with_unknown_fields) {
     {
-        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
+        message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
         array<byte, 30> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
                           0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
                           0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
@@ -155,7 +155,7 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
     }
 
     {
-        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
+        message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
         array<byte, 40> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
                           0x70_b, 0x81_b,0x82_b,0x83_b,0x84_b,0x85_b,0x86_b,0x87_b,0x88_b,0x09_b,
                           0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
@@ -169,7 +169,7 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
     }
 
     {
-        message<integer_field<1, int>, string_field<2>, float_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
+        message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>> m;
         array<byte, 50> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
                           0x70_b, 0x81_b,0x82_b,0x83_b,0x84_b,0x85_b,0x86_b,0x87_b,0x88_b,0x09_b,
                           0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
@@ -230,7 +230,7 @@ GTEST_TEST(message_coder, nested_encode) {
     }
 
     {
-        using Student = message<varint_field<1, uint32_t>, string_field<3>>;
+        using Student = message<uint32_field<1>, string_field<3>>;
         using Class = message<string_field<8>, message_field<3, Student, repeated>>;
 
         // serialization

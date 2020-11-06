@@ -35,7 +35,7 @@ We can use *protopuf* to describe it as C++ types:
 ```c++
 using namespace pp;
 
-using Student = message<varint_field<1, uint32_t>, string_field<3>>;
+using Student = message<uint32_field<1>, string_field<3>>;
 using Class = message<string_field<8>, message_field<3, Student, repeated>>;
 ```
 Subsequently, both serialization and deserialization become so easy to do:
@@ -58,6 +58,14 @@ assert(yourClass[3_f][1], Student{123456, "jerry"});
 assert(yourClass == myClass);
 assert(begin_diff(bufferEnd2, bufferEnd) == 0);
 ```
+
+## Supported Field Types
+Category|	Supported Types
+--------|------------------
+Varint  | int32, int64, uint32, uint64, sint32, sint64
+64-bit  | fixed64, sfixed64, double
+Length-delimited| string, bytes, embedded messages, packed repeated fields
+32-bit 	| fixed32, sfixed32, float
 
 ## Worklist
 - [ ] named field via NTTP (issue [#1](https://github.com/PragmaTwice/protopuf/issues/1))
