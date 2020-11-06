@@ -228,6 +228,29 @@ GTEST_TEST(message_coder, nested_encode) {
         EXPECT_EQ(yourClass, myClass);
         EXPECT_EQ(begin_diff(bufferEnd2, bufferEnd), 0);
     }
+
+    {
+        using Student = message<varint_field<1, uint32_t>, string_field<3>>;
+        using Class = message<string_field<8>, message_field<3, Student, repeated>>;
+
+        // serialization
+        Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
+        Class myClass {"class 101", {tom, jerry}};
+        myClass[3_f].push_back(twice);
+
+        array<byte, 64> buffer{};
+        auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
+        EXPECT_EQ(begin_diff(bufferEnd, buffer), 45);
+
+        // deserialization
+        auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
+        EXPECT_EQ(yourClass[8_f], "class 101");
+        EXPECT_EQ(yourClass[3_f][2][3_f], "twice");
+        EXPECT_EQ(yourClass[3_f][2][1_f], 123);
+        EXPECT_EQ(yourClass[3_f][1], (Student{123456, "jerry"}));
+        EXPECT_EQ(yourClass, myClass);
+        EXPECT_EQ(begin_diff(bufferEnd2, bufferEnd), 0);
+    }
 }
 
 GTEST_TEST(message_coder, nested_decode) {

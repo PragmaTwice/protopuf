@@ -28,6 +28,16 @@ namespace pp {
             return static_cast<field_selector<N, T...>&>(*this);
         }
 
+        template <uint<4> F>
+        constexpr decltype(auto) operator[](std::integral_constant<uint<4>, F>) const {
+            return get<F>();
+        }
+
+        template <uint<4> F>
+        constexpr decltype(auto) operator[](std::integral_constant<uint<4>, F>) {
+            return get<F>();
+        }
+
         template <uint<4> N>
         constexpr decltype(auto) get_base() const {
             return static_cast<const typename field_selector<N, T...>::base_type&>(get<N>());

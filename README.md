@@ -43,7 +43,7 @@ Subsequently, both serialization and deserialization become so easy to do:
 // serialization
 Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
 Class myClass {"class 101", {tom, jerry}};
-myClass.get<3>().push_back(twice);
+myClass[3_f].push_back(twice);
 
 array<byte, 64> buffer;
 auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
@@ -51,9 +51,10 @@ assert(begin_diff(bufferEnd, buffer) == 45);
 
 // deserialization
 auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
-assert(yourClass.get<8>() == "class 101");
-assert(yourClass.get<3>()[2].get<3>() == "twice");
-assert(yourClass.get<3>()[1], Student{123456, "jerry"});
+assert(yourClass[8_f] == "class 101");
+assert(yourClass[3_f][2][3_f] == "twice");
+assert(yourClass[3_f][2][1_f] == 123);
+assert(yourClass[3_f][1], Student{123456, "jerry"});
 assert(yourClass == myClass);
 assert(begin_diff(bufferEnd2, bufferEnd) == 0);
 ```
