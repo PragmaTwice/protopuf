@@ -123,14 +123,14 @@ namespace pp {
     }
 
     template <uint<4> V, char ... D> requires (('0' <= D <= '9') && ...)
-    constexpr auto field_literal = V;
+    constexpr auto field_literal_helper = V;
 
     template <uint<4> V, char D1, char ... Dn>
-    constexpr auto field_literal<V, D1, Dn...> = field_literal<V * 10 + (D1 - '0'), Dn...>;
+    constexpr auto field_literal_helper<V, D1, Dn...> = field_literal_helper<V * 10 + (D1 - '0'), Dn...>;
 
     template <char ... D>
     constexpr auto operator"" _f() {
-        return std::integral_constant<uint<4>, field_literal<0, D...>>{};
+        return std::integral_constant<uint<4>, field_literal_helper<0, D...>>{};
     }
 }
 
