@@ -58,7 +58,7 @@ assert(yourClass[3_f][1], Student{123456, "jerry"});
 assert(yourClass == myClass);
 assert(begin_diff(bufferEnd2, bufferEnd) == 0);
 ```
-More examples can be found in our test cases (`/test`).
+More examples can be found in our test cases (`/test/message.cpp`).
 
 ## Supported Field Types
 Category|	Supported Types
