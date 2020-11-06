@@ -53,8 +53,9 @@ assert(begin_diff(bufferEnd, buffer) == 45);
 auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
 assert(yourClass.get<8>() == "class 101");
 assert(yourClass.get<3>()[2].get<3>() == "twice");
+assert(yourClass.get<3>()[1], Student{123456, "jerry"});
 assert(yourClass == myClass);
-assert(begin_diff(bufferEnd, bufferEnd2) == 0);
+assert(begin_diff(bufferEnd2, bufferEnd) == 0);
 ```
 
 ## Worklist
