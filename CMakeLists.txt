@@ -15,7 +15,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(protopuf)
 
-message(NOTICE "Expected a compiler with C++20 support (i.e. GCC 10 or above)")
+message(NOTICE "[TIP] Expected a compiler with C++20 support (i.e. GCC 10 or above)")
 
 set(CXX_STANDARD_REQUIRED ON)
 
