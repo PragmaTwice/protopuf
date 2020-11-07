@@ -15,7 +15,9 @@
 cmake_minimum_required(VERSION 3.17)
 project(protopuf)
 
-set(CMAKE_CXX_STANDARD 20)
+add_library(protopuf INTERFACE)
+target_include_directories(protopuf INTERFACE include/)
+target_compile_features(protopuf INTERFACE cxx_std_20)
 
 # Download and unpack googletest at configure time
 configure_file(googletest/CMakeLists.txt.in googletest/CMakeLists.txt)
@@ -44,8 +46,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 file(GLOB TESTS test/*.cpp)
 add_executable(protopuf_test ${TESTS})
-target_include_directories(protopuf_test PUBLIC include)
-target_link_libraries(protopuf_test gtest_main)
+target_link_libraries(protopuf_test protopuf gtest_main)
 
 include(GoogleTest)
 enable_testing()
