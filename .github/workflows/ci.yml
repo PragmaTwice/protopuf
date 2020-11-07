@@ -13,7 +13,12 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019]
+        include:
+          - os: ubuntu-20.04
+            vcpkg: which vcpkg
+          - os: windows-2019
+            vcpkg: Get-Command vcpkg | Select-Object -ExpandProperty Definition
+    
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -22,16 +27,9 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install deps
         run: vcpkg install gtest
-      - name: get vcpkg root
-        run: export VCPKG_ROOT=$(which vcpkg) && echo ${{ env.VCPKG_DEST }} && export
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-      - name: get vcpkg root
-        run: set VCPKG_ROOT $(Get-Command vcpkg | Select-Object -ExpandProperty Definition); echo $VCPKG_ROOT
-        if: ${{ startsWith(matrix.os, 'windows') }}
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake .
+        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$(${{ matrix.vcpkg }})/scripts/buildsystems/vcpkg.cmake .
       - name: build project
         run: cmake --build .
       - name: run unit testing
         run: ctest
-
