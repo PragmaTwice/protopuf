@@ -19,6 +19,9 @@
 #include "field.h"
 #include "float.h"
 
+#include <unordered_map>
+#include <functional>
+
 namespace pp {
 
     template <field_c ... T>
