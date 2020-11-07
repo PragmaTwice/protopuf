@@ -70,3 +70,6 @@ if(BUILD_TESTS)
     enable_testing()
     gtest_add_tests(TARGET protopuf_test)
 endif()
+
+install(DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
