@@ -28,7 +28,7 @@ jobs:
       - name: install deps
         run: vcpkg install gtest
       - name: fuck
-        run: find /usr/share/vcpkg -name 'vcpkg.cmake'
+        run: find /usr/local/share/vcpkg -name 'vcpkg.cmake'
       - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$(${{ matrix.vcpkg }})/scripts/buildsystems/vcpkg.cmake .
       - name: build project
