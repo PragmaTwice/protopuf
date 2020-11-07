@@ -22,8 +22,14 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install deps
         run: vcpkg install gtest
+      - name: get vcpkg root
+        run: export VCPKG_ROOT=$(which vcpkg) && echo $VCPKG_ROOT
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: get vcpkg root
+        run: set VCPKG_ROOT $(Get-Command vcpkg | Select-Object -ExpandProperty Definition); echo $VCPKG_ROOT
+        if: ${{ startsWith(matrix.os, 'windows') }}
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_DEST_WIN }}/scripts/buildsystems/vcpkg.cmake .
+        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake .
       - name: build project
         run: cmake --build .
       - name: run unit testing

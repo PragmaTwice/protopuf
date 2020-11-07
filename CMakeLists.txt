@@ -60,7 +60,7 @@ if(BUILD_TESTS)
         set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 
         find_package(Threads REQUIRED)
-        find_package(GTest CONFIG REQUIRED)
+        find_package(GTest REQUIRED)
     endif()
     
     enable_testing()
