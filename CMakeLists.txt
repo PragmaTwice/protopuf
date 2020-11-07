@@ -24,46 +24,49 @@ target_include_directories(protopuf INTERFACE include/)
 target_compile_features(protopuf INTERFACE cxx_std_20)
 
 option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" OFF)
+option(BUILD_TESTS "Build unit testings" ON)
 
-if(DOWNLOAD_GTEST)
-    # Download and unpack googletest at configure time
-    configure_file(googletest/CMakeLists.txt.in googletest/CMakeLists.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
-    if(result)
-        message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+if(BUILD_TESTS)
+    if(DOWNLOAD_GTEST)
+        # Download and unpack googletest at configure time
+        configure_file(googletest/CMakeLists.txt.in googletest/CMakeLists.txt)
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                RESULT_VARIABLE result
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
+        if(result)
+            message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+        endif()
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                RESULT_VARIABLE result
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
+        if(result)
+            message(FATAL_ERROR "Build step for googletest failed: ${result}")
+        endif()
+
+    # Prevent overriding the parent project's compiler/linker
+    # settings on Windows
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+    # Add googletest directly to our build. This defines
+    # the gtest and gtest_main targets.
+    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+            ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+            EXCLUDE_FROM_ALL)
+    else()
+        set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+        set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+
+        find_package(Threads REQUIRED)
+        find_package(GTest REQUIRED)
     endif()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
-    if(result)
-        message(FATAL_ERROR "Build step for googletest failed: ${result}")
-    endif()
 
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    file(GLOB TESTS test/*.cpp)
+    add_executable(protopuf_test ${TESTS})
+    target_include_directories(protopuf_test PRIVATE ${GTEST_INCLUDE_DIRS})
+    target_link_libraries(protopuf_test protopuf ${CMAKE_THREAD_LIBS_INIT} ${GTEST_BOTH_LIBRARIES})
 
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-        ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-        EXCLUDE_FROM_ALL)
-else()
-    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    include(GoogleTest)
 
-    find_package(Threads REQUIRED)
-    find_package(GTest REQUIRED)
+    enable_testing()
+    gtest_add_tests(TARGET protopuf_test)
 endif()
-
-file(GLOB TESTS test/*.cpp)
-add_executable(protopuf_test ${TESTS})
-target_include_directories(protopuf_test PRIVATE ${GTEST_INCLUDE_DIRS})
-target_link_libraries(protopuf_test protopuf ${CMAKE_THREAD_LIBS_INIT} ${GTEST_BOTH_LIBRARIES})
-
-include(GoogleTest)
-
-enable_testing()
-gtest_add_tests(TARGET protopuf_test)
