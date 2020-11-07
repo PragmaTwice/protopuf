@@ -23,7 +23,7 @@ jobs:
       - name: install deps
         run: vcpkg install gtest
       - name: get vcpkg root
-        run: export VCPKG_ROOT=$(which vcpkg) && echo $VCPKG_ROOT
+        run: export VCPKG_ROOT=$(which vcpkg) && echo ${{ env.VCPKG_DEST }} && export
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: get vcpkg root
         run: set VCPKG_ROOT $(Get-Command vcpkg | Select-Object -ExpandProperty Definition); echo $VCPKG_ROOT
