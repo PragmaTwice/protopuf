@@ -8,7 +8,8 @@ A little, highly templated, and protobuf-compatible serialization/deserializatio
 ## Requirements
 
 - a compiler and a standard library implementation with C++20 support 
-    - only GCC 10 and its libstdc++ now
+    - GCC 10 or above, or
+    - MSVC 14.26 (Visual Studio 2019 Version 16.6) or above
 - GoogleTest (optional)
 - CMake 3
 
