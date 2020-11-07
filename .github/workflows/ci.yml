@@ -23,11 +23,7 @@ jobs:
       - name: install deps
         run: vcpkg install gtest
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=Release .
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-      - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_DEST_WIN }}/scripts/buildsystems/vcpkg.cmake .
-        if: ${{ startsWith(matrix.os, 'windows') }}
       - name: build project
         run: cmake --build .
       - name: run unit testing
