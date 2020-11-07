@@ -11,25 +11,25 @@ on:
 
 jobs:
   build:
-    - strategy:
-        matrix:
-          os: [ubuntu-20.04, windows-2019]
-    - runs-on: ${{ matrix.os }}
-      steps:
-        - uses: actions/checkout@v2
-        - name: install tools
-          run: sudo apt install gcc-10 && export CXX=$(which g++-10)
-          if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        - name: install deps
-          run: vcpkg install gtest
-        - name: generate build script
-          run: cmake -DCMAKE_BUILD_TYPE=Release .
-          if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        - name: generate build script
-          run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_DEST_WIN }}/scripts/buildsystems/vcpkg.cmake .
-          if: ${{ startsWith(matrix.os, 'windows') }}
-        - name: build project
-          run: cmake --build .
-        - name: run unit testing
-          run: ctest
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-2019]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: install tools
+        run: sudo apt install gcc-10 && export CXX=$(which g++-10)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: install deps
+        run: vcpkg install gtest
+      - name: generate build script
+        run: cmake -DCMAKE_BUILD_TYPE=Release .
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: generate build script
+        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_DEST_WIN }}/scripts/buildsystems/vcpkg.cmake .
+        if: ${{ startsWith(matrix.os, 'windows') }}
+      - name: build project
+        run: cmake --build .
+      - name: run unit testing
+        run: ctest
 
