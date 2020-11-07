@@ -20,7 +20,9 @@ message(NOTICE "[TIP] Expected a compiler with C++20 support (i.e. GCC 10 or abo
 set(CXX_STANDARD_REQUIRED ON)
 
 add_library(protopuf INTERFACE)
-target_include_directories(protopuf INTERFACE include/)
+target_include_directories(protopuf INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 target_compile_features(protopuf INTERFACE cxx_std_20)
 
 option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" OFF)
@@ -71,5 +73,6 @@ if(BUILD_TESTS)
     gtest_add_tests(TARGET protopuf_test)
 endif()
 
-install(DIRECTORY include/
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(DIRECTORY include DESTINATION "${CMAKE_INSTALL_PREFIX}")
+install(TARGETS protopuf EXPORT protopufConfig)
+install(EXPORT protopufConfig DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake")
