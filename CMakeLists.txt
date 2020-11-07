@@ -52,11 +52,12 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
         EXCLUDE_FROM_ALL)
 else()
     find_package(GTest REQUIRED)
+    find_package(Threads REQUIRED)
 endif()
 
 file(GLOB TESTS test/*.cpp)
 add_executable(protopuf_test ${TESTS})
-target_link_libraries(protopuf_test protopuf gtest gtest_main)
+target_link_libraries(protopuf_test protopuf ${CMAKE_THREAD_LIBS_INIT} ${GTEST_BOTH_LIBRARIES})
 
 include(GoogleTest)
 
