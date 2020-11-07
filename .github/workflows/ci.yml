@@ -15,9 +15,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
-            vcpkg: which vcpkg
-          # - os: windows-2019
-          #   vcpkg: Get-Command vcpkg | Select-Object -ExpandProperty Definition
+            vcpkg: echo /usr/local/share/vcpkg
+          - os: windows-2019
+            vcpkg: Get-Command vcpkg | Select-Object -ExpandProperty Definition
     
     runs-on: ${{ matrix.os }}
     steps:
