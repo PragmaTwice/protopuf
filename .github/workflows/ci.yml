@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - name: install gcc
-        run: sudo apt install gcc-10
+      - name: install deps
+        run: sudo apt install gcc-10 googletest
       - name: generate build script
         run: CXX=/usr/bin/g++-10 cmake .
       - name: build project

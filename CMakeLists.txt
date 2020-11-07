@@ -23,20 +23,23 @@ add_library(protopuf INTERFACE)
 target_include_directories(protopuf INTERFACE include/)
 target_compile_features(protopuf INTERFACE cxx_std_20)
 
-# Download and unpack googletest at configure time
-configure_file(googletest/CMakeLists.txt.in googletest/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
-if(result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
-if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
+option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" OFF)
+
+if(DOWNLOAD_GTEST)
+    # Download and unpack googletest at configure time
+    configure_file(googletest/CMakeLists.txt.in googletest/CMakeLists.txt)
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
+    if(result)
+        message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+    endif()
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
+    if(result)
+        message(FATAL_ERROR "Build step for googletest failed: ${result}")
+    endif()
 
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
@@ -47,11 +50,15 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
         ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
         EXCLUDE_FROM_ALL)
+else()
+    find_package(GTest REQUIRED)
+endif()
 
 file(GLOB TESTS test/*.cpp)
 add_executable(protopuf_test ${TESTS})
-target_link_libraries(protopuf_test protopuf gtest_main)
+target_link_libraries(protopuf_test protopuf gtest gtest_main)
 
 include(GoogleTest)
+
 enable_testing()
 gtest_add_tests(TARGET protopuf_test)
