@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install deps
-        run: sudo apt install gcc-10 googletest
+        run: sudo apt install gcc-10 libgtest-dev
       - name: generate build script
         run: CXX=/usr/bin/g++-10 cmake .
       - name: build project
