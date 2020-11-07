@@ -27,6 +27,8 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install deps
         run: vcpkg install gtest
+      - name: fuck
+        run: find / -name 'vcpkg.cmake'
       - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$(${{ matrix.vcpkg }})/scripts/buildsystems/vcpkg.cmake .
       - name: build project
