@@ -26,7 +26,7 @@ jobs:
       - name: install deps
         run: vcpkg install gtest
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_CXX_COMPILER=gcc-10 .
+        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_CXX_COMPILER=g++-10 .
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$(Get-Command vcpkg | Select-Object -ExpandProperty Definition)/scripts/buildsystems/vcpkg.cmake .
