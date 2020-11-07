@@ -17,6 +17,8 @@
 #include <protopuf/skip.h>
 #include <protopuf/array.h>
 
+#include <array>
+
 using namespace pp;
 using namespace std;
 
@@ -73,7 +75,7 @@ GTEST_TEST(skipper, encode) {
 
     wstring wstr = L"twice!!!", lwstr;
     for(int i = 0; i < 30000; ++i) lwstr.append(wstr);
-    EXPECT_EQ(skipper<basic_string_coder<wchar_t>>::encode_skip(lwstr), 3 + 4 * 8 * 30000);
+    EXPECT_EQ(skipper<basic_string_coder<wchar_t>>::encode_skip(lwstr), 3 + sizeof(wchar_t) * 8 * 30000);
 }
 
 GTEST_TEST(skipper, decode) {

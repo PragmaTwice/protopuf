@@ -17,6 +17,7 @@
 #include <protopuf/int.h>
 #include <protopuf/byte.h>
 
+#include <array>
 #include <algorithm>
 
 using namespace pp;

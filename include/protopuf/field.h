@@ -21,6 +21,7 @@
 #include "zigzag.h"
 #include "varint.h"
 #include "bool.h"
+#include <optional>
 
 namespace pp {
 

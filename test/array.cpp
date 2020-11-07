@@ -16,6 +16,7 @@
 
 #include <protopuf/array.h>
 #include <protopuf/zigzag.h>
+#include <array>
 
 using namespace pp;
 using namespace std;

@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include <protopuf/varint.h>
+#include <array>
 
 using namespace pp;
 using namespace std;
