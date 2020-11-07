@@ -75,4 +75,5 @@ endif()
 
 install(DIRECTORY include DESTINATION "${CMAKE_INSTALL_PREFIX}")
 install(TARGETS protopuf EXPORT protopufConfig)
-install(EXPORT protopufConfig DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake")
+export(TARGETS protopuf FILE "${CMAKE_CURRENT_BINARY_DIR}/protopufConfig.cmake")
+install(EXPORT protopufConfig DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake")
