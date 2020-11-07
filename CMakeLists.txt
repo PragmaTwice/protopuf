@@ -55,13 +55,12 @@ if(BUILD_TESTS)
                 ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                 EXCLUDE_FROM_ALL)
 
-        set(GTEST_BOTH_LIBRARIES gtest gtest_main)
     else()
         set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
         set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 
         find_package(Threads REQUIRED)
-        find_package(GTest REQUIRED)
+        find_package(GTest CONFIG REQUIRED)
     endif()
     
     enable_testing()
@@ -69,7 +68,7 @@ if(BUILD_TESTS)
     file(GLOB TESTS test/*.cpp)
     add_executable(protopuf_test ${TESTS})
     target_include_directories(protopuf_test PRIVATE ${GTEST_INCLUDE_DIRS})
-    target_link_libraries(protopuf_test protopuf ${CMAKE_THREAD_LIBS_INIT} ${GTEST_BOTH_LIBRARIES})
+    target_link_libraries(protopuf_test protopuf ${CMAKE_THREAD_LIBS_INIT} gtest gtest_main)
 
     include(GoogleTest)
     gtest_discover_tests(protopuf_test)
