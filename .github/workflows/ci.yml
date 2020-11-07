@@ -16,8 +16,8 @@ jobs:
         include:
           - os: ubuntu-20.04
             vcpkg: which vcpkg
-          - os: windows-2019
-            vcpkg: Get-Command vcpkg | Select-Object -ExpandProperty Definition
+          # - os: windows-2019
+          #   vcpkg: Get-Command vcpkg | Select-Object -ExpandProperty Definition
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -28,7 +28,7 @@ jobs:
       - name: install deps
         run: vcpkg install gtest
       - name: fuck
-        run: find / -name 'vcpkg.cmake'
+        run: find /usr/share/vcpkg -name 'vcpkg.cmake'
       - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$(${{ matrix.vcpkg }})/scripts/buildsystems/vcpkg.cmake .
       - name: build project
