@@ -36,6 +36,24 @@ jobs:
           - os: windows-2019
             gtest: -DDOWNLOAD_GTEST=ON
             type: Release
+          - os: macos-11.0
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Debug
+          - os: macos-11.0
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Release
+          - os: macos-11.0
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            macos_vcpkg_var: CXX=g++-10
+            type: Debug
+          - os: macos-11.0
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            macos_vcpkg_var: CXX=g++-10
+            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -43,8 +61,11 @@ jobs:
       - name: install tools
         run: sudo apt install gcc-10
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: install tools
+        run: brew install gcc
+        if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install deps
-        run: vcpkg install gtest
+        run: ${{ matrix.macos_vcpkg_var }} vcpkg install gtest
         if: ${{ matrix.vcpkg }}
       - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} .
