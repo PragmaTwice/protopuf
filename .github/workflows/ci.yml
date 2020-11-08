@@ -35,6 +35,6 @@ jobs:
       - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=Release ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} .
       - name: build project
-        run: cmake --build .
+        run: cmake --build . --config Release
       - name: run unit testing
         run: ctest
