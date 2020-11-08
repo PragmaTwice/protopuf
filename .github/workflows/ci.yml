@@ -49,6 +49,11 @@ jobs:
             cxx: -DCMAKE_CXX_COMPILER=g++-10
             macos_vcpkg_var: CXX=g++-10
             type: Debug
+          - os: macos-11.0
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            macos_vcpkg_var: CXX=g++-10
+            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
