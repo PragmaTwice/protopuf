@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install tools
-        run: sudo apt install gcc-10 && export CXX=$(which g++-10)
+        run: sudo apt install gcc-10
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install deps
         run: vcpkg install gtest
