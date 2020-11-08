@@ -17,6 +17,10 @@ jobs:
           - os: ubuntu-20.04
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
             cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Debug
+          - os: ubuntu-20.04
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
             type: Release
           - os: ubuntu-20.04
             gtest: -DDOWNLOAD_GTEST=ON
