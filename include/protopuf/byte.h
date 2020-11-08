@@ -30,9 +30,9 @@ namespace pp {
     using bytes = std::span<std::byte>;
 
     inline constexpr std::size_t begin_diff(bytes a, bytes b) {
-        return a.begin() - b.begin();
+        // `std::to_address` is used here for MSVC, ref to https://github.com/microsoft/STL/issues/1435
+        return std::to_address(a.begin()) - std::to_address(b.begin());
     }
-
 }
 
 #endif //PROTOPUF_BYTE_H
