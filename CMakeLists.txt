@@ -45,32 +45,36 @@ if(BUILD_TESTS)
             message(FATAL_ERROR "Build step for googletest failed: ${result}")
         endif()
 
-    # Prevent overriding the parent project's compiler/linker
-    # settings on Windows
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        # Prevent overriding the parent project's compiler/linker
+        # settings on Windows
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    # Add googletest directly to our build. This defines
-    # the gtest and gtest_main targets.
-    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-            ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-            EXCLUDE_FROM_ALL)
+        # Add googletest directly to our build. This defines
+        # the gtest and gtest_main targets.
+        add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+                ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+                EXCLUDE_FROM_ALL)
+
+        set(GTEST_LIBS gtest gtest_main)
     else()
         set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
         set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 
         find_package(Threads REQUIRED)
-        find_package(GTest REQUIRED)
+        find_package(GTest CONFIG REQUIRED)
+
+        set(GTEST_LIBS GTest::gtest GTest::gtest_main)
     endif()
+    
+    enable_testing()
 
     file(GLOB TESTS test/*.cpp)
     add_executable(protopuf_test ${TESTS})
     target_include_directories(protopuf_test PRIVATE ${GTEST_INCLUDE_DIRS})
-    target_link_libraries(protopuf_test protopuf ${CMAKE_THREAD_LIBS_INIT} ${GTEST_BOTH_LIBRARIES})
+    target_link_libraries(protopuf_test protopuf ${CMAKE_THREAD_LIBS_INIT} ${GTEST_LIBS})
 
     include(GoogleTest)
-
-    enable_testing()
-    gtest_add_tests(TARGET protopuf_test)
+    gtest_discover_tests(protopuf_test)
 endif()
 
 install(DIRECTORY include DESTINATION "${CMAKE_INSTALL_PREFIX}")

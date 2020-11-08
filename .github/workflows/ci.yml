@@ -8,16 +8,33 @@ on:
       - 'asset/**'
       - 'LICENSE'
 
+
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=g++-10 
+          - os: ubuntu-20.04
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=g++-10 
+          - os: windows-2019
+            gtest: -DDOWNLOAD_GTEST=ON
+    
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - name: install tools
+        run: sudo apt install gcc-10
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install deps
-        run: sudo apt install gcc-10 libgtest-dev
+        run: vcpkg install gtest
+        if: ${{ matrix.vcpkg }}
       - name: generate build script
-        run: CXX=/usr/bin/g++-10 cmake .
+        run: cmake -DCMAKE_BUILD_TYPE=Release ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} .
       - name: build project
-        run: make all
+        run: cmake --build . --config Release
       - name: run unit testing
-        run: make test
+        run: ctest
