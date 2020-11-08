@@ -62,6 +62,7 @@ if(BUILD_TESTS)
 
         find_package(Threads REQUIRED)
         find_package(GTest CONFIG REQUIRED)
+        message(NOTICE "-- Found GTest: " ${GTest_DIR})
 
         set(GTEST_LIBS GTest::gtest GTest::gtest_main)
     endif()
