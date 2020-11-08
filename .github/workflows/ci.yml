@@ -16,12 +16,26 @@ jobs:
         include:
           - os: ubuntu-20.04
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-            cxx: -DCMAKE_CXX_COMPILER=g++-10 
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Debug
+          - os: ubuntu-20.04
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Release
           - os: ubuntu-20.04
             gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=g++-10 
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Debug
+          - os: ubuntu-20.04
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Release
           - os: windows-2019
             gtest: -DDOWNLOAD_GTEST=ON
+            type: Debug
+          - os: windows-2019
+            gtest: -DDOWNLOAD_GTEST=ON
+            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -33,8 +47,8 @@ jobs:
         run: vcpkg install gtest
         if: ${{ matrix.vcpkg }}
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=Release ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} .
+        run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} .
       - name: build project
-        run: cmake --build . --config Release
+        run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
         run: ctest
