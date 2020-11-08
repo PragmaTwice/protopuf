@@ -15,7 +15,13 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=g++-10 
+          - os: ubuntu-20.04
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=g++-10 
           - os: windows-2019
+            gtest: -DDOWNLOAD_GTEST=ON
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -25,12 +31,9 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install deps
         run: vcpkg install gtest
+        if: ${{ matrix.vcpkg }}
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_CXX_COMPILER=g++-10 .
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-      - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake .
-        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: cmake -DCMAKE_BUILD_TYPE=Release ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} .
       - name: build project
         run: cmake --build .
       - name: run unit testing
