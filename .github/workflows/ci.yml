@@ -37,9 +37,13 @@ jobs:
             gtest: -DDOWNLOAD_GTEST=ON
             type: Release
           - os: macos-11.0
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            gtest: -DDOWNLOAD_GTEST=ON
             cxx: -DCMAKE_CXX_COMPILER=g++-10
             type: Debug
+          - os: macos-11.0
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=g++-10
+            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
