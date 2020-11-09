@@ -59,9 +59,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: install tools
+      - name: install build tools
         run: sudo apt install gcc-10
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: install coverage tools
+        run: sudo apt install lcov
+        if: ${{ matrix.coverage }}
       - name: install tools
         run: brew install gcc
         if: ${{ startsWith(matrix.os, 'macos') }}
@@ -76,6 +79,7 @@ jobs:
         run: ctest
       - name: capture coverage
         run: lcov --directory . --capture --output-file coverage.info
+        if: ${{ matrix.coverage }}
       - uses: codecov/codecov-action@v1
         with:
           file: ./coverage.info
