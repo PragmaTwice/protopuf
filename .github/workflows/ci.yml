@@ -30,6 +30,7 @@ jobs:
             gtest: -DDOWNLOAD_GTEST=ON
             cxx: -DCMAKE_CXX_COMPILER=g++-10
             type: Release
+            coverage: -DCMAKE_CXX_FLAGS=--coverage
           - os: windows-2019
             gtest: -DDOWNLOAD_GTEST=ON
             type: Debug
@@ -68,8 +69,14 @@ jobs:
         run: ${{ matrix.macos_vcpkg_var }} vcpkg install gtest
         if: ${{ matrix.vcpkg }}
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} .
+        run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} ${{ matrix.coverage }} .
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
         run: ctest
+      - name: capture coverage
+        run: lcov --directory . --capture --output-file coverage.info
+      - uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.info
+        if: ${{ matrix.coverage }}
