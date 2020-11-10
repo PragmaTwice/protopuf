@@ -2,6 +2,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/31e7d1d7bcbe43959aaec3b86093b843)](https://app.codacy.com/gh/PragmaTwice/protopuf?utm_source=github.com&utm_medium=referral&utm_content=PragmaTwice/protopuf&utm_campaign=Badge_Grade)
 [![Github Actions](https://github.com/PragmaTwice/protopuf/workflows/BuildAndTest/badge.svg)](https://github.com/PragmaTwice/protopuf/actions)
 [![Vcpkg Port](https://img.shields.io/badge/vcpkg-protopuf-blue)](https://github.com/microsoft/vcpkg/blob/master/ports/protopuf/vcpkg.json)
+[![codecov](https://codecov.io/gh/PragmaTwice/protopuf/branch/master/graph/badge.svg?token=4EPLZ6Z4J5)](https://codecov.io/gh/PragmaTwice/protopuf)
 
 *What is this?*
 
