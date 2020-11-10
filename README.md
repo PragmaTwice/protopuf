@@ -11,8 +11,9 @@ A little, highly templated, and protobuf-compatible serialization/deserializatio
 - a compiler and a standard library implementation with C++20 support 
     - GCC 10 or above, or
     - MSVC 14.26 (Visual Studio 2019 Version 16.6) or above
-- GoogleTest (optional)
 - CMake 3
+- GoogleTest (optional, for unit tests)
+- vcpkg (optional, `vcpkg install protopuf` to install)
 
 ## Features
 
@@ -47,7 +48,7 @@ Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
 Class myClass {"class 101", {tom, jerry}};
 myClass[3_f].push_back(twice);
 
-array<byte, 64> buffer;
+array<byte, 64> buffer{};
 auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
 assert(begin_diff(bufferEnd, buffer) == 45);
 
