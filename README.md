@@ -1,6 +1,7 @@
 # ![puffer](asset/puffer.png) Protocol Puffers
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/31e7d1d7bcbe43959aaec3b86093b843)](https://app.codacy.com/gh/PragmaTwice/protopuf?utm_source=github.com&utm_medium=referral&utm_content=PragmaTwice/protopuf&utm_campaign=Badge_Grade)
 [![Github Actions](https://github.com/PragmaTwice/protopuf/workflows/BuildAndTest/badge.svg)](https://github.com/PragmaTwice/protopuf/actions)
+[![Vcpkg Port](https://img.shields.io/badge/vcpkg-1.0.0-blue)](https://github.com/microsoft/vcpkg/blob/master/ports/protopuf/vcpkg.json)
 
 *What is this?*
 
