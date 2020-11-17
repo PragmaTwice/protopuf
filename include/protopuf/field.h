@@ -106,23 +106,29 @@ namespace pp {
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using varint_field = field<N, varint_coder<T>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<4>>>
-    using int32_field = varint_field<N, sint<4>, A, Container>;
+    using int32 = sint<4>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<int32>>
+    using int32_field = varint_field<N, int32, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<4>>>
-    using uint32_field = varint_field<N, uint<4>, A, Container>;
+    using uint32 = uint<4>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint32>>
+    using uint32_field = varint_field<N, uint32, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint_zigzag<4>>>
-    using sint32_field = varint_field<N, sint_zigzag<4>, A, Container>;
+    using sint32 = sint_zigzag<4>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint32>>
+    using sint32_field = varint_field<N, sint32, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<8>>>
-    using int64_field = varint_field<N, sint<8>, A, Container>;
+    using int64 = sint<8>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<int64>>
+    using int64_field = varint_field<N, int64, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<8>>>
-    using uint64_field = varint_field<N, uint<8>, A, Container>;
+    using uint64 = uint<8>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint64>>
+    using uint64_field = varint_field<N, uint64, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint_zigzag<8>>>
-    using sint64_field = varint_field<N, sint_zigzag<8>, A, Container>;
+    using sint64 = sint_zigzag<8>;
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint64>>
+    using sint64_field = varint_field<N, sint64, A, Container>;
 
     template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using floating_field = field<N, float_coder<T>, A, Container>;
@@ -142,7 +148,7 @@ namespace pp {
     template <uint<4> N, attribute A = singular, typename Container = std::vector<std::string>>
     using string_field = field<N, string_coder, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<bytes>>>
+    template <uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<std::byte>>>
     using bytes_field = field<N, bytes_coder, A, Container>;
 
     template <uint<4> N, attribute A = singular, typename Container = std::vector<bool>>
