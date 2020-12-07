@@ -77,3 +77,6 @@ Length-delimited| string, bytes, embedded messages, packed repeated fields
 - [ ] named field via NTTP (issue [#1](https://github.com/PragmaTwice/protopuf/issues/1))
     - shelved due to a CTAD bug in GCC 10 & 11 (exists until now, [PR96331](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96331))
 - [ ] better deduction for initializer list
+
+## Known issue
+There is [a known bug in Visual Studio 2019 Version 16.8](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794), which can produce a wrong compilation error while compiling protopuf.
