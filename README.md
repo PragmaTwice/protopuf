@@ -79,4 +79,4 @@ Length-delimited| string, bytes, embedded messages, packed repeated fields
 - [ ] better deduction for initializer list
 
 ## Known issue
-There is [a known bug in Visual Studio 2019 Version 16.8](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794), which can produce a wrong compilation error while compiling protopuf.
+- There is [a known bug](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794) related to template parameter lists of lambda expressions in Visual Studio 2019 Version 16.8, which can produce a wrong compilation error while compiling protopuf.
