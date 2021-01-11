@@ -37,16 +37,31 @@ namespace pp {
 
         template <uint<4> N>
         constexpr decltype(auto) get() const {
-            return static_cast<const field_selector<N, T...>&>(*this);
+            return static_cast<const field_number_selector<N, T...>&>(*this);
+        }
+
+        template <basic_fixed_string S>
+        constexpr decltype(auto) get() const {
+            return static_cast<const field_name_selector<S, T...>&>(*this);
         }
 
         template <uint<4> N>
         constexpr decltype(auto) get() {
-            return static_cast<field_selector<N, T...>&>(*this);
+            return static_cast<field_number_selector<N, T...>&>(*this);
+        }
+
+        template <basic_fixed_string S>
+        constexpr decltype(auto) get() {
+            return static_cast<field_name_selector<S, T...>&>(*this);
         }
 
         template <uint<4> F>
         constexpr decltype(auto) operator[](std::integral_constant<uint<4>, F>) const {
+            return get<F>();
+        }
+
+        template <basic_fixed_string F>
+        constexpr decltype(auto) operator[](constant<F>) const {
             return get<F>();
         }
 
@@ -55,14 +70,29 @@ namespace pp {
             return get<F>();
         }
 
+        template <basic_fixed_string F>
+        constexpr decltype(auto) operator[](constant<F>) {
+            return get<F>();
+        }
+
         template <uint<4> N>
         constexpr decltype(auto) get_base() const {
-            return static_cast<const typename field_selector<N, T...>::base_type&>(get<N>());
+            return static_cast<const typename field_number_selector<N, T...>::base_type&>(get<N>());
+        }
+
+        template <basic_fixed_string S>
+        constexpr decltype(auto) get_base() const {
+            return static_cast<const typename field_name_selector<S, T...>::base_type&>(get<S>());
         }
 
         template <uint<4> N>
         constexpr decltype(auto) get_base() {
-            return static_cast<typename field_selector<N, T...>::base_type&>(get<N>());
+            return static_cast<typename field_number_selector<N, T...>::base_type&>(get<N>());
+        }
+
+        template <basic_fixed_string S>
+        constexpr decltype(auto) get_base() {
+            return static_cast<typename field_name_selector<S, T...>::base_type&>(get<S>());
         }
 
         constexpr bool operator==(const message & other) const {
@@ -292,8 +322,8 @@ namespace pp {
     template <typename T>
     struct wire_type_impl<embedded_message_coder<T>> : std::integral_constant<uint<1>, 2> {};
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
-    using message_field = field<N, embedded_message_coder<T>, A, Container>;
+    template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using message_field = field<S, N, embedded_message_coder<T>, A, Container>;
 }
 
 #endif //PROTOPUF_MESSAGE_H

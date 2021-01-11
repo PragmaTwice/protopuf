@@ -11,8 +11,9 @@ A little, highly templated, and protobuf-compatible serialization/deserializatio
 ## Requirements
 
 - a compiler and a standard library implementation with C++20 support 
-    - GCC 10 or above, or
-    - MSVC 14.26 (Visual Studio 2019 Version 16.6) or above
+    - GCC 11 or above, or
+    - Clang 12 or above, or
+    - MSVC 14.29 (Visual Studio 2019 Version 16.9) or above
 - CMake 3
 - GoogleTest (optional, for unit tests)
 - vcpkg (optional, `vcpkg install protopuf` to install)
@@ -40,15 +41,15 @@ We can use *protopuf* to describe it as C++ types:
 ```c++
 using namespace pp;
 
-using Student = message<uint32_field<1>, string_field<3>>;
-using Class = message<string_field<8>, message_field<3, Student, repeated>>;
+using Student = message<uint32_field<"id", 1>, string_field<"name", 3>>;
+using Class = message<string_field<"name", 8>, message_field<"students", 3, Student, repeated>>;
 ```
 Subsequently, both serialization and deserialization become so easy to do:
 ```c++
 // serialization
 Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
 Class myClass {"class 101", {tom, jerry}};
-myClass[3_f].push_back(twice);
+myClass["students"_f].push_back(twice);
 
 array<byte, 64> buffer{};
 auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
@@ -56,10 +57,10 @@ assert(begin_diff(bufferEnd, buffer) == 45);
 
 // deserialization
 auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
-assert(yourClass[8_f] == "class 101");
-assert(yourClass[3_f][2][3_f] == "twice");
-assert(yourClass[3_f][2][1_f] == 123);
-assert(yourClass[3_f][1], Student{123456, "jerry"});
+assert(yourClass["name"_f] == "class 101");
+assert(yourClass["students"_f][2]["name"_f] == "twice");
+assert(yourClass["students"_f][2]["id"_f] == 123);
+assert(yourClass["students"_f][1] == Student{123456, "jerry"});
 assert(yourClass == myClass);
 assert(begin_diff(bufferEnd2, bufferEnd) == 0);
 ```
@@ -74,9 +75,9 @@ Length-delimited| string, bytes, embedded messages, packed repeated fields
 32-bit 	| fixed32, sfixed32, float
 
 ## Worklist
-- [ ] named field via NTTP (issue [#1](https://github.com/PragmaTwice/protopuf/issues/1))
-    - shelved due to a CTAD bug in GCC 10 & 11 (exists until now, [PR96331](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96331))
+- [x] named field via NTTP (issue [#1](https://github.com/PragmaTwice/protopuf/issues/1))
 - [ ] better deduction for initializer list
 
 ## Known issues
 - There is [a known bug](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794) related to template parameter lists of lambda expressions in Visual Studio 2019 Version 16.8, which can produce a wrong compilation error while compiling protopuf
+- Although class type in NTTP ([P0732R2](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0732r2.pdf)) is implemented in GCC 10, there is a CTAD bug ([PR96331](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96331), exists until GCC 10.2) to reject valid NTTP usage, which prevent protopuf to compile successfully

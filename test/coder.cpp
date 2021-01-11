@@ -52,13 +52,13 @@ GTEST_TEST(static, coder) {
     static_assert(coder<float_coder<floating<4>>>);
     static_assert(coder<float_coder<floating<8>>>);
 
-    static_assert(coder<message_coder<message<integer_field<1, int>, floating_field<3, float>>>>);
-    static_assert(coder<message_coder<message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>>> >);
-    static_assert(coder<message_coder<message<integer_field<1, int, repeated>, floating_field<0, float, repeated>>>>);
+    static_assert(coder<message_coder<message<integer_field<"", 1, int>, floating_field<"", 3, float>>>>);
+    static_assert(coder<message_coder<message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>>> >);
+    static_assert(coder<message_coder<message<integer_field<"", 1, int, repeated>, floating_field<"", 0, float, repeated>>>>);
 
-    static_assert(coder<embedded_message_coder<message<integer_field<1, int>, floating_field<3, float>>>>);
-    static_assert(coder<embedded_message_coder<message<integer_field<1, int>, string_field<2>, floating_field<4, float>, varint_field<100, sint_zigzag<4>>>> >);
-    static_assert(coder<embedded_message_coder<message<integer_field<1, int, repeated>, floating_field<0, float, repeated>>>>);
+    static_assert(coder<embedded_message_coder<message<integer_field<"", 1, int>, floating_field<"", 3, float>>>>);
+    static_assert(coder<embedded_message_coder<message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>>> >);
+    static_assert(coder<embedded_message_coder<message<integer_field<"", 1, int, repeated>, floating_field<"", 0, float, repeated>>>>);
 
     static_assert(coder<bool_coder>);
 
