@@ -31,30 +31,30 @@ jobs:
             cxx: -DCMAKE_CXX_COMPILER=g++-10
             type: Release
             coverage: -DCMAKE_CXX_FLAGS=--coverage
-          - os: windows-2019
-            gtest: -DDOWNLOAD_GTEST=ON
-            type: Debug
-          - os: windows-2019
-            gtest: -DDOWNLOAD_GTEST=ON
-            type: Release
-          - os: macos-11.0
-            gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=g++-10
-            type: Debug
-          - os: macos-11.0
-            gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=g++-10
-            type: Release
-          - os: macos-11.0
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-            cxx: -DCMAKE_CXX_COMPILER=g++-10
-            macos_vcpkg_var: CXX=g++-10
-            type: Debug
-          - os: macos-11.0
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-            cxx: -DCMAKE_CXX_COMPILER=g++-10
-            macos_vcpkg_var: CXX=g++-10
-            type: Release
+#          - os: windows-2019
+#            gtest: -DDOWNLOAD_GTEST=ON
+#            type: Debug
+#          - os: windows-2019
+#            gtest: -DDOWNLOAD_GTEST=ON
+#            type: Release
+#          - os: macos-11.0
+#            gtest: -DDOWNLOAD_GTEST=ON
+#            cxx: -DCMAKE_CXX_COMPILER=g++-10
+#            type: Debug
+#          - os: macos-11.0
+#            gtest: -DDOWNLOAD_GTEST=ON
+#            cxx: -DCMAKE_CXX_COMPILER=g++-10
+#            type: Release
+#          - os: macos-11.0
+#            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+#            cxx: -DCMAKE_CXX_COMPILER=g++-10
+#            macos_vcpkg_var: CXX=g++-10
+#            type: Debug
+#          - os: macos-11.0
+#            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+#            cxx: -DCMAKE_CXX_COMPILER=g++-10
+#            macos_vcpkg_var: CXX=g++-10
+#            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
