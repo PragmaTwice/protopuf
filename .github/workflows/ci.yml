@@ -66,8 +66,9 @@ jobs:
         run: |
           wget -q http://kayari.org/gcc-latest/gcc-latest.deb \
           && sudo dpkg -i gcc-latest.deb
-          echo "PATH=/opt/gcc-latest/bin:$PATH" >> $GITHUB_ENV
+          echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
           echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
+          sudo rm -rf `which g++` `which gcov` /usr/local/lib/gcc
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install coverage tools
         run: sudo apt install lcov
