@@ -16,15 +16,19 @@ jobs:
         include:
           - os: ubuntu-20.04
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=$GCC
             type: Debug
           - os: ubuntu-20.04
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+            cxx: -DCMAKE_CXX_COMPILER=$GCC
             type: Release
           - os: ubuntu-20.04
             gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=$GCC
             type: Debug
           - os: ubuntu-20.04
             gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=$GCC
             type: Release
             coverage: -DCMAKE_CXX_FLAGS=--coverage
 #          - os: windows-2019
@@ -59,9 +63,8 @@ jobs:
         run: |
           wget http://kayari.org/gcc-latest/gcc-latest.deb \
           && sudo dpkg -i gcc-latest.deb
-          sed "1i/opt/gcc-latest/bin" $GITHUB_PATH
+          echo "GCC=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
           echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
-          cat $GITHUB_PATH
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install coverage tools
         run: sudo apt install lcov
@@ -75,7 +78,7 @@ jobs:
       - name: generate build script
         run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} ${{ matrix.coverage }} .
       - name: build project
-        run: cat $GITHUB_PATH && which gcc && cmake --build . --config ${{ matrix.type }}
+        run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
         run: ctest
       - name: capture coverage
