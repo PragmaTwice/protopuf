@@ -31,14 +31,14 @@ jobs:
             cxx: -DCMAKE_CXX_COMPILER=$GCC
             type: Release
             coverage: -DCMAKE_CXX_FLAGS=--coverage
-          - os: ubuntu-20.04
-            gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=$CLANG
-            type: Debug
-          - os: ubuntu-20.04
-            gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=$CLANG
-            type: Release
+#          - os: ubuntu-20.04
+#            gtest: -DDOWNLOAD_GTEST=ON
+#            cxx: -DCMAKE_CXX_COMPILER=$CLANG
+#            type: Debug
+#          - os: ubuntu-20.04
+#            gtest: -DDOWNLOAD_GTEST=ON
+#            cxx: -DCMAKE_CXX_COMPILER=$CLANG
+#            type: Release
 #          - os: windows-2019
 #            gtest: -DDOWNLOAD_GTEST=ON
 #            type: Debug
