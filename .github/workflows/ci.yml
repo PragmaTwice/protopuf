@@ -31,6 +31,14 @@ jobs:
             cxx: -DCMAKE_CXX_COMPILER=$GCC
             type: Release
             coverage: -DCMAKE_CXX_FLAGS=--coverage
+          - os: ubuntu-20.04
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=$CLANG
+            type: Debug
+          - os: ubuntu-20.04
+            gtest: -DDOWNLOAD_GTEST=ON
+            cxx: -DCMAKE_CXX_COMPILER=$CLANG
+            type: Release
 #          - os: windows-2019
 #            gtest: -DDOWNLOAD_GTEST=ON
 #            type: Debug
@@ -61,11 +69,18 @@ jobs:
       - uses: actions/checkout@v2
       - name: install build tools
         run: |
-          wget http://kayari.org/gcc-latest/gcc-latest.deb \
+          wget -q http://kayari.org/gcc-latest/gcc-latest.deb \
           && sudo dpkg -i gcc-latest.deb
           echo "GCC=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
           echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') && endsWith(matrix.cxx, 'GCC') }}
+      - name: install build tools
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 12
+          echo "CLANG=clang++-12" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'ubuntu') && endsWith(matrix.cxx, 'CLANG') }}
       - name: install coverage tools
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
