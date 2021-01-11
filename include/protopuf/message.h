@@ -40,7 +40,7 @@ namespace pp {
             return static_cast<const field_number_selector<N, T...>&>(*this);
         }
 
-        template <fixed_string S>
+        template <basic_fixed_string S>
         constexpr decltype(auto) get() const {
             return static_cast<const field_name_selector<S, T...>&>(*this);
         }
@@ -50,7 +50,7 @@ namespace pp {
             return static_cast<field_number_selector<N, T...>&>(*this);
         }
 
-        template <fixed_string S>
+        template <basic_fixed_string S>
         constexpr decltype(auto) get() {
             return static_cast<field_name_selector<S, T...>&>(*this);
         }
@@ -60,7 +60,7 @@ namespace pp {
             return get<F>();
         }
 
-        template <fixed_string F>
+        template <basic_fixed_string F>
         constexpr decltype(auto) operator[](constant<F>) const {
             return get<F>();
         }
@@ -70,7 +70,7 @@ namespace pp {
             return get<F>();
         }
 
-        template <fixed_string F>
+        template <basic_fixed_string F>
         constexpr decltype(auto) operator[](constant<F>) {
             return get<F>();
         }
@@ -80,7 +80,7 @@ namespace pp {
             return static_cast<const typename field_number_selector<N, T...>::base_type&>(get<N>());
         }
 
-        template <fixed_string S>
+        template <basic_fixed_string S>
         constexpr decltype(auto) get_base() const {
             return static_cast<const typename field_name_selector<S, T...>::base_type&>(get<S>());
         }
@@ -90,7 +90,7 @@ namespace pp {
             return static_cast<typename field_number_selector<N, T...>::base_type&>(get<N>());
         }
 
-        template <fixed_string S>
+        template <basic_fixed_string S>
         constexpr decltype(auto) get_base() {
             return static_cast<typename field_name_selector<S, T...>::base_type&>(get<S>());
         }
@@ -322,7 +322,7 @@ namespace pp {
     template <typename T>
     struct wire_type_impl<embedded_message_coder<T>> : std::integral_constant<uint<1>, 2> {};
 
-    template <fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using message_field = field<S, N, embedded_message_coder<T>, A, Container>;
 }
 
