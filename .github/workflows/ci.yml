@@ -16,19 +16,15 @@ jobs:
         include:
           - os: ubuntu-20.04
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-            cxx: -DCMAKE_CXX_COMPILER=g++
             type: Debug
           - os: ubuntu-20.04
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-            cxx: -DCMAKE_CXX_COMPILER=g++
             type: Release
           - os: ubuntu-20.04
             gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=g++
             type: Debug
           - os: ubuntu-20.04
             gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=g++
             type: Release
             coverage: -DCMAKE_CXX_FLAGS=--coverage
 #          - os: windows-2019
@@ -63,8 +59,8 @@ jobs:
         run: |
           wget http://kayari.org/gcc-latest/gcc-latest.deb \
           && sudo dpkg -i gcc-latest.deb
-          export PATH=/opt/gcc-latest/bin:$PATH
-          export LD_RUN_PATH=/opt/gcc-latest/lib64
+          echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
+          echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install coverage tools
         run: sudo apt install lcov
