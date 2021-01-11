@@ -76,7 +76,7 @@ namespace pp {
 
     template <fixed_string S, uint<4> N, coder C, attribute A = singular, std::ranges::sized_range Container = std::vector<typename C::value_type>>
     struct field : field_container<A, typename C::value_type, Container>{
-        static constexpr fixed_string name = S;
+        static constexpr basic_fixed_string name = S;
 
         static constexpr uint<4> number = N;
 
