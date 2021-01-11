@@ -8,28 +8,23 @@ on:
       - 'asset/**'
       - 'LICENSE'
 
-
 jobs:
   build:
     strategy:
       matrix:
         include:
           - os: ubuntu-20.04
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-            cxx: -DCMAKE_CXX_COMPILER=$GCC
             type: Debug
-          - os: ubuntu-20.04
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-            cxx: -DCMAKE_CXX_COMPILER=$GCC
-            type: Release
           - os: ubuntu-20.04
-            gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=$GCC
+            type: Release
+            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+          - os: ubuntu-20.04
             type: Debug
-          - os: ubuntu-20.04
             gtest: -DDOWNLOAD_GTEST=ON
-            cxx: -DCMAKE_CXX_COMPILER=$GCC
+          - os: ubuntu-20.04
             type: Release
+            gtest: -DDOWNLOAD_GTEST=ON
             coverage: -DCMAKE_CXX_FLAGS=--coverage
 #          - os: ubuntu-20.04
 #            gtest: -DDOWNLOAD_GTEST=ON
@@ -71,16 +66,9 @@ jobs:
         run: |
           wget -q http://kayari.org/gcc-latest/gcc-latest.deb \
           && sudo dpkg -i gcc-latest.deb
-          echo "GCC=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
+          echo "PATH=/opt/gcc-latest/bin:$PATH" >> $GITHUB_ENV
           echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.os, 'ubuntu') && endsWith(matrix.cxx, 'GCC') }}
-      - name: install build tools
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 12
-          echo "CLANG=clang++-12" >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.os, 'ubuntu') && endsWith(matrix.cxx, 'CLANG') }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install coverage tools
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
