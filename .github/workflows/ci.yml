@@ -15,25 +15,21 @@ jobs:
         include:
           - os: ubuntu-20.04
             type: Debug
+            cxx: -DCMAKE_CXX_COMPILER=g++
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
           - os: ubuntu-20.04
             type: Release
+            cxx: -DCMAKE_CXX_COMPILER=g++
             vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
           - os: ubuntu-20.04
             type: Debug
+            cxx: -DCMAKE_CXX_COMPILER=g++
             gtest: -DDOWNLOAD_GTEST=ON
           - os: ubuntu-20.04
             type: Release
+            cxx: -DCMAKE_CXX_COMPILER=g++
             gtest: -DDOWNLOAD_GTEST=ON
             coverage: -DCMAKE_CXX_FLAGS=--coverage
-#          - os: ubuntu-20.04
-#            gtest: -DDOWNLOAD_GTEST=ON
-#            cxx: -DCMAKE_CXX_COMPILER=$CLANG
-#            type: Debug
-#          - os: ubuntu-20.04
-#            gtest: -DDOWNLOAD_GTEST=ON
-#            cxx: -DCMAKE_CXX_COMPILER=$CLANG
-#            type: Release
 #          - os: windows-2019
 #            gtest: -DDOWNLOAD_GTEST=ON
 #            type: Debug
@@ -68,7 +64,7 @@ jobs:
           && sudo dpkg -i gcc-latest.deb
           echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
           echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
-          sudo rm -rf `which g++` `which gcov` /usr/local/lib/gcc
+          sudo rm -rf /usr/local/bin/g++ /usr/local/bin/gcov /usr/local/lib/gcc
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install coverage tools
         run: sudo apt install lcov
