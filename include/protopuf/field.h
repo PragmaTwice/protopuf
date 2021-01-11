@@ -21,6 +21,7 @@
 #include "zigzag.h"
 #include "varint.h"
 #include "bool.h"
+#include "fixed_string.h"
 #include <optional>
 
 namespace pp {
@@ -73,8 +74,10 @@ namespace pp {
     template <attribute A, typename T, std::ranges::sized_range Container = std::vector<T>>
     using field_container = typename field_container_impl<A, T, Container>::type;
 
-    template <uint<4> N, coder C, attribute A = singular, std::ranges::sized_range Container = std::vector<typename C::value_type>>
+    template <fixed_string S, uint<4> N, coder C, attribute A = singular, std::ranges::sized_range Container = std::vector<typename C::value_type>>
     struct field : field_container<A, typename C::value_type, Container>{
+        static constexpr fixed_string name = S;
+
         static constexpr uint<4> number = N;
 
         static constexpr uint<4> key = (N << 3u) | wire_type<C>;
@@ -88,80 +91,80 @@ namespace pp {
         using base_type::base_type;
     };
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
-    using integer_field = field<N, integer_coder<T>, A, Container>;
+    template <fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using integer_field = field<S, N, integer_coder<T>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<4>>>
-    using fixed32_field = integer_field<N, uint<4>, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint<4>>>
+    using fixed32_field = integer_field<S, N, uint<4>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<4>>>
-    using sfixed32_field = integer_field<N, sint<4>, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint<4>>>
+    using sfixed32_field = integer_field<S, N, sint<4>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint<8>>>
-    using fixed64_field = integer_field<N, uint<8>, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint<8>>>
+    using fixed64_field = integer_field<S, N, uint<8>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint<8>>>
-    using sfixed64_field = integer_field<N, sint<8>, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint<8>>>
+    using sfixed64_field = integer_field<S, N, sint<8>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
-    using varint_field = field<N, varint_coder<T>, A, Container>;
+    template <fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using varint_field = field<S, N, varint_coder<T>, A, Container>;
 
     using int32 = sint<4>;
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<int32>>
-    using int32_field = varint_field<N, int32, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<int32>>
+    using int32_field = varint_field<S, N, int32, A, Container>;
 
     using uint32 = uint<4>;
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint32>>
-    using uint32_field = varint_field<N, uint32, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint32>>
+    using uint32_field = varint_field<S, N, uint32, A, Container>;
 
     using sint32 = sint_zigzag<4>;
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint32>>
-    using sint32_field = varint_field<N, sint32, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint32>>
+    using sint32_field = varint_field<S, N, sint32, A, Container>;
 
     using int64 = sint<8>;
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<int64>>
-    using int64_field = varint_field<N, int64, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<int64>>
+    using int64_field = varint_field<S, N, int64, A, Container>;
 
     using uint64 = uint<8>;
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<uint64>>
-    using uint64_field = varint_field<N, uint64, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint64>>
+    using uint64_field = varint_field<S, N, uint64, A, Container>;
 
     using sint64 = sint_zigzag<8>;
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<sint64>>
-    using sint64_field = varint_field<N, sint64, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint64>>
+    using sint64_field = varint_field<S, N, sint64, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
-    using floating_field = field<N, float_coder<T>, A, Container>;
+    template <fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using floating_field = field<S, N, float_coder<T>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<floating<4>>>
-    using float_field = floating_field<N, floating<4>, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<floating<4>>>
+    using float_field = floating_field<S, N, floating<4>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<floating<8>>>
-    using double_field = floating_field<N, floating<8>, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<floating<8>>>
+    using double_field = floating_field<S, N, floating<8>, A, Container>;
 
-    template <uint<4> N, coder T, attribute A = singular, typename Container = std::vector<typename T::value_type>>
-    using array_field = field<N, array_coder<T>, A, Container>;
+    template <fixed_string S, uint<4> N, coder T, attribute A = singular, typename Container = std::vector<typename T::value_type>>
+    using array_field = field<S, N, array_coder<T>, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<std::basic_string<T>>>
-    using basic_string_field = field<N, basic_string_coder<T>, A, Container>;
+    template <fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<std::basic_string<T>>>
+    using basic_string_field = field<S, N, basic_string_coder<T>, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<std::string>>
-    using string_field = field<N, string_coder, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<std::string>>
+    using string_field = field<S, N, string_coder, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<std::byte>>>
-    using bytes_field = field<N, bytes_coder, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<std::byte>>>
+    using bytes_field = field<S, N, bytes_coder, A, Container>;
 
-    template <uint<4> N, attribute A = singular, typename Container = std::vector<bool>>
-    using bool_field = field<N, bool_coder, A, Container>;
+    template <fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<bool>>
+    using bool_field = field<S, N, bool_coder, A, Container>;
 
-    template <uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
-    using enum_field = field<N, enum_coder<T>, A, Container>;
+    template <fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
+    using enum_field = field<S, N, enum_coder<T>, A, Container>;
 
     template <typename>
     constexpr bool is_field = false;
 
-    template <uint<4> N, coder C, attribute A, typename Container>
-    constexpr bool is_field <field<N, C, A, Container>> = true;
+    template <fixed_string S, uint<4> N, coder C, attribute A, typename Container>
+    constexpr bool is_field <field<S, N, C, A, Container>> = true;
 
     template <typename T>
     concept field_c = is_field<T>;
@@ -169,20 +172,36 @@ namespace pp {
     struct field_not_found;
 
     template <uint<4>, field_c...>
-    struct field_selector_impl;
+    struct field_number_selector_impl;
 
     template <uint<4> I, field_c C, field_c... D>
-    struct field_selector_impl<I, C, D...> {
-        using type = std::conditional_t<I == C::number, C, typename field_selector_impl<I, D...>::type>;
+    struct field_number_selector_impl<I, C, D...> {
+        using type = std::conditional_t<I == C::number, C, typename field_number_selector_impl<I, D...>::type>;
     };
 
     template <uint<4> I>
-    struct field_selector_impl<I> {
+    struct field_number_selector_impl<I> {
         using type = field_not_found;
     };
 
     template <uint<4> I, field_c... C>
-    using field_selector = typename field_selector_impl<I, C...>::type;
+    using field_number_selector = typename field_number_selector_impl<I, C...>::type;
+
+    template <fixed_string, field_c...>
+    struct field_name_selector_impl;
+
+    template <fixed_string S, field_c C, field_c... D>
+    struct field_name_selector_impl<S, C, D...> {
+        using type = std::conditional_t<S == C::name, C, typename field_name_selector_impl<S, D...>::type>;
+    };
+
+    template <fixed_string S>
+    struct field_name_selector_impl<S> {
+        using type = field_not_found;
+    };
+
+    template <fixed_string S, field_c... C>
+    using field_name_selector = typename field_name_selector_impl<S, C...>::type;
 
     template <field_c T>
     constexpr bool empty_field(const T& v) {
