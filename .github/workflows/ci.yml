@@ -71,10 +71,10 @@ jobs:
           wget -q http://kayari.org/gcc-latest/gcc-latest.deb
           sudo dpkg -i gcc-latest.deb
           echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
-          echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
           sudo rm -rf /usr/local/bin/gcc /usr/local/bin/g++ /usr/local/bin/gcov /usr/local/lib/gcc
-          echo "CC=`which gcc`" >> $GITHUB_ENV
-          echo "CXX=`which g++`" >> $GITHUB_ENV
+          echo "CC=/opt/gcc-latest/bin/gcc" >> $GITHUB_ENV
+          echo "CXX=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
+          echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
       - name: install build tools (clang)
         run: |
