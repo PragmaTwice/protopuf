@@ -16,14 +16,6 @@ jobs:
           - os: ubuntu-20.04
             type: Debug
             cxx: gcc
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-          - os: ubuntu-20.04
-            type: Release
-            cxx: gcc
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-          - os: ubuntu-20.04
-            type: Debug
-            cxx: gcc
             gtest: -DDOWNLOAD_GTEST=ON
           - os: ubuntu-20.04
             type: Release
@@ -71,7 +63,7 @@ jobs:
           wget -q http://kayari.org/gcc-latest/gcc-latest.deb
           sudo dpkg -i gcc-latest.deb
           echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
-          sudo rm -rf /usr/local/bin/gcc /usr/local/bin/g++ /usr/local/bin/gcov /usr/local/lib/gcc
+          sudo rm -rf /usr/local/bin/gcov /usr/local/lib/gcc
           echo "CC=/opt/gcc-latest/bin/gcc" >> $GITHUB_ENV
           echo "CXX=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
           echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
