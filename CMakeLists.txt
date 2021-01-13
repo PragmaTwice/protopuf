@@ -25,7 +25,7 @@ target_include_directories(protopuf INTERFACE
         $<INSTALL_INTERFACE:include>)
 target_compile_features(protopuf INTERFACE cxx_std_20)
 
-option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" OFF)
+option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" ON)
 option(BUILD_TESTS "Build unit testings" ON)
 
 if(BUILD_TESTS)
