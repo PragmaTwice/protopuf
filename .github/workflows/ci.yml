@@ -15,21 +15,21 @@ jobs:
         include:
           - os: ubuntu-20.04
             type: Debug
-            cxx: -DCMAKE_CXX_COMPILER=g++
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-          - os: ubuntu-20.04
-            type: Release
-            cxx: -DCMAKE_CXX_COMPILER=g++
-            vcpkg: -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
-          - os: ubuntu-20.04
-            type: Debug
-            cxx: -DCMAKE_CXX_COMPILER=g++
+            cxx: gcc
             gtest: -DDOWNLOAD_GTEST=ON
           - os: ubuntu-20.04
             type: Release
-            cxx: -DCMAKE_CXX_COMPILER=g++
+            cxx: gcc
             gtest: -DDOWNLOAD_GTEST=ON
             coverage: -DCMAKE_CXX_FLAGS=--coverage
+          - os: ubuntu-20.04
+            type: Debug
+            cxx: clang
+            gtest: -DDOWNLOAD_GTEST=ON
+          - os: ubuntu-20.04
+            type: Release
+            cxx: clang
+            gtest: -DDOWNLOAD_GTEST=ON
 #          - os: windows-2019
 #            gtest: -DDOWNLOAD_GTEST=ON
 #            type: Debug
@@ -58,14 +58,24 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: install build tools
+      - name: install build tools (gcc)
         run: |
-          wget -q http://kayari.org/gcc-latest/gcc-latest.deb \
-          && sudo dpkg -i gcc-latest.deb
+          wget -q http://kayari.org/gcc-latest/gcc-latest.deb
+          sudo dpkg -i gcc-latest.deb
           echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
+          sudo rm -rf /usr/local/bin/gcov /usr/local/lib/gcc
+          echo "CC=/opt/gcc-latest/bin/gcc" >> $GITHUB_ENV
+          echo "CXX=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
           echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
-          sudo rm -rf /usr/local/bin/g++ /usr/local/bin/gcov /usr/local/lib/gcc
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
+      - name: install build tools (clang)
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 12
+          echo "CC=`which clang-12`" >> $GITHUB_ENV
+          echo "CXX=`which clang++-12`" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
       - name: install coverage tools
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
@@ -76,7 +86,7 @@ jobs:
         run: ${{ matrix.macos_vcpkg_var }} vcpkg install gtest
         if: ${{ matrix.vcpkg }}
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.cxx }} ${{ matrix.coverage }} .
+        run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.vcpkg }} ${{ matrix.coverage }} .
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
@@ -84,7 +94,8 @@ jobs:
       - name: capture coverage
         run: lcov --directory . --capture --output-file coverage.info
         if: ${{ matrix.coverage }}
-      - uses: codecov/codecov-action@v1
+      - name: upload coverage
+        uses: codecov/codecov-action@v1
         with:
           file: ./coverage.info
         if: ${{ matrix.coverage }}
