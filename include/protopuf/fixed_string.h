@@ -34,7 +34,7 @@ namespace pp {
     };
 
     template <typename CharT, std::size_t N, std::size_t M>
-    constexpr auto operator==(const basic_fixed_string<CharT, N> &l, const basic_fixed_string<CharT, M> &r) {
+    constexpr bool operator==(const basic_fixed_string<CharT, N> &l, const basic_fixed_string<CharT, M> &r) {
         if (N != M) {
             return false;
         }
@@ -46,11 +46,6 @@ namespace pp {
         }
 
         return true;
-    }
-
-    template <typename CharT, std::size_t N, std::size_t M>
-    constexpr auto operator!=(const basic_fixed_string<CharT, N> &l, const basic_fixed_string<CharT, M> &r) {
-        return !(l == r);
     }
 
     template <typename CharT, std::size_t N, std::size_t M>
