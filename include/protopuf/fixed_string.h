@@ -49,6 +49,11 @@ namespace pp {
     }
 
     template <typename CharT, std::size_t N, std::size_t M>
+    constexpr auto operator!=(const basic_fixed_string<CharT, N> &l, const basic_fixed_string<CharT, M> &r) {
+        return !(l == r);
+    }
+
+    template <typename CharT, std::size_t N, std::size_t M>
     constexpr auto operator<=>(const basic_fixed_string<CharT, N> &l, const basic_fixed_string<CharT, M> &r) {
         for (std::size_t i = 0; i < std::min(N, M); ++i) {
             if(l.data[i] != r.data[i]) {
@@ -103,7 +108,7 @@ namespace pp {
 
         template <std::size_t N>
         constexpr decltype(auto) get() const {
-            return constant<value<N>>{};
+            return constant<constant_get<N, v...>>{};
         }
     };
 
@@ -120,7 +125,7 @@ namespace pp {
 
         template <std::size_t N>
         constexpr decltype(auto) get() const {
-            return constant<value<N>>{};
+            return constant<constant_get<N, v...>>{};
         }
     };
 
