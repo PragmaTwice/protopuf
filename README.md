@@ -64,7 +64,7 @@ assert(yourClass["students"_f][1] == Student{123456, "jerry"});
 assert(yourClass == myClass);
 assert(begin_diff(bufferEnd2, bufferEnd) == 0);
 ```
-More examples can be found in our test cases (`/test/message.cpp`).
+More examples can be found in our test cases ([test/message.cpp](https://github.com/PragmaTwice/protopuf/blob/master/test/message.cpp)).
 
 ## Supported Field Types
 Category|	Supported Types
@@ -77,6 +77,7 @@ Length-delimited| string, bytes, embedded messages, packed repeated fields
 ## Worklist
 - [x] named field via NTTP (issue [#1](https://github.com/PragmaTwice/protopuf/issues/1))
 - [ ] better deduction for initializer list
+- [ ] dynamic reflection on field names and others
 
 ## Known issues
 - There is [a known bug](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794) related to template parameter lists of lambda expressions in Visual Studio 2019 Version 16.8, which can produce a wrong compilation error while compiling protopuf
