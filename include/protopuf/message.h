@@ -24,7 +24,13 @@
 
 namespace pp {
 
-    template <field_c ... T>
+    template <typename...>
+    constexpr bool are_same = true;
+
+    template <typename T, typename... Ts>
+    constexpr bool are_same<T, Ts...> = std::conjunction_v<std::is_same<T, Ts>...>;
+
+    template <field_c ... T> requires are_same<typename T::name_type::value_type...>
     struct message : private T... {
 
         message() = default;
@@ -34,6 +40,12 @@ namespace pp {
         message(const message& other) : T(static_cast<const T&>(other))... {}
 
         static constexpr uint<4> size = sizeof...(T);
+
+        template <uint<4> N>
+        using get_type_by_number = field_number_selector<N, T...>;
+
+        template <basic_fixed_string S>
+        using get_type_by_name = field_name_selector<S, T...>;
 
         template <uint<4> N>
         constexpr decltype(auto) get() const {
