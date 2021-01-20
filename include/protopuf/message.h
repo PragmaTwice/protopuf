@@ -24,7 +24,13 @@
 
 namespace pp {
 
-    template <field_c ... T>
+    template <typename...>
+    constexpr bool are_same = true;
+
+    template <typename T, typename... Ts>
+    constexpr bool are_same<T, Ts...> = std::conjunction_v<std::is_same<T, Ts>...>;
+
+    template <field_c ... T> requires are_same<typename T::name_type::value_type...>
     struct message : private T... {
 
         message() = default;

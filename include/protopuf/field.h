@@ -78,6 +78,8 @@ namespace pp {
     struct field : field_container<A, typename C::value_type, Container>{
         static constexpr basic_fixed_string name = S;
 
+        using name_type = decltype(name);
+
         static constexpr uint<4> number = N;
 
         static constexpr uint<4> key = (N << 3u) | wire_type<C>;

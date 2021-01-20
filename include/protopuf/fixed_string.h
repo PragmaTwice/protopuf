@@ -89,6 +89,22 @@ namespace pp {
     template <std::size_t N, auto... v>
     constexpr auto constant_get = constant_get_impl<N, v...>::value;
 
+    template <std::size_t, typename...>
+    struct type_get_impl;
+
+    template <std::size_t N, typename T, typename... Ts>
+    struct type_get_impl<N, T, Ts...> {
+        using type = typename type_get_impl<N - 1, Ts...>::type;
+    };
+
+    template <typename T, typename... Ts>
+    struct type_get_impl<0, T, Ts...> {
+        using type = T;
+    };
+
+    template <std::size_t N, typename... Ts>
+    using type_get = typename type_get_impl<N, Ts...>::type;
+
     template <auto... v>
     struct constant_tuple {
         using type = constant_tuple;
