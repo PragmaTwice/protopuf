@@ -24,11 +24,13 @@ namespace pp {
     template<typename... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<typename... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    template <typename F, field_c ... Ts> requires (sizeof...(Ts) > 0)
-    auto dynamic_get_by_name(F&& f, const message<Ts...>& msg,
-                             const std::basic_string<type_get<0, typename Ts::name_type::value_type...>>& name) {
+    template <field_c... Ts> requires (sizeof...(Ts) > 0)
+    using dynamic_name_type = std::basic_string<type_get<0, typename Ts::name_type::value_type...>>;
+
+    template <typename F, field_c ... Ts>
+    auto dynamic_get_by_name(F&& f, const message<Ts...>& msg, const dynamic_name_type<Ts...>& name) {
         using result_type = std::common_type_t<std::invoke_result_t<F, Ts>...>;
-        using key_type = std::remove_cvref_t<decltype(name)>;
+        using key_type = dynamic_name_type<Ts...>;
 
         static const std::unordered_map <std::string, std::function<
             result_type (F&&, const message<Ts...>&)
