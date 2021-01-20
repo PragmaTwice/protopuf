@@ -32,6 +32,8 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
     EXPECT_TRUE(dynamic_get_by_name([](auto&& x){
         if constexpr (remove_reference_t<decltype(x)>::name == "name"_f()) {
             EXPECT_EQ(x.value(), "class 101");
+        } else {
+            FAIL();
         }
     }, myClass, "name"));
 
@@ -41,5 +43,24 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
         } else {
             return false;
         }
-    }, myClass, "name").value());
+    }, myClass, "name").value_or(false));
+
+    EXPECT_TRUE(dynamic_get_by_name([](auto&& x){
+        if constexpr (remove_reference_t<decltype(x)>::name == "students"_f()) {
+            EXPECT_EQ(x.size(), 3);
+        } else {
+            FAIL();
+        }
+    }, myClass, "students"));
+
+    auto f = overloaded{[](auto&&) {
+        FAIL();
+    }, [](const Class::get_type_by_name<"name">& x){
+        EXPECT_EQ(x.value(), "class 101");
+    }, [](const Class::get_type_by_name<"students">& x){
+        EXPECT_EQ(x.size(), 3);
+    }};
+
+    EXPECT_TRUE(dynamic_get_by_name(f, myClass, "name"));
+    EXPECT_TRUE(dynamic_get_by_name(f, myClass, "students"));
 }

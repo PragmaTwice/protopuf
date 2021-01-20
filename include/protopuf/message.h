@@ -42,6 +42,12 @@ namespace pp {
         static constexpr uint<4> size = sizeof...(T);
 
         template <uint<4> N>
+        using get_type_by_number = field_number_selector<N, T...>;
+
+        template <basic_fixed_string S>
+        using get_type_by_name = field_name_selector<S, T...>;
+
+        template <uint<4> N>
         constexpr decltype(auto) get() const {
             return static_cast<const field_number_selector<N, T...>&>(*this);
         }
