@@ -29,17 +29,17 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
     Class myClass {"class 101", {tom, jerry}};
     myClass["students"_f].push_back(twice);
 
-    EXPECT_TRUE(dynamic_get_by_name(overloaded([](auto&& x){
+    EXPECT_TRUE(dynamic_get_by_name([](auto&& x){
         if constexpr (remove_reference_t<decltype(x)>::name == "name"_f()) {
             EXPECT_EQ(x.value(), "class 101");
         }
-    }), myClass, "name"));
+    }, myClass, "name"));
 
-    EXPECT_TRUE(dynamic_get_by_name(overloaded([](auto&& x){
+    EXPECT_TRUE(dynamic_get_by_name([](auto&& x){
         if constexpr (remove_reference_t<decltype(x)>::name == "name"_f()) {
             return x.value() == "class 101";
         } else {
             return false;
         }
-    }), myClass, "name").value());
+    }, myClass, "name").value());
 }

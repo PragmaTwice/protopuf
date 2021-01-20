@@ -19,18 +19,20 @@
 
 namespace pp {
 
-    template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+    template<typename> inline constexpr bool always_false = false;
 
-    template <typename F, field_c ... T>
-    auto dynamic_get_by_name(F&& f, const message<T...>& msg, const std::string& name) {
-        using result_type = std::common_type_t<std::invoke_result_t<F, T>...>;
+    template<typename... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template<typename... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+    template <typename F, field_c ... Ts>
+    auto dynamic_get_by_name(F&& f, const message<Ts...>& msg, const std::string& name) {
+        using result_type = std::common_type_t<std::invoke_result_t<F, Ts>...>;
 
         static const std::unordered_map <std::string, std::function<
-            result_type (F&&, const message<T...>&)
+            result_type (F&&, const message<Ts...>&)
         >> reflect_map = {
-            {std::string{ T::name.data }, [](F&& f, const message<T...>& msg){
-                return std::forward<F>(f)(msg.template get<T::name>());
+            {std::string{ Ts::name.data }, [](F&& f, const message<Ts...>& msg){
+                return std::forward<F>(f)(msg.template get<Ts::name>());
             }}...
         };
 
