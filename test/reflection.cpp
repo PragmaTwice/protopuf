@@ -63,4 +63,6 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
 
     EXPECT_TRUE(dynamic_get_by_name(f, myClass, "name"));
     EXPECT_TRUE(dynamic_get_by_name(f, myClass, "students"));
+
+    EXPECT_FALSE(dynamic_get_by_name([](auto&&){}, myClass, "unknown"));
 }
