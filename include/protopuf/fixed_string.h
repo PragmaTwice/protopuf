@@ -30,6 +30,10 @@ namespace pp {
         using value_type = CharT;
         static constexpr auto size = N;
 
+        constexpr operator std::basic_string_view<CharT>() const {
+            return data;
+        };
+
         CharT data[N];
     };
 
