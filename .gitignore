@@ -74,3 +74,4 @@ fabric.properties
 .idea/
 .vs/
 CMakeSettings.json
+.vscode/
