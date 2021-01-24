@@ -54,6 +54,7 @@ namespace pp {
     using dynamic_key_type = typename dynamic_key_type_impl<Prop, T>::type;
 
     template <template<field_c> typename Prop, typename F, field_c ... Ts>
+        requires std::conjunction_v<std::bool_constant<std::invocable<F, Ts>>...>
     auto dynamic_get_by(F&& f, const message<Ts...>& msg, const dynamic_key_type<Prop, type_get_first<Ts...>>& name) {
         using result_type = std::common_type_t<std::invoke_result_t<F, Ts>...>;
         using key_type = dynamic_key_type<Prop, type_get_first<Ts...>>;
@@ -82,13 +83,13 @@ namespace pp {
         }
     }
 
-    template <typename F, field_c ... Ts>
-    auto dynamic_get_by_name(F&& f, const message<Ts...>& msg, const auto& name) {
+    template <typename F, message_c T>
+    auto dynamic_get_by_name(F&& f, const T& msg, const auto& name) {
         return dynamic_get_by<field_name>(std::forward<F>(f), msg, name);
     }
 
-    template <typename F, field_c ... Ts>
-    auto dynamic_get_by_number(F&& f, const message<Ts...>& msg, const auto& name) {
+    template <typename F, message_c T>
+    auto dynamic_get_by_number(F&& f, const T& msg, const auto& name) {
         return dynamic_get_by<field_number>(std::forward<F>(f), msg, name);
     }
 }
