@@ -76,7 +76,8 @@ Length-delimited| string, bytes, embedded messages, packed repeated fields
 
 ## Worklist
 - [x] named field via NTTP ([#6](https://github.com/PragmaTwice/protopuf/pull/6))
-- [x] dynamic reflection on field names and others ([#9](https://github.com/PragmaTwice/protopuf/pull/9))
+- [x] dynamic reflection on field names and numbers ([#9](https://github.com/PragmaTwice/protopuf/pull/9))
+- [x] compatibility test between protopuf and protobuf ([#10](https://github.com/PragmaTwice/protopuf/pull/10))
 
 ## Known issues
 - There is [a known bug](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794) related to template parameter lists of lambda expressions in Visual Studio 2019 Version 16.8, which can produce a wrong compilation error while compiling protopuf
