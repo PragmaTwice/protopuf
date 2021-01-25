@@ -48,6 +48,8 @@ jobs:
           echo "CC=`which clang-12`" >> $GITHUB_ENV
           echo "CXX=`which clang++-12`" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
+      - name: install protobuf for compatibility test
+        run: sudo apt install protobuf-compiler libprotobuf-dev
       - name: install coverage tools
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
@@ -55,7 +57,7 @@ jobs:
         run: brew install gcc
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: generate build script
-        run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.coverage }} .
+        run: cmake -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.coverage }} .
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
