@@ -28,6 +28,7 @@ target_compile_features(protopuf INTERFACE cxx_std_20)
 option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" ON)
 option(BUILD_TESTS "Build unit testings" ON)
 option(ENABLE_COMPATIBILITY_TEST "Build compatibility testing between protopuf and protobuf" OFF)
+option(ENABLE_BENCHMARK "Build benchmark testing between protopuf and protobuf (requires Release mode)" OFF)
 
 if(BUILD_TESTS)
     if(DOWNLOAD_GTEST)
@@ -80,6 +81,10 @@ if(BUILD_TESTS)
 
     if(ENABLE_COMPATIBILITY_TEST)
         add_subdirectory(test/compatibility)
+    endif()
+
+    if(ENABLE_BENCHMARK)
+        add_subdirectory(test/benchmark)
     endif()
 endif()
 
