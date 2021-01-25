@@ -50,6 +50,11 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
       - name: install protobuf for compatibility test
         run: sudo apt install protobuf-compiler libprotobuf-dev
+      - name: install benchmark deps
+        run: |
+          sudo apt install libbenchmark-dev
+          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
+        if: ${{ matrix.type == 'Release' }}
       - name: install coverage tools
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
@@ -57,7 +62,7 @@ jobs:
         run: brew install gcc
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: generate build script
-        run: cmake -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.gtest }} ${{ matrix.coverage }} .
+        run: cmake $BENCHMARK -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
