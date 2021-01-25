@@ -67,6 +67,9 @@ jobs:
         run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
         run: ctest
+      - name: run benchmark
+        run: ./test/benchmark/protopuf_benchmark
+        if: ${{ matrix.type == 'Release' }}
       - name: capture coverage
         run: lcov --directory . --capture --output-file coverage.info
         if: ${{ matrix.coverage }}
