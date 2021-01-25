@@ -27,6 +27,7 @@ target_compile_features(protopuf INTERFACE cxx_std_20)
 
 option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" ON)
 option(BUILD_TESTS "Build unit testings" ON)
+option(ENABLE_COMPATIBILITY_TEST "Build compatibility testing between protopuf and protobuf" OFF)
 
 if(BUILD_TESTS)
     if(DOWNLOAD_GTEST)
@@ -76,6 +77,10 @@ if(BUILD_TESTS)
 
     include(GoogleTest)
     gtest_discover_tests(protopuf_test)
+
+    if(ENABLE_COMPATIBILITY_TEST)
+        add_subdirectory(test/compatibility)
+    endif()
 endif()
 
 install(DIRECTORY include DESTINATION "${CMAKE_INSTALL_PREFIX}")
