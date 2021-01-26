@@ -60,7 +60,7 @@ auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
 assert(yourClass["name"_f] == "class 101");
 assert(yourClass["students"_f][2]["name"_f] == "twice");
 assert(yourClass["students"_f][2]["id"_f] == 123);
-assert(yourClass["students"_f][1] == Student{123456, "jerry"});
+assert(yourClass["students"_f][1] == (Student{123456, "jerry"}));
 assert(yourClass == myClass);
 assert(begin_diff(bufferEnd2, bufferEnd) == 0);
 ```
