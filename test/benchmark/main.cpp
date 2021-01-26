@@ -55,8 +55,7 @@ void BM_protobuf_encode(benchmark::State& state) {
 }
 BENCHMARK(BM_protobuf_encode);
 
-void BM_protopuf_decode(benchmark::State& state) {
-    array<byte, 64> buffer {
+array<byte, 64> decode_buffer {
         0x42_b, 0x9_b, 0x63_b, 0x6c_b, 0x61_b,
         0x73_b, 0x73_b, 0x20_b, 0x31_b, 0x30_b,
         0x31_b, 0x1a_b, 0x8_b, 0x8_b, 0xc8_b,
@@ -67,28 +66,18 @@ void BM_protopuf_decode(benchmark::State& state) {
         0x9_b, 0x8_b, 0x7b_b, 0x1a_b, 0x5_b,
         0x74_b, 0x77_b, 0x69_b, 0x63_b, 0x65_b};
 
+void BM_protopuf_decode(benchmark::State& state) {
     for(auto _ : state) {
-        auto [myClass, _2] = message_coder<Class>::decode(buffer);
+        auto [myClass, _2] = message_coder<Class>::decode(decode_buffer);
         benchmark::DoNotOptimize(myClass);
     }
 }
 BENCHMARK(BM_protopuf_decode);
 
 void BM_protobuf_decode(benchmark::State& state) {
-    array<byte, 64> buffer {
-        0x42_b, 0x9_b, 0x63_b, 0x6c_b, 0x61_b,
-        0x73_b, 0x73_b, 0x20_b, 0x31_b, 0x30_b,
-        0x31_b, 0x1a_b, 0x8_b, 0x8_b, 0xc8_b,
-        0x3_b, 0x1a_b, 0x3_b, 0x74_b, 0x6f_b,
-        0x6d_b, 0x1a_b, 0xb_b, 0x8_b, 0xc0_b,
-        0xc4_b, 0x7_b, 0x1a_b, 0x5_b, 0x6a_b,
-        0x65_b, 0x72_b, 0x72_b, 0x79_b, 0x1a_b,
-        0x9_b, 0x8_b, 0x7b_b, 0x1a_b, 0x5_b,
-        0x74_b, 0x77_b, 0x69_b, 0x63_b, 0x65_b};
-
     for(auto _ : state) {
         pb::Class myClass;
-        myClass.ParseFromArray(buffer.data(), buffer.size());
+        myClass.ParseFromArray(decode_buffer.data(), decode_buffer.size());
         benchmark::DoNotOptimize(myClass);
     }
 }
