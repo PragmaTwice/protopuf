@@ -83,3 +83,8 @@ Length-delimited| string, bytes, embedded messages, packed repeated fields
 ## Known issues
 - There is [a known bug](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794) related to template parameter lists of lambda expressions in Visual Studio 2019 Version 16.8, which can produce a wrong compilation error while compiling protopuf
 - Although class type in NTTP ([P0732R2](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0732r2.pdf)) is implemented in GCC 10, there is a CTAD bug ([PR96331](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96331), exists until GCC 10.2) to reject valid NTTP usage, which prevent protopuf to compile successfully
+
+## Special Thanks
+to [JetBrains](https://www.jetbrains.com/?from=protopuf) for its [Open Source License](https://www.jetbrains.com/community/opensource/?from=protopuf) of All Products Pack
+
+![JetBrains Logo](https://www.jetbrains.com/company/brand/img/jetbrains_logo.png)
