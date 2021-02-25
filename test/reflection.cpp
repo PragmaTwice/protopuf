@@ -16,8 +16,6 @@
 
 #include <protopuf/reflection.h>
 
-#include <cxxabi.h>
-
 using namespace pp;
 using namespace std;
 
