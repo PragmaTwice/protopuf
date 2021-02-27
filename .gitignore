@@ -75,3 +75,5 @@ fabric.properties
 .vs/
 CMakeSettings.json
 .vscode/
+
+build/

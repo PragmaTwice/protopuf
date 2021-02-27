@@ -35,7 +35,7 @@ namespace pp {
 
         message() = default;
 
-        explicit message(T&& ...v) : T(std::forward<T>(v))... {};
+        explicit message(const T& ...v) : T(v)... {};
 
         message(const message& other) : T(static_cast<const T&>(other))... {}
 
