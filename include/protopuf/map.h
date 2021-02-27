@@ -20,16 +20,30 @@
 namespace pp {
 
     template<coder key_coder, coder value_coder>
-    struct map_element : message<field<"key", 1, key_coder>, field<"value", 2, value_coder>> {
-        using base_type = message<field<"key", 1, key_coder>, field<"value", 2, value_coder>>;
-        using pair_type = std::pair<const typename key_coder::value_type, typename value_coder::value_type>;
+    using map_element_base = message<field<"key", 1, key_coder>, field<"value", 2, value_coder>>;
 
-        map_element(const pair_type& v) : base_type(v.first, v.second) {}
+    template<coder key_coder, coder value_coder>
+    struct map_element : map_element_base<key_coder, value_coder> {
+        using base_type = map_element_base<key_coder, value_coder>;
+
+        using first_field = typename base_type::get_type_by_number<1>;
+        using second_field = typename base_type::get_type_by_number<2>;
+
+        using first_type = typename first_field::base_type;
+        using second_type = typename second_field::base_type;
+
+        using pair_type = std::pair<const first_type, second_type>;
+
+        map_element(const pair_type& v) : base_type(
+            static_cast<const first_field &>(v.first), static_cast<const second_field &>(v.second)
+        ) {}
 
         using base_type::base_type;
 
         operator pair_type() const {
-            return { this->template get<1>().value(), this->template get<2>().value() };
+            return pair_type { 
+                this->template get<1>(), this->template get<2>() 
+            };
         }
     };
 
@@ -40,7 +54,11 @@ namespace pp {
     struct message_decode_map<map_element<T1, T2>> : message_decode_map<typename map_element<T1, T2>::base_type> {};
 
     template<basic_fixed_string S, uint<4> N, coder key_coder, coder value_coder,
-            typename Container = std::map<typename key_coder::value_type, typename value_coder::value_type>>
+        typename Container = std::map<
+            typename map_element<key_coder, value_coder>::first_type, 
+            typename map_element<key_coder, value_coder>::second_type
+        >
+    >
     using map_field = message_field<S, N, map_element<key_coder, value_coder>, repeated, Container>;
 
 }
