@@ -26,8 +26,8 @@ namespace pp {
     struct map_element : map_element_base<key_coder, value_coder> {
         using base_type = map_element_base<key_coder, value_coder>;
 
-        using first_field = typename base_type::get_type_by_number<1>;
-        using second_field = typename base_type::get_type_by_number<2>;
+        using first_field = typename base_type::template get_type_by_number<1>;
+        using second_field = typename base_type::template get_type_by_number<2>;
 
         using first_type = typename first_field::base_type;
         using second_type = typename second_field::base_type;
