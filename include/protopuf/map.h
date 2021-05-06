@@ -38,7 +38,9 @@ namespace pp {
             static_cast<const first_field &>(v.first), static_cast<const second_field &>(v.second)
         ) {}
 
-        using base_type::message;
+        // workaround for MSVC error C2385
+        using base_type_ = base_type;
+        using base_type_::base_type_;
 
         operator pair_type() const {
             return pair_type { 
