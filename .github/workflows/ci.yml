@@ -84,7 +84,7 @@ jobs:
         run: cmake $BENCHMARK -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ !startsWith(matrix.os, 'windows') }}
       - name: generate build script
-        run: cmake $env:BENCHMARK -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
+        run: cmake $Env:BENCHMARK -DCMAKE_TOOLCHAIN_FILE=$Env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ startsWith(matrix.os, 'windows') }}
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
