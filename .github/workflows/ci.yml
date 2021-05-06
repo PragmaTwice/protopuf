@@ -26,9 +26,9 @@ jobs:
           - os: ubuntu-20.04
             type: Release
             cxx: clang
-          - os: macos-10.15
+          - os: windows-2019
             type: Debug
-          - os: macos-10.15
+          - os: windows-2019
             type: Release
     
     runs-on: ${{ matrix.os }}
@@ -61,12 +61,6 @@ jobs:
           sudo apt install libbenchmark-dev
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
-      - name: install tools (mac)
-        run: |
-          echo "CC=$(brew --prefix llvm)/bin/clang" >> $GITHUB_ENV
-          echo "CXX=$(brew --prefix llvm)/bin/clang++" >> $GITHUB_ENV
-          echo "CXXFLAGS=-mmacosx-version-min=10.8" >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install protobuf for compatibility test (mac)
         run: brew install protobuf
         if: ${{ startsWith(matrix.os, 'macos') }}
@@ -75,11 +69,21 @@ jobs:
           brew install google-benchmark
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') && matrix.type == 'Release' }}
+      - name: install build tools (windows)
+        run: |
+          echo "VCPKG=-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" >> $GITHUB_ENV
+          vcpkg install protobuf
+        if: ${{ startsWith(matrix.os, 'windows') }}
+      - name: install benchmark deps (windows)
+        run: |
+          vcpkg install benchmark
+          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }} 
       - name: install coverage tools
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
       - name: generate build script
-        run: cmake $BENCHMARK -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
+        run: cmake $BENCHMARK $VCPKG -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
       - name: run unit testing
