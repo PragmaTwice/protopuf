@@ -221,7 +221,7 @@ namespace pp {
     constexpr auto field_literal_helper<V, D1, Dn...> = field_literal_helper<V * 10 + (D1 - '0'), Dn...>;
 
     template <char ... D>
-    constexpr auto operator"" _f() {
+    constexpr auto operator"" _i() {
         return std::integral_constant<uint<4>, field_literal_helper<0, D...>>{};
     }
 }

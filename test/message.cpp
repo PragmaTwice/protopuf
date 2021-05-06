@@ -251,7 +251,7 @@ GTEST_TEST(message_coder, nested_encode) {
         // serialization
         Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
         Class myClass {"class 101", {tom, jerry}};
-        myClass[3_f].push_back(twice);
+        myClass[3_i].push_back(twice);
 
         array<byte, 64> buffer{};
         auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
@@ -259,10 +259,10 @@ GTEST_TEST(message_coder, nested_encode) {
 
         // deserialization
         auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
-        EXPECT_EQ(yourClass[8_f], "class 101");
-        EXPECT_EQ(yourClass[3_f][2][3_f], "twice");
-        EXPECT_EQ(yourClass[3_f][2][1_f], 123);
-        EXPECT_EQ(yourClass[3_f][1], (Student{123456, "jerry"}));
+        EXPECT_EQ(yourClass[8_i], "class 101");
+        EXPECT_EQ(yourClass[3_i][2][3_i], "twice");
+        EXPECT_EQ(yourClass[3_i][2][1_i], 123);
+        EXPECT_EQ(yourClass[3_i][1], (Student{123456, "jerry"}));
         EXPECT_EQ(yourClass, myClass);
         EXPECT_EQ(begin_diff(bufferEnd2, bufferEnd), 0);
     }
