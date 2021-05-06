@@ -26,6 +26,8 @@ target_include_directories(protopuf INTERFACE
         $<INSTALL_INTERFACE:include>)
 target_compile_features(protopuf INTERFACE cxx_std_20)
 
+set(GTEST_REPO "https://github.com/google/googletest.git" CACHE STRING "url of GoogleTest repository")
+
 option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" ON)
 option(BUILD_TESTS "Build unit testings" ON)
 option(ENABLE_COMPATIBILITY_TEST "Build compatibility testing between protopuf and protobuf" OFF)
