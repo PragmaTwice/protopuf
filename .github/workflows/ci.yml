@@ -26,6 +26,10 @@ jobs:
           - os: ubuntu-20.04
             type: Release
             cxx: clang
+          - os: macos-11.0
+            type: Debug
+          - os: macos-11.0
+            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -51,17 +55,23 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
       - name: install protobuf for compatibility test
         run: sudo apt install protobuf-compiler libprotobuf-dev
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install benchmark deps
         run: |
           sudo apt install libbenchmark-dev
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
-        if: ${{ matrix.type == 'Release' }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
+      - name: install protobuf for compatibility test (mac)
+        run: brew install protobuf
+        if: ${{ startsWith(matrix.os, 'macos') }}
+      - name: install benchmark deps (mac)
+        run: |
+          brew install google-benchmark
+          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'macos') && matrix.type == 'Release' }}
       - name: install coverage tools
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
-      - name: install tools
-        run: brew install gcc
-        if: ${{ startsWith(matrix.os, 'macos') }}
       - name: generate build script
         run: cmake $BENCHMARK -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
       - name: build project
