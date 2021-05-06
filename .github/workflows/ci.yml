@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "CC=$(brew --prefix llvm)/bin/clang" >> $GITHUB_ENV
           echo "CXX=$(brew --prefix llvm)/bin/clang++" >> $GITHUB_ENV
-          echo "CXXFLAGS=-stdlib=libstdc++" >> $GITHUB_ENV
+          echo "CXXFLAGS=-mmacosx-version-min=10.8" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install protobuf for compatibility test (mac)
         run: brew install protobuf
