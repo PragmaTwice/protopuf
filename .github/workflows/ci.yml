@@ -26,9 +26,9 @@ jobs:
           - os: ubuntu-20.04
             type: Release
             cxx: clang
-          - os: macos-11.0
+          - os: macos-10.15
             type: Debug
-          - os: macos-11.0
+          - os: macos-10.15
             type: Release
     
     runs-on: ${{ matrix.os }}
