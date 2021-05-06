@@ -61,6 +61,12 @@ jobs:
           sudo apt install libbenchmark-dev
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
+      - name: install tools (mac)
+        run: |
+          echo "CC=$(brew --prefix llvm)/bin/clang" >> $GITHUB_ENV
+          echo "CXX=$(brew --prefix llvm)/bin/clang++" >> $GITHUB_ENV
+          echo "CXXFLAGS=-stdlib=libstdc++" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install protobuf for compatibility test (mac)
         run: brew install protobuf
         if: ${{ startsWith(matrix.os, 'macos') }}
