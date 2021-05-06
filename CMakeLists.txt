@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 project(protopuf)
 
 message(NOTICE "[TIP] Expected a compiler with C++20 support (i.e. GCC 11, Clang 12 or above)")
