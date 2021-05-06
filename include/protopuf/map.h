@@ -38,7 +38,7 @@ namespace pp {
             static_cast<const first_field &>(v.first), static_cast<const second_field &>(v.second)
         ) {}
 
-        using base_type::base_type;
+        using base_type::message;
 
         operator pair_type() const {
             return pair_type { 
