@@ -13,7 +13,7 @@ A little, highly templated, and protobuf-compatible serialization/deserializatio
 - a compiler and a standard library implementation with C++20 support 
     - GCC 11 or above, or
     - Clang 12 or above, or
-    - ~~MSVC 14.29 (Visual Studio 2019 Version 16.9) or above~~
+    - MSVC 14.29 (Visual Studio 2019 Version 16.9) or above
 - CMake 3
 - GoogleTest (optional, for unit tests)
 - vcpkg (optional, `vcpkg install protopuf` to install)
