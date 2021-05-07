@@ -15,6 +15,7 @@
 #include <protopuf/message.h>
 #include <benchmark/benchmark.h>
 #include <message.pb.h>
+#include <array>
 
 using namespace pp;
 using namespace std;
