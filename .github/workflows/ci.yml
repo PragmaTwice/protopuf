@@ -70,11 +70,11 @@ jobs:
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') && matrix.type == 'Release' }}
       - name: install protobuf for compatibility test (windows)
-        run: vcpkg install protobuf
+        run: vcpkg install protobuf:x64-windows
         if: ${{ startsWith(matrix.os, 'windows') }}
       - name: install benchmark deps (windows)
         run: |
-          vcpkg install benchmark
+          vcpkg install benchmark:x64-windows
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }} 
       - name: install coverage tools
@@ -92,7 +92,10 @@ jobs:
         run: ctest
       - name: run benchmark
         run: ./test/benchmark/protopuf_benchmark
-        if: ${{ matrix.type == 'Release' }}
+        if: ${{ !startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
+      - name: run benchmark (windows)
+        run: Tree /F
+        if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
       - name: capture coverage
         run: lcov --directory . --capture --output-file coverage.info
         if: ${{ matrix.coverage }}
