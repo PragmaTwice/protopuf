@@ -94,9 +94,7 @@ jobs:
         run: ./test/benchmark/protopuf_benchmark
         if: ${{ !startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
       - name: run benchmark (windows)
-        run: |
-          Tree /F
-          echo $BENCHMARK x $Env:BENCHMARK y ${{ env.BENCHMARK }}
+        run: .\test\benchmark\Release\protopuf_benchmark
         if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
       - name: capture coverage
         run: lcov --directory . --capture --output-file coverage.info
