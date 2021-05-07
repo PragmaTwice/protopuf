@@ -75,7 +75,7 @@ jobs:
       - name: install benchmark deps (windows)
         run: |
           vcpkg install benchmark:x64-windows
-          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
+          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $Env:GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }} 
       - name: install coverage tools
         run: sudo apt install lcov
