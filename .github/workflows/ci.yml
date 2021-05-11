@@ -67,7 +67,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
       - name: install build tools (mac)
         run: |
-          brew install gcc
+          brew update && brew install gcc
           echo "CC=`which gcc`" >> $GITHUB_ENV
           echo "CXX=`which g++`" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') }}
