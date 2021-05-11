@@ -68,8 +68,8 @@ jobs:
       - name: install build tools (mac)
         run: |
           brew update && brew upgrade gcc
-          echo "CC=`which gcc`" >> $GITHUB_ENV
-          echo "CXX=`which g++`" >> $GITHUB_ENV
+          echo "CC=`which gcc-11`" >> $GITHUB_ENV
+          echo "CXX=`which g++-11`" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install protobuf for compatibility test (mac)
         run: brew install protobuf
