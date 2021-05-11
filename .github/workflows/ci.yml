@@ -30,6 +30,10 @@ jobs:
             type: Debug
           - os: windows-2019
             type: Release
+          - os: macos-10.15
+            type: Debug
+          - os: macos-10.15
+            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -61,6 +65,12 @@ jobs:
           sudo apt install libbenchmark-dev
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
+      - name: install build tools (mac)
+        run: |
+          brew install gcc
+          echo "CC=`which gcc`" >> $GITHUB_ENV
+          echo "CXX=`which g++`" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install protobuf for compatibility test (mac)
         run: brew install protobuf
         if: ${{ startsWith(matrix.os, 'macos') }}
