@@ -40,22 +40,16 @@ jobs:
       - uses: actions/checkout@v2
       - name: install build tools (gcc)
         run: |
-          wget -q http://kayari.org/gcc-latest/gcc-latest.deb
-          sudo dpkg -i gcc-latest.deb
-          echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
-          sudo rm -rf /usr/local/bin/gcov /usr/local/lib/gcc
-          echo "CC=/opt/gcc-latest/bin/gcc" >> $GITHUB_ENV
-          echo "CXX=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
-          echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
+          echo "CC=gcc-11" >> $GITHUB_ENV
+          echo "CXX=g++-11" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
       - name: install build tools (clang)
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sed -i 's/LLVM_VERSION_PATTERNS\[12\]=""/LLVM_VERSION_PATTERNS\[12\]="-12"/g' llvm.sh
           sudo ./llvm.sh 12
-          echo "CC=`which clang-12`" >> $GITHUB_ENV
-          echo "CXX=`which clang++-12`" >> $GITHUB_ENV
+          echo "CC=clang-12" >> $GITHUB_ENV
+          echo "CXX=clang++-12" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
       - name: install protobuf for compatibility test
         run: sudo apt install protobuf-compiler libprotobuf-dev
