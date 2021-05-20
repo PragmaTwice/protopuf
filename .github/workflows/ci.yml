@@ -45,8 +45,8 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
       - name: install build tools (clang)
         run: |
-          sudo apt install clang
-          rm `which gcc-11` `which g++-11`
+          sudo apt install clang-12
+          sudo rm `which gcc-11` `which g++-11`
           echo "CC=clang-12" >> $GITHUB_ENV
           echo "CXX=clang++-12" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
