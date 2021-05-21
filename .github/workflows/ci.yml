@@ -97,7 +97,7 @@ jobs:
         run: ctest
       - name: run benchmark
         run: ./test/benchmark/protopuf_benchmark
-        if: ${{ !startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
       - name: run benchmark (windows)
         run: .\test\benchmark\Release\protopuf_benchmark
         if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
