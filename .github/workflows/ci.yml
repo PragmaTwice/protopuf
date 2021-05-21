@@ -51,6 +51,9 @@ jobs:
           echo "CC=clang-12" >> $GITHUB_ENV
           echo "CXX=clang++-12" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
+      - name: enable compatibility test (linux)
+        run: echo "COMPATIBILITY=-DENABLE_COMPATIBILITY_TEST=ON" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install protobuf for compatibility test
         run: sudo apt install protobuf-compiler libprotobuf-dev
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
@@ -61,7 +64,6 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
       - name: install build tools (mac)
         run: |
-          brew update && brew upgrade gcc
           echo "CC=`which gcc-11`" >> $GITHUB_ENV
           echo "CXX=`which g++-11`" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') }}
@@ -85,7 +87,7 @@ jobs:
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
       - name: generate build script
-        run: cmake $BENCHMARK -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
+        run: cmake $BENCHMARK $COMPATIBILITY -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ !startsWith(matrix.os, 'windows') }}
       - name: generate build script
         run: cmake $Env:BENCHMARK -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
