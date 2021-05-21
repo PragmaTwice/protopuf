@@ -73,7 +73,6 @@ jobs:
       - name: install benchmark deps (mac)
         run: |
           brew install google-benchmark
-          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') && matrix.type == 'Release' }}
       - name: install protobuf for compatibility test (windows)
         run: vcpkg install protobuf:x64-windows
