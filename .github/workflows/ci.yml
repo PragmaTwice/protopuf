@@ -30,29 +30,30 @@ jobs:
             type: Debug
           - os: windows-2019
             type: Release
+          - os: macos-10.15
+            type: Debug
+          - os: macos-10.15
+            type: Release
     
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: install build tools (gcc)
         run: |
-          wget -q http://kayari.org/gcc-latest/gcc-latest.deb
-          sudo dpkg -i gcc-latest.deb
-          echo "/opt/gcc-latest/bin" >> $GITHUB_PATH
-          sudo rm -rf /usr/local/bin/gcov /usr/local/lib/gcc
-          echo "CC=/opt/gcc-latest/bin/gcc" >> $GITHUB_ENV
-          echo "CXX=/opt/gcc-latest/bin/g++" >> $GITHUB_ENV
-          echo "LD_RUN_PATH=/opt/gcc-latest/lib64" >> $GITHUB_ENV
+          echo "CC=gcc-11" >> $GITHUB_ENV
+          echo "CXX=g++-11" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
       - name: install build tools (clang)
         run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sed -i 's/LLVM_VERSION_PATTERNS\[12\]=""/LLVM_VERSION_PATTERNS\[12\]="-12"/g' llvm.sh
-          sudo ./llvm.sh 12
-          echo "CC=`which clang-12`" >> $GITHUB_ENV
-          echo "CXX=`which clang++-12`" >> $GITHUB_ENV
+          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
+          sudo apt install clang-12
+          sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/11 /usr/include/c++/11
+          echo "CC=clang-12" >> $GITHUB_ENV
+          echo "CXX=clang++-12" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
+      - name: enable compatibility test (linux)
+        run: echo "COMPATIBILITY=-DENABLE_COMPATIBILITY_TEST=ON" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install protobuf for compatibility test
         run: sudo apt install protobuf-compiler libprotobuf-dev
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
@@ -61,13 +62,17 @@ jobs:
           sudo apt install libbenchmark-dev
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
+      - name: install build tools (mac)
+        run: |
+          echo "CC=`which gcc-11`" >> $GITHUB_ENV
+          echo "CXX=`which g++-11`" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install protobuf for compatibility test (mac)
         run: brew install protobuf
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: install benchmark deps (mac)
         run: |
           brew install google-benchmark
-          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'macos') && matrix.type == 'Release' }}
       - name: install protobuf for compatibility test (windows)
         run: vcpkg install protobuf:x64-windows
@@ -81,7 +86,7 @@ jobs:
         run: sudo apt install lcov
         if: ${{ matrix.coverage }}
       - name: generate build script
-        run: cmake $BENCHMARK -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
+        run: cmake $BENCHMARK $COMPATIBILITY -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ !startsWith(matrix.os, 'windows') }}
       - name: generate build script
         run: cmake $Env:BENCHMARK -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
@@ -92,7 +97,7 @@ jobs:
         run: ctest
       - name: run benchmark
         run: ./test/benchmark/protopuf_benchmark
-        if: ${{ !startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
       - name: run benchmark (windows)
         run: .\test\benchmark\Release\protopuf_benchmark
         if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
