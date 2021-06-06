@@ -40,13 +40,15 @@ jobs:
       - uses: actions/checkout@v2
       - name: install build tools (gcc)
         run: |
+          sudo apt-get install g++-11 -y
           echo "CC=gcc-11" >> $GITHUB_ENV
           echo "CXX=g++-11" >> $GITHUB_ENV
+          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-11 90
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
       - name: install build tools (clang)
         run: |
           sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
-          sudo apt install clang-12
+          sudo apt install clang-12 -y
           sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/11 /usr/include/c++/11
           echo "CC=clang-12" >> $GITHUB_ENV
           echo "CXX=clang++-12" >> $GITHUB_ENV
@@ -55,11 +57,11 @@ jobs:
         run: echo "COMPATIBILITY=-DENABLE_COMPATIBILITY_TEST=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install protobuf for compatibility test
-        run: sudo apt install protobuf-compiler libprotobuf-dev
+        run: sudo apt install protobuf-compiler libprotobuf-dev -y
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
       - name: install benchmark deps
         run: |
-          sudo apt install libbenchmark-dev
+          sudo apt install libbenchmark-dev -y
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
       - name: install build tools (mac)
@@ -83,7 +85,7 @@ jobs:
           echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $Env:GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }} 
       - name: install coverage tools
-        run: sudo apt install lcov
+        run: sudo apt install lcov -y
         if: ${{ matrix.coverage }}
       - name: generate build script
         run: cmake $BENCHMARK $COMPATIBILITY -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
