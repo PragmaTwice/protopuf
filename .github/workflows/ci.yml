@@ -76,14 +76,16 @@ jobs:
         run: |
           brew install google-benchmark
         if: ${{ startsWith(matrix.os, 'macos') && matrix.type == 'Release' }}
-      - name: install protobuf for compatibility test (windows)
-        run: vcpkg install protobuf:x64-windows
-        if: ${{ startsWith(matrix.os, 'windows') }}
-      - name: install benchmark deps (windows)
-        run: |
-          vcpkg install benchmark:x64-windows
-          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $Env:GITHUB_ENV
-        if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }} 
+      # - name: install protobuf for compatibility test (windows)
+      #   run: |
+      #     vcpkg install protobuf:x64-windows
+      #     echo "COMPATIBILITY=-DENABLE_COMPATIBILITY_TEST=ON" >> $Env:GITHUB_ENV
+      #   if: ${{ startsWith(matrix.os, 'windows') }}
+      # - name: install benchmark deps (windows)
+      #   run: |
+      #     vcpkg install benchmark:x64-windows
+      #     echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $Env:GITHUB_ENV
+      #   if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }} 
       - name: install coverage tools
         run: sudo apt install lcov -y
         if: ${{ matrix.coverage }}
@@ -91,7 +93,7 @@ jobs:
         run: cmake $BENCHMARK $COMPATIBILITY -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ !startsWith(matrix.os, 'windows') }}
       - name: generate build script
-        run: cmake $Env:BENCHMARK -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DENABLE_COMPATIBILITY_TEST=ON -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
+        run: cmake $Env:BENCHMARK $Env:COMPATIBILITY -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ startsWith(matrix.os, 'windows') }}
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
@@ -100,9 +102,9 @@ jobs:
       - name: run benchmark
         run: ./test/benchmark/protopuf_benchmark
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
-      - name: run benchmark (windows)
-        run: .\test\benchmark\Release\protopuf_benchmark
-        if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
+      # - name: run benchmark (windows)
+      #   run: .\test\benchmark\Release\protopuf_benchmark
+      #   if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
       - name: capture coverage
         run: lcov --directory . --capture --output-file coverage.info
         if: ${{ matrix.coverage }}
