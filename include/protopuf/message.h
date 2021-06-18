@@ -33,24 +33,24 @@ namespace pp {
     template <field_c ... T> requires are_same<typename T::name_type::value_type...>
     struct message : private T... {
 
-        message() = default;
+        constexpr message() = default;
 
-        explicit message(T&& ...v) : T(std::move(v))... {};
-        explicit message(const T& ...v) : T(v)... {};
+        constexpr explicit message(T&& ...v) : T(std::move(v))... {};
+        constexpr explicit message(const T& ...v) : T(v)... {};
 
-        message(const message& other) : T(static_cast<const T&>(other))... {}
-        message(message&& other) noexcept : T(static_cast<T&&>(other))... {}
+        constexpr message(const message& other) : T(static_cast<const T&>(other))... {}
+        constexpr message(message&& other) noexcept : T(static_cast<T&&>(other))... {}
 
         template <typename... U>
             requires (sizeof...(T) == sizeof...(U) && !are_same<message, std::remove_reference_t<U>...> )
-        explicit message(U&& ...v) : T(std::forward<U>(v))... {};
+        constexpr explicit message(U&& ...v) : T(std::forward<U>(v))... {};
 
-        message& operator=(const message& other) {
+        constexpr message& operator=(const message& other) {
             ((static_cast<T&>(*this) = static_cast<const T&>(other)), ...);
             return *this;
         }
 
-        message& operator=(message&& other) noexcept {
+        constexpr message& operator=(message&& other) noexcept {
             ((static_cast<T&>(*this) = static_cast<T&&>(other)), ...);
             return *this;
         }
