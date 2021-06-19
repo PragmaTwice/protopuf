@@ -30,6 +30,23 @@ namespace pp {
     template <typename T, typename... Ts>
     constexpr bool are_same<T, Ts...> = std::conjunction_v<std::is_same<T, Ts>...>;
 
+    template <typename U, typename F>
+    struct fold_impl {
+
+        template <typename V>
+        constexpr auto operator+(V&& other) {
+            return pp::fold_impl {
+                std::forward<F>(f)(static_cast<U&&>(v), std::forward<V>(other)), std::forward<F>(f)
+            };
+        }
+
+        U v;
+        F&& f;
+    };
+
+    template <typename U, typename F>
+    fold_impl(U&&, F&&) -> fold_impl<U, F>;
+
     template <field_c ... T> requires are_same<typename T::name_type::value_type...>
     struct message : private T... {
 
@@ -142,6 +159,16 @@ namespace pp {
         template <typename F> requires (std::invocable<F, T> && ...)
         constexpr void for_each(F&& f) {
             (std::forward<F>(f)(static_cast<T&>(*this)), ...);
+        }
+
+        template <typename F, typename U>
+        constexpr auto fold(F&& f, U&& init) const {
+            return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<const T&>(*this)).v;
+        }
+
+        template <typename F, typename U>
+        constexpr auto fold(F&& f, U&& init) {
+            return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<T&>(*this)).v;
         }
 
     };
