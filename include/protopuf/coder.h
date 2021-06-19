@@ -20,21 +20,42 @@
 
 namespace pp {
 
+    /// @brief A pair type which `decoder`'s `decode` returns.
+    /// - Left type of pair `T`: the type of decoded object.
+    /// - Right type of pair `bytes`: the `bytes` which remains not decoded after finishing `decode`.
     template<typename T>
     using decode_result = std::pair<T, bytes>;
 
+    /// @brief Describe a type with static member function `encode`, which serializes an object to `bytes`.
+    ///
+    /// Type alias `value_type` describes type of the object to be encoded.
+    /// Static member function `encode`:
+    /// @param v the object to be encoded (source object).
+    /// @param s the bytes which the object `v` is encoded to (target bytes).
+    /// @returns a bytes from `begin(s) + encoding_length(v)` to `end(s)`, where `encoding_length` is the length of
+    /// encoded object (bytes form), representing the left bytes which remains not used yet.
     template<typename T>
     concept encoder = requires(typename T::value_type v, bytes s) {
         typename T::value_type;
         { T::encode(v, s) } -> std::same_as<bytes>;
     };
 
+    /// @brief Describe a type with static member function `decode`, which deserializes some `bytes` to an object.
+    ///
+    /// Type alias `value_type` describes type of the object to be decoded.
+    /// Static member function `decode`:
+    /// @param s the bytes which the object is decoded from (source bytes).
+    /// @returns the `decode_result` which is a pair including:
+    /// - the decoded object `v`;
+    /// - the bytes from `begin(s) + decoding_length(v)` to `end(s)`, where `decoding_length` is the length of
+    /// decoded object (bytes form), representing the left bytes which remains not used yet.
     template<typename T>
     concept decoder = requires(bytes s) {
         typename T::value_type;
         { T::decode(s) } -> std::same_as<decode_result<typename T::value_type>>;
     };
 
+    /// Describe a type which is both `encoder` and `decoder`.
     template<typename T>
     concept coder = encoder<T> && decoder<T>;
 
