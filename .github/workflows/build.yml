@@ -5,6 +5,14 @@ on:
     paths-ignore:
       - 'README.md'
       - '.gitignore'
+      - 'Doxyfile'
+      - 'asset/**'
+      - 'LICENSE'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - 'Doxyfile'
       - 'asset/**'
       - 'LICENSE'
 

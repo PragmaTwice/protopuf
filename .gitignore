@@ -77,3 +77,4 @@ CMakeSettings.json
 .vscode/
 
 build/
+doxygen/
