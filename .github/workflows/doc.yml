@@ -17,6 +17,9 @@ jobs:
         run: |
           sudo apt install doxygen -y
           sudo npm install -g surge
+      - name: fix
+        run: |
+          sed -i 's/!\[puffer\](asset\/puffer.png)//g' README.md
       - name: doxygen
         run: doxygen Doxyfile
       - name: upload
