@@ -14,7 +14,7 @@ jobs:
       - name: install deps
         run: |
           sudo apt install doxygen -y
-          npm install -g surge
+          sudo npm install -g surge
       - name: doxygen
         run: doxygen Doxyfile
       - name: upload
