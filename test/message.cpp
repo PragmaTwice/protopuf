@@ -344,4 +344,17 @@ GTEST_TEST(message, fold) {
 
     static_assert(is_same_v<decltype(tup), tuple<optional<int32>, optional<string>>>);
     EXPECT_EQ(tup, (tuple{ optional<int32>{1}, optional<string>{"hello"} }));
+
+    auto count = m.fold([](auto x, auto&& y){
+        return x + (empty_field(y) ? 0 : 1);
+    }, 0);
+
+    EXPECT_EQ(count, 2);
+
+    size_t count2 = 0;
+    m.for_each([&count2](auto&& x) {
+        count2 += empty_field(x) ? 0 : 1;
+    });
+
+    EXPECT_EQ(count2, 2);
 }
