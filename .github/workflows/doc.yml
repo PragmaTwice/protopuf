@@ -19,7 +19,9 @@ jobs:
           sudo npm install -g surge
       - name: fix
         run: |
-          sed -i 's/!\[puffer\](asset\/puffer.png)//g' README.md
+          sed -i 's/!\[puffer\](.*?)//g' README.md
+          sed -i 's|!\[\([^(]*\)\]([^)]*)|\1|g' README.md
+          sed -i 's|```c++|```{.cpp}|g' README.md
       - name: doxygen
         run: doxygen Doxyfile
       - name: upload
