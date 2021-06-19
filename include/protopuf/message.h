@@ -166,6 +166,11 @@ namespace pp {
             return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<const T&>(*this)).v;
         }
 
+        template <typename F, typename U>
+        constexpr auto fold(F&& f, U&& init) {
+            return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<T&>(*this)).v;
+        }
+
     };
 
     template <typename>
