@@ -20,7 +20,7 @@ jobs:
       - name: fix
         run: |
           sed -i 's/!\[puffer\](.*?)//g' README.md
-          sed -i 's|!\[\([^(]*\)\]([^)]*)|\1|g' README.md
+          sed -i 's|\[!\[\([^(]*\)\]([^)]*)|[\1|g' README.md
           sed -i 's|```c++|```{.cpp}|g' README.md
       - name: doxygen
         run: doxygen Doxyfile
