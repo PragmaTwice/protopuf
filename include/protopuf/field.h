@@ -91,6 +91,14 @@ namespace pp {
         using base_type = field_container<A, typename C::value_type, Container>;
 
         using base_type::base_type;
+
+        constexpr decltype(auto) cast_to_base() {
+            return static_cast<base_type&>(*this);
+        }
+
+        constexpr decltype(auto) cast_to_base() const {
+            return static_cast<const base_type&>(*this);
+        }
     };
 
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>

@@ -334,3 +334,14 @@ GTEST_TEST(message_coder, nested_decode) {
         EXPECT_EQ(v.get_base<3>()[2], (decltype(m1){444456, "tom"}));
     }
 }
+
+GTEST_TEST(message, fold) {
+    message<int32_field<"int", 1>, string_field<"str", 2>> m {1, "hello"};
+
+    auto tup = m.fold([]<typename T, typename U>(T&& x, U&& y){
+        return tuple_cat(forward<T>(x), make_tuple(forward<U>(y).cast_to_base()));
+    }, tuple{});
+
+    static_assert(is_same_v<decltype(tup), tuple<optional<int32>, optional<string>>>);
+    EXPECT_EQ(tup, (tuple{ optional<int32>{1}, optional<string>{"hello"} }));
+}
