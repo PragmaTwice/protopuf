@@ -1,0 +1,21 @@
+name: Doxygen
+
+on:
+  push:
+    branches:
+      - master
+      - ci-*
+
+jobs:
+  doc:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: install deps
+        run: |
+          sudo apt install doxygen -y
+          npm install -g surge
+      - name: doxygen
+        run: doxygen Doxyfile
+      - name: upload
+        run: surge ./doxygen/html protopuf.surge.sh --token ${{ secrets.SURGE_TOKEN }}

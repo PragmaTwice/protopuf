@@ -7,6 +7,12 @@ on:
       - '.gitignore'
       - 'asset/**'
       - 'LICENSE'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - 'asset/**'
+      - 'LICENSE'
 
 jobs:
   build:
