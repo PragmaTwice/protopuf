@@ -22,7 +22,16 @@
 
 namespace pp {
 
-    // varint encoder/decoder
+    /// @brief @ref coder for variable-length integers
+    ///
+    /// Each byte in a varint, except the last byte, has the most significant bit (msb) set, 
+    /// which indicates that there are further bytes to come. 
+    /// The lower 7 bits of each byte are used to store the the number in groups of 7 bits, least significant group first.
+    ///
+    /// References:
+    /// 1. https://developers.google.com/protocol-buffers/docs/encoding#varints
+    /// 2. https://en.wikipedia.org/wiki/Variable-length_quantity#Applications_and_history
+    /// 3. https://en.wikipedia.org/wiki/LEB128
     // template <pp::integral> // failed to pass GCC, strangely
     template <typename>
     class varint_coder;

@@ -21,9 +21,11 @@
 
 namespace pp {
 
+    /// A concept to check whether type `T` is an enumeration type
     template <typename T>
     concept enum_c = std::is_enum_v<T>;
 
+    /// @ref coder for enumeration types
     template<enum_c T>
     struct enum_coder {
         using value_type = T;

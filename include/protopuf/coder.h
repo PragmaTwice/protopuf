@@ -55,7 +55,7 @@ namespace pp {
         { T::decode(s) } -> std::same_as<decode_result<typename T::value_type>>;
     };
 
-    /// Describe a type which is both `encoder` and `decoder`.
+    /// @brief Describe a type which is both @ref encoder and @ref decoder.
     template<typename T>
     concept coder = encoder<T> && decoder<T>;
 

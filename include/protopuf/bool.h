@@ -21,6 +21,7 @@
 
 namespace pp {
 
+    /// @ref coder for boolean type
     struct bool_coder {
         using value_type = bool;
 

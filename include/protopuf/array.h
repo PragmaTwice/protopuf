@@ -23,14 +23,21 @@
 
 namespace pp {
 
+    /// @brief A `std::ranges::range<T>` where some element can be inserted into `T`, 
+    /// as type `T` has member function `insert` with `T::iterator` and `T::value_type` as parameters.
     template <typename T>
     concept insertable_range = std::ranges::range<T> && requires (T t) {
         sizeof(std::inserter(t, t.end()));
     };
 
+    /// @brief A @ref insertable_range where the parameter type `T` satisfies `std::ranges::sized_range`.
     template <typename T>
     concept insertable_sized_range = insertable_range<T> && std::ranges::sized_range<T>;
 
+    /// @brief @ref coder for range types, i.e. `std::vector<T>`.
+    ///
+    /// @param C the @ref coder for the element type of the range types, i.e. `C = integer_coder<int>` for `R = std::vector<int>`
+    /// @param R the range type to encode/decode, which should satisfy `std::ranges::sized_range`
     template <coder C, std::ranges::sized_range R = std::vector<typename C::value_type>>
     struct array_coder {
         using value_type = R;
@@ -92,11 +99,14 @@ namespace pp {
         }
     };
 
+    /// Type alias of @ref coder for `std::basic_string<T>`
     template <integral T>
     using basic_string_coder = array_coder<integer_coder<T>, std::basic_string<T>>;
 
+    /// Type alias of @ref coder for `std::string`
     using string_coder = basic_string_coder<std::string::value_type>;
 
+    /// Type alias of @ref coder for `std::vector<uint<1>>`
     using bytes_coder = array_coder<integer_coder<uint<1>>>;
 
 }
