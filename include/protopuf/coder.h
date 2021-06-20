@@ -26,12 +26,12 @@ namespace pp {
     template<typename T>
     using decode_result = std::pair<T, bytes>;
 
-    /// @brief Describe a type with static member function `encode`, which serializes an object to `bytes`.
+    /// @brief Describe a type with static member function `encode`, which serializes an object to `bytes` (no ownership).
     ///
     /// Type alias `value_type` describes type of the object to be encoded.
     /// Static member function `encode`:
     /// @param v the object to be encoded (source object).
-    /// @param s the bytes which the object `v` is encoded to (target bytes).
+    /// @param s the bytes which the object `v` is encoded into (target bytes).
     /// @returns a bytes from `begin(s) + encoding_length(v)` to `end(s)`, where `encoding_length` is the length of
     /// encoded object (bytes form), representing the left bytes which remains not used yet.
     template<typename T>
@@ -45,7 +45,7 @@ namespace pp {
     /// Type alias `value_type` describes type of the object to be decoded.
     /// Static member function `decode`:
     /// @param s the bytes which the object is decoded from (source bytes).
-    /// @returns the `decode_result` which is a pair including:
+    /// @returns the @ref decode_result which is a pair including:
     /// - the decoded object `v`;
     /// - the bytes from `begin(s) + decoding_length(v)` to `end(s)`, where `decoding_length` is the length of
     /// decoded object (bytes form), representing the left bytes which remains not used yet.
