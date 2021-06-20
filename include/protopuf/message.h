@@ -24,6 +24,7 @@
 
 namespace pp {
 
+    /// Checks whether all types in the parameter list are equal
     template <typename...>
     constexpr bool are_same = true;
 
@@ -47,6 +48,8 @@ namespace pp {
     template <typename U, typename F>
     fold_impl(U&&, F&&) -> fold_impl<U, F>;
 
+    /// @brief The message type
+    /// @param T the field types of the message, where all `T::name_type::value_type` are equal
     template <field_c ... T> requires are_same<typename T::name_type::value_type...>
     struct message : private T... {
 
@@ -72,69 +75,84 @@ namespace pp {
             return *this;
         }
 
+        /// the number of fields
         static constexpr uint<4> size = sizeof...(T);
 
+        /// get the field type by the specific field number
         template <uint<4> N>
         using get_type_by_number = field_number_selector<N, T...>;
 
+        /// get the field type by the specific field name
         template <basic_fixed_string S>
         using get_type_by_name = field_name_selector<S, T...>;
 
+        /// get a field by the field number
         template <uint<4> N>
         constexpr decltype(auto) get() const {
             return static_cast<const field_number_selector<N, T...>&>(*this);
         }
 
+        /// get a field by the field name
         template <basic_fixed_string S>
         constexpr decltype(auto) get() const {
             return static_cast<const field_name_selector<S, T...>&>(*this);
         }
 
+        /// get a field by the field number
         template <uint<4> N>
         constexpr decltype(auto) get() {
             return static_cast<field_number_selector<N, T...>&>(*this);
         }
 
+        /// get a field by the field name
         template <basic_fixed_string S>
         constexpr decltype(auto) get() {
             return static_cast<field_name_selector<S, T...>&>(*this);
         }
 
+        /// get a field by the field number, i.e. `msg[233_i]`
         template <uint<4> F>
         constexpr decltype(auto) operator[](std::integral_constant<uint<4>, F>) const {
             return get<F>();
         }
 
+        /// get a field by the field name, i.e. `msg["a"_f]`
         template <basic_fixed_string F>
         constexpr decltype(auto) operator[](constant<F>) const {
             return get<F>();
         }
 
+        /// get a field by the field number, i.e. `msg[233_i]`
         template <uint<4> F>
         constexpr decltype(auto) operator[](std::integral_constant<uint<4>, F>) {
             return get<F>();
         }
 
+        /// get a field by the field name, i.e. `msg["a"_f]
         template <basic_fixed_string F>
         constexpr decltype(auto) operator[](constant<F>) {
             return get<F>();
         }
 
+        /// get a field as its @ref field::base_type by the field number
         template <uint<4> N>
         constexpr decltype(auto) get_base() const {
             return static_cast<const typename field_number_selector<N, T...>::base_type&>(get<N>());
         }
 
+        /// get a field as its @ref field::base_type by the field name
         template <basic_fixed_string S>
         constexpr decltype(auto) get_base() const {
             return static_cast<const typename field_name_selector<S, T...>::base_type&>(get<S>());
         }
 
+        /// get a field as its @ref field::base_type by the field number
         template <uint<4> N>
         constexpr decltype(auto) get_base() {
             return static_cast<typename field_number_selector<N, T...>::base_type&>(get<N>());
         }
 
+        /// get a field as its @ref field::base_type by the field name
         template <basic_fixed_string S>
         constexpr decltype(auto) get_base() {
             return static_cast<typename field_name_selector<S, T...>::base_type&>(get<S>());
@@ -151,21 +169,25 @@ namespace pp {
             return !(*this == other);
         }
 
+        /// iterate all fields and apply function `f` to them
         template <typename F> requires (std::invocable<F, T> && ...)
         constexpr void for_each(F&& f) const {
             (std::forward<F>(f)(static_cast<const T&>(*this)), ...);
         }
 
+        /// iterate all fields and apply function `f` to them
         template <typename F> requires (std::invocable<F, T> && ...)
         constexpr void for_each(F&& f) {
             (std::forward<F>(f)(static_cast<T&>(*this)), ...);
         }
 
+        /// same as `f(f(...f(f(init, field1), field2), ...), fieldN)`
         template <typename F, typename U>
         constexpr auto fold(F&& f, U&& init) const {
             return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<const T&>(*this)).v;
         }
 
+        /// same as `f(f(...f(f(init, field1), field2), ...), fieldN)`
         template <typename F, typename U>
         constexpr auto fold(F&& f, U&& init) {
             return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<T&>(*this)).v;
@@ -173,19 +195,23 @@ namespace pp {
 
     };
 
+    /// Checks whether the type is a @ref message type
     template <typename>
     constexpr bool is_message = false;
 
     template <typename ...T>
     constexpr bool is_message <message<T...>> = true;
 
+    /// A concept satisfied while type `T` is a @ref message type
     template <typename T>
     concept message_c = is_message<T>;
 
+    /// Get the wire type from a field key, ref to @ref field::key and @ref wire_type
     inline constexpr uint<1> to_wire_key(uint<4> field_key) {
         return field_key & 0b111u;
     }
 
+    /// Get the field number from a field key, ref to @ref field::key and @ref field::number
     inline constexpr uint<4> to_field_number(uint<4> field_key) {
         return field_key >> 3u;
     }
@@ -213,6 +239,7 @@ namespace pp {
         using type = skipper<integer_coder<uint<4>>>;
     };
 
+    /// Dispatch a wire type number to a @ref skipper
     template <uint<1> N>
     using wire_skip = typename wire_skip_impl<N>::type;
 
@@ -273,6 +300,7 @@ namespace pp {
     template <message_c T>
     inline const message_decode_map<T> decode_map;
 
+    /// A @ref coder for @ref message type
     template <message_c T>
     struct message_coder {
         using value_type = T;
@@ -341,6 +369,9 @@ namespace pp {
         }
     };
 
+    /// @brief A @ref coder for embedded message
+    ///
+    /// Ref to https://developers.google.com/protocol-buffers/docs/encoding#embedded
     template <message_c T>
     struct embedded_message_coder {
         using value_type = T;
@@ -377,6 +408,7 @@ namespace pp {
     template <typename T>
     struct wire_type_impl<embedded_message_coder<T>> : std::integral_constant<uint<1>, 2> {};
 
+    /// Type alias for embedded message fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using message_field = field<S, N, embedded_message_coder<T>, A, Container>;
 }

@@ -25,19 +25,42 @@
 
 namespace pp {
 
+    /// @brief A concept statisfied while `T::coder` is a @ref coder and 
+    /// type `T` has static member function `encode_skip`, which try to encode an object 
+    /// but actually not decode it into any byte sequence; it just skip the bytes which can be encoded from the object.
+    ///
+    /// Static member function `encode_skip`:
+    /// @param v the object to be encoded from
+    /// @returns the length of the encoded object (byte form)
+    /// 
+    /// Corresponding to @ref encoder, except it just return the length of the encoded object 
+    /// and does not really encode it into bytes. 
     template <typename T>
     concept encode_skipper = coder<typename T::coder> && requires(typename T::value_type v) {
         { T::encode_skip(v) } -> std::same_as<std::size_t>;
     };
 
+    /// @brief A concept statisfied while `T::coder` is a @ref coder and 
+    /// type `T` has static member function `decode_skip`, which try to decode a byte sequence 
+    /// but actually not decode it to an object; it just skip the bytes which can be decoded to an object.
+    ///
+    /// Static member function `decode_skip`:
+    /// @param v the bytes to be decoded from
+    /// @returns the bytes from `begin(v) + decoded_object_length` to `end(v)`
+    /// 
+    /// Corresponding to @ref decoder, except it just skip the length of the decoded object from the bytes 
+    /// and does not really generate the object. 
     template <typename T>
     concept decode_skipper = coder<typename T::coder> && requires(bytes v) {
         { T::decode_skip(v) } -> std::same_as<bytes>;
     };
 
+    /// @brief A concept statisfied while `T` is both @ref encode_skipper and @ref decode_skipper
     template <typename T>
     concept skipper_c = encode_skipper<T> && decode_skipper<T>;
 
+    /// @brief The implementations of @ref skipper_c
+    /// @param C the corresponding @ref coder to the skipper
     template <coder C>
     struct skipper;
 

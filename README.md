@@ -6,7 +6,7 @@
 
 A little, highly templated, and protobuf-compatible serialization/deserialization library written in C++20
 
-:closed_book: [Documentation](https://protopuf.surge.sh) (WIP)
+:closed_book: [Documentation](https://protopuf.surge.sh)
 
 ## Requirements
 

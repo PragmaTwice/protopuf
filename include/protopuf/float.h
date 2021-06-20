@@ -21,6 +21,7 @@
 
 namespace pp {
 
+    /// A @ref coder for floating point types
     template<std::floating_point T>
     struct float_coder {
         using value_type = T;
@@ -63,15 +64,19 @@ namespace pp {
         using type = double;
     };
 
+    /// Type alias of floating points, i.e. `floating<4>` as `float`, `floating<8>` as `double`
     template <std::size_t N>
     using floating = typename floating_impl<N>::type;
 
+    /// A `std::floating_point<T>` where byte size of `T` equals to `N` 
     template <typename T, std::size_t N>
     concept sized_floating_point = std::floating_point<T> && sizeof(T) == N;
 
+    /// A concept statisfied while `T = float`
     template <typename T>
     concept floating_point32 = sized_floating_point<T, 4>;
 
+    /// A concept statisfied while `T = double`
     template <typename T>
     concept floating_point64 = sized_floating_point<T, 8>;
 }

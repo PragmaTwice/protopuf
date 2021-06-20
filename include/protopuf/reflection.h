@@ -19,21 +19,28 @@
 
 namespace pp {
 
+    /// Make `false` a dependent name
     template<typename> inline constexpr bool always_false = false;
 
+    /// @brief An overload method for lambda expression
+    ///
+    /// Ref to https://en.cppreference.com/w/cpp/utility/variant/visit#Example
     template<typename... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<typename... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
+    /// A getter type for field name
     template <field_c T>
     struct field_name {
         static constexpr inline auto value = T::name;
     };
 
+    /// A getter type for field number
     template <field_c T>
     struct field_number {
         static constexpr inline auto value = T::number;
     };
 
+    /// Get the first type from a type list `Ts...`
     template <typename... Ts> requires (sizeof...(Ts) > 0)
     using type_get_first = type_get<0, Ts...>;
 
@@ -50,9 +57,21 @@ namespace pp {
         using type = std::remove_cv_t<decltype(field_number<T>::value)>;
     };
 
+    /// @brief Get the run-time type for a field number/name, i.e. a `std::basic_string_view` for field name
+    /// @param Prop the getter, which can be @ref field_name or @ref field_number
+    /// @param T the field type
     template <template<typename> typename Prop, field_c T>
     using dynamic_key_type = typename dynamic_key_type_impl<Prop, T>::type;
 
+    /// @brief Apply a function `f` to a field found by a property with run-time value `key` in a message `msg`
+    /// 
+    /// Template parameters:
+    /// @param Prop the getter, which can be @ref field_name or @ref field_number
+    /// 
+    /// Function parameters:
+    /// @param f the callback function to be invoked
+    /// @param msg the message where the field is found 
+    /// @param key the run-time value to find the specific field in the message
     template <template<field_c> typename Prop, typename F, field_c ... Ts>
         requires std::conjunction_v<std::bool_constant<std::invocable<F, Ts>>...>
     auto dynamic_get_by(F&& f, const message<Ts...>& msg, const dynamic_key_type<Prop, type_get_first<Ts...>>& key) {
@@ -83,11 +102,13 @@ namespace pp {
         }
     }
 
+    /// Apply a function `f` to a field found by run-time field `name` in a message `msg`, same as `dynamic_get_by<field_name>`
     template <typename F, message_c T>
     auto dynamic_get_by_name(F&& f, const T& msg, const auto& name) {
         return dynamic_get_by<field_name>(std::forward<F>(f), msg, name);
     }
 
+    /// Apply a function `f` to a field found by run-time field `number` in a message `msg`, same as `dynamic_get_by<field_number>`
     template <typename F, message_c T>
     auto dynamic_get_by_number(F&& f, const T& msg, const auto& number) {
         return dynamic_get_by<field_number>(std::forward<F>(f), msg, number);

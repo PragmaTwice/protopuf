@@ -44,7 +44,8 @@ namespace pp {
         using type = std::int64_t;
     };
 
-    // type for signed integer
+    /// @brief Type alias for signed integer.
+    /// @param N byte length of the integer, i.e. `2` for `std::int16_t`.
     template <std::size_t N>
     using sint = typename sint_impl<N>::type;
 
@@ -71,32 +72,49 @@ namespace pp {
         using type = std::uint64_t;
     };
 
-    // type for unsigned integer
+    /// @brief Type alias for unsigned integer.
+    /// @param N byte length of the integer, i.e. `2` for `std::uint16_t`.
     template <std::size_t N>
     using uint = typename uint_impl<N>::type;
 
-    // specializing std::is_integral is not allowed
+    /// @brief Checks whether `T` is an integral type.
+    ///
+    /// We need it because specializing `std::is_integral` is not allowed, 
+    /// but something like @ref sint_zigzag is also an integral type in protopuf.
     template <typename T>
     struct is_integral : std::is_integral<T> {};
 
+    /// Checks whether `T` is an integral type.
     template <typename T>
     constexpr bool is_integral_v = is_integral<T>::value;
 
+    /// @brief A concept satisfied if and only if `T` is an integral type.
     template <typename T>
     concept integral = is_integral_v<T>;
 
+    /// @brief A concept satisfied if and only if `T` is an integral type, 
+    /// and the size of `T` equals to `N`.
     template <typename T, std::size_t N>
     concept sized_integral = integral<T> && sizeof(T) == N;
 
+    /// @brief A concept satisfied if and only if `T` is an integral type, 
+    /// and the byte size of `T` equals to `4`.
     template <typename T>
     concept integral32 = sized_integral<T, 4>;
 
+    /// @brief A concept satisfied if and only if `T` is an integral type, 
+    /// and the byte size of `T` equals to `8`.
     template <typename T>
     concept integral64 = sized_integral<T, 8>;
 
-    // direct way to implement `bytes_to_int` is:
-    // 1. *(uint<N> *)bytes.data() // but it generates a UB while N > 1
-    // 2. std::bit_cast(std::to_array(bytes)) // but libstdc++ has not implemented bit_cast yet
+    /// @brief Convert some bytes (with length `N`) to an unsigned integer `uint<N>`.
+    ///
+    /// @param bytes the input bytes (with length `N`) to be coverted
+    /// @returns the coverted unsigned integer `uint<N>`
+    /// 
+    /// Direct way to implement `bytes_to_int` is:
+    /// 1. `*(uint<N> *)bytes.data()` but it generates an UB while `N > 1`
+    /// 2. `std::bit_cast(std::to_array(bytes))` but libstdc++ has not implemented bit_cast yet
     template <std::size_t N>
     constexpr uint<N> bytes_to_int(sized_bytes<N> bytes) {
         return bytes_to_int(bytes.template subspan<0, N/2>()) | bytes_to_int(bytes.template subspan<N/2>()) << N*4;
@@ -106,7 +124,12 @@ namespace pp {
         return static_cast<uint<1>>(bytes.front());
     }
 
-    // same as above
+    /// @brief Convert an unsigned integer (with byte length `N`) into a byte sequence with length `N` (no ownership).
+    ///
+    /// @param i the unsigned integer to be converted
+    /// @param bytes the byte sequence which the integer is converted into (with length `N`)
+    ///
+    /// Like @ref bytes_to_int, we cannot find a direct solution to convert without excess overhead and UB yet.
     template <std::size_t N>
     constexpr void int_to_bytes(uint<N> i, sized_bytes<N> bytes) {
         int_to_bytes<N/2>(i, bytes.template subspan<0, N/2>());
@@ -117,7 +140,10 @@ namespace pp {
         bytes.front() = static_cast<std::byte>(i);
     }
 
-    // NRVO is expected
+    /// @brief Convert an unsigned integer (with byte length `N`) into an byte array with length `N` (with ownership).
+    /// @param i the unsigned integer to be converted
+    /// @returns 
+    /// @warning NRVO is expected here to optimize the function template.
     template <std::size_t N>
     constexpr auto int_to_bytes(uint<N> i) {
         std::array<std::byte, N> a;
@@ -127,7 +153,7 @@ namespace pp {
         return a;
     }
 
-    // fixed integer encoder/decoder
+    /// A @ref coder for fixed-length signed/unsigned integer
     template <typename>
     class integer_coder;
 

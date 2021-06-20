@@ -20,15 +20,19 @@
 
 namespace pp {
 
+    /// Byte literals, i.e. `0x12_b` as `std::byte{0x12}`.
     inline constexpr std::byte operator "" _b(unsigned long long int i) {
         return std::byte(i);
     }
 
+    /// A sized byte (contiguous) sequence reference (no ownership).
     template <std::size_t N>
     using sized_bytes = std::span<std::byte, N>;
 
+    /// A byte (contiguous) sequence reference (no ownership).
     using bytes = std::span<std::byte>;
 
+    /// Returns the byte-distance between `begin(a)` and `begin(b)`.
     inline constexpr std::size_t begin_diff(bytes a, bytes b) {
         // `std::to_address` is used here for MSVC, ref to https://github.com/microsoft/STL/issues/1435
         return std::to_address(a.begin()) - std::to_address(b.begin());
