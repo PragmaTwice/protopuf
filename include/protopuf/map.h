@@ -19,9 +19,13 @@
 
 namespace pp {
 
+    /// A message type for map element, used in @ref map_element
     template<coder key_coder, coder value_coder>
     using map_element_base = message<field<"key", 1, key_coder>, field<"value", 2, value_coder>>;
 
+    /// @brief A map element wrapper for message, which can convert from and to `std::pair`
+    ///
+    /// Ref to https://developers.google.com/protocol-buffers/docs/proto3#maps
     template<coder key_coder, coder value_coder>
     struct map_element : map_element_base<key_coder, value_coder> {
         using base_type = map_element_base<key_coder, value_coder>;
@@ -55,6 +59,7 @@ namespace pp {
     template <typename T1, typename T2>
     struct message_decode_map<map_element<T1, T2>> : message_decode_map<typename map_element<T1, T2>::base_type> {};
 
+    /// The type alias for map field
     template<basic_fixed_string S, uint<4> N, coder key_coder, coder value_coder,
         typename Container = std::map<
             typename map_element<key_coder, value_coder>::first_type, 
