@@ -181,13 +181,13 @@ namespace pp {
             (std::forward<F>(f)(static_cast<T&>(*this)), ...);
         }
 
-        /// same as f(f(...f(f(init, field1), field2), ...), fieldN) 
+        /// same as `f(f(...f(f(init, field1), field2), ...), fieldN)`
         template <typename F, typename U>
         constexpr auto fold(F&& f, U&& init) const {
             return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<const T&>(*this)).v;
         }
 
-        /// same as f(f(...f(f(init, field1), field2), ...), fieldN) 
+        /// same as `f(f(...f(f(init, field1), field2), ...), fieldN)`
         template <typename F, typename U>
         constexpr auto fold(F&& f, U&& init) {
             return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<T&>(*this)).v;
