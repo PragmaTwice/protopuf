@@ -19,7 +19,7 @@ jobs:
           cd doxygen-tool
           mkdir build
           cd build
-          cmake ..
+          cmake -Duse_libclang=ON ..
           make
           sudo make install
           cd ../..
