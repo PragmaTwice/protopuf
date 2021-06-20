@@ -15,17 +15,18 @@ jobs:
           submodules: true
       - name: install deps
         run: |
-          sudo apt install -y libclang-10-dev
+          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
+          sudo apt install -y libclang-12-dev
           git clone https://github.com/doxygen/doxygen doxygen-tool
           cd doxygen-tool
           mkdir build
           cd build
-          cmake -Duse_libclang=ON -DCMAKE_PREFIX_PATH=/usr/lib/llvm-10/ ..
-          make
+          cmake -Duse_libclang=ON -DCMAKE_PREFIX_PATH=/usr/lib/llvm-12/ ..
+          make -j$(nproc)
           sudo make install
           cd ../..
           sudo npm install -g surge
-      - name: fix
+      - name: apply patch to README
         run: |
           sed -i 's/!\[puffer\](.*)//g' README.md
           sed -i 's|\[!\[\([^(]*\)\]([^)]*)|[\1|g' README.md
