@@ -369,7 +369,7 @@ namespace pp {
         }
     };
 
-    /// @ref coder for embedded message
+    /// @brief @ref coder for embedded message
     ///
     /// Ref to https://developers.google.com/protocol-buffers/docs/encoding#embedded
     template <message_c T>
