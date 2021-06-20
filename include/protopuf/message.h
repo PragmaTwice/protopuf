@@ -300,6 +300,7 @@ namespace pp {
     template <message_c T>
     inline const message_decode_map<T> decode_map;
 
+    /// @ref coder for @ref message type
     template <message_c T>
     struct message_coder {
         using value_type = T;
@@ -368,6 +369,9 @@ namespace pp {
         }
     };
 
+    /// @ref coder for embedded message
+    ///
+    /// Ref to https://developers.google.com/protocol-buffers/docs/encoding#embedded
     template <message_c T>
     struct embedded_message_coder {
         using value_type = T;
