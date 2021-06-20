@@ -202,7 +202,7 @@ namespace pp {
     template <typename ...T>
     constexpr bool is_message <message<T...>> = true;
 
-    /// The conepts satisfied while type `T` is a @ref message type
+    /// A concept satisfied while type `T` is a @ref message type
     template <typename T>
     concept message_c = is_message<T>;
 
@@ -300,7 +300,7 @@ namespace pp {
     template <message_c T>
     inline const message_decode_map<T> decode_map;
 
-    /// @ref coder for @ref message type
+    /// A @ref coder for @ref message type
     template <message_c T>
     struct message_coder {
         using value_type = T;
@@ -369,7 +369,7 @@ namespace pp {
         }
     };
 
-    /// @brief @ref coder for embedded message
+    /// @brief A @ref coder for embedded message
     ///
     /// Ref to https://developers.google.com/protocol-buffers/docs/encoding#embedded
     template <message_c T>
@@ -408,7 +408,7 @@ namespace pp {
     template <typename T>
     struct wire_type_impl<embedded_message_coder<T>> : std::integral_constant<uint<1>, 2> {};
 
-    /// The type alias for embedded message fields
+    /// Type alias for embedded message fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using message_field = field<S, N, embedded_message_coder<T>, A, Container>;
 }

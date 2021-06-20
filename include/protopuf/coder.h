@@ -26,7 +26,7 @@ namespace pp {
     template<typename T>
     using decode_result = std::pair<T, bytes>;
 
-    /// @brief Describe a type with static member function `encode`, which serializes an object to `bytes` (no ownership).
+    /// @brief Describes a type with static member function `encode`, which serializes an object to `bytes` (no ownership).
     ///
     /// Type alias `value_type` describes type of the object to be encoded.
     /// Static member function `encode`:
@@ -40,7 +40,7 @@ namespace pp {
         { T::encode(v, s) } -> std::same_as<bytes>;
     };
 
-    /// @brief Describe a type with static member function `decode`, which deserializes some `bytes` to an object.
+    /// @brief Describes a type with static member function `decode`, which deserializes some `bytes` to an object.
     ///
     /// Type alias `value_type` describes type of the object to be decoded.
     /// Static member function `decode`:
@@ -55,7 +55,7 @@ namespace pp {
         { T::decode(s) } -> std::same_as<decode_result<typename T::value_type>>;
     };
 
-    /// @brief Describe a type which is both @ref encoder and @ref decoder.
+    /// @brief Describes a type which is both @ref encoder and @ref decoder.
     template<typename T>
     concept coder = encoder<T> && decoder<T>;
 

@@ -34,7 +34,7 @@ namespace pp {
     template <typename T>
     concept insertable_sized_range = insertable_range<T> && std::ranges::sized_range<T>;
 
-    /// @brief @ref coder for range types, i.e. `std::vector<T>`.
+    /// @brief A @ref coder for range types, i.e. `std::vector<T>`.
     ///
     /// @param C the @ref coder for the element type of the range types, i.e. `C = integer_coder<int>` for `R = std::vector<int>`
     /// @param R the range type to encode/decode, which should satisfy `std::ranges::sized_range`

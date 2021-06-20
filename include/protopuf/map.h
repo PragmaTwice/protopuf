@@ -59,7 +59,7 @@ namespace pp {
     template <typename T1, typename T2>
     struct message_decode_map<map_element<T1, T2>> : message_decode_map<typename map_element<T1, T2>::base_type> {};
 
-    /// The type alias for map fields
+    /// Type alias for map fields
     template<basic_fixed_string S, uint<4> N, coder key_coder, coder value_coder,
         typename Container = std::map<
             typename map_element<key_coder, value_coder>::first_type, 

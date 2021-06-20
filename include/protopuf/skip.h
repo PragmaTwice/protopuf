@@ -25,7 +25,7 @@
 
 namespace pp {
 
-    /// @brief The concept statisfied while `T::coder` is a @ref coder and 
+    /// @brief A concept statisfied while `T::coder` is a @ref coder and 
     /// type `T` has static member function `encode_skip`, which try to encode an object 
     /// but actually not decode it into any byte sequence; it just skip the bytes which can be encoded from the object.
     ///
@@ -40,7 +40,7 @@ namespace pp {
         { T::encode_skip(v) } -> std::same_as<std::size_t>;
     };
 
-    /// @brief The concept statisfied while `T::coder` is a @ref coder and 
+    /// @brief A concept statisfied while `T::coder` is a @ref coder and 
     /// type `T` has static member function `decode_skip`, which try to decode a byte sequence 
     /// but actually not decode it to an object; it just skip the bytes which can be decoded to an object.
     ///
@@ -55,7 +55,7 @@ namespace pp {
         { T::decode_skip(v) } -> std::same_as<bytes>;
     };
 
-    /// @brief The concept statisfied while `T` is both @ref encode_skipper and @ref decode_skipper
+    /// @brief A concept statisfied while `T` is both @ref encode_skipper and @ref decode_skipper
     template <typename T>
     concept skipper_c = encode_skipper<T> && decode_skipper<T>;
 

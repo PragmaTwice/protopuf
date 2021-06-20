@@ -21,7 +21,7 @@
 
 namespace pp {
 
-    /// @brief ZigZag encoded signed integer.
+    /// @brief A ZigZag encoded signed integer.
     /// @param N the byte length of the underlying integer type, i.e. `2` for `uint<2>` as well as `std::int16_t`.
     ///
     /// Unlike two's complement, Zigzag encoding use the least-significant bit for sign,

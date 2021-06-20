@@ -22,7 +22,7 @@
 
 namespace pp {
 
-    /// @brief @ref coder for variable-length integers
+    /// @brief A @ref coder for variable-length integers
     ///
     /// Each byte in a varint, except the last byte, has the most significant bit (msb) set, 
     /// which indicates that there are further bytes to come. 

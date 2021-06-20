@@ -57,7 +57,7 @@ namespace pp {
         using type = std::remove_cv_t<decltype(field_number<T>::value)>;
     };
 
-    /// @brief The run-time type for field number/name, i.e. a `std::basic_string_view` for field name
+    /// @brief Get the run-time type for a field number/name, i.e. a `std::basic_string_view` for field name
     /// @param Prop the getter, which can be @ref field_name or @ref field_number
     /// @param T the field type
     template <template<typename> typename Prop, field_c T>

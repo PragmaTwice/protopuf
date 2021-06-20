@@ -88,21 +88,21 @@ namespace pp {
     template <typename T>
     constexpr bool is_integral_v = is_integral<T>::value;
 
-    /// @brief The concept satisfied if and only if `T` is an integral type.
+    /// @brief A concept satisfied if and only if `T` is an integral type.
     template <typename T>
     concept integral = is_integral_v<T>;
 
-    /// @brief The concept satisfied if and only if `T` is an integral type, 
+    /// @brief A concept satisfied if and only if `T` is an integral type, 
     /// and the size of `T` equals to `N`.
     template <typename T, std::size_t N>
     concept sized_integral = integral<T> && sizeof(T) == N;
 
-    /// @brief The concept satisfied if and only if `T` is an integral type, 
+    /// @brief A concept satisfied if and only if `T` is an integral type, 
     /// and the byte size of `T` equals to `4`.
     template <typename T>
     concept integral32 = sized_integral<T, 4>;
 
-    /// @brief The concept satisfied if and only if `T` is an integral type, 
+    /// @brief A concept satisfied if and only if `T` is an integral type, 
     /// and the byte size of `T` equals to `8`.
     template <typename T>
     concept integral64 = sized_integral<T, 8>;
@@ -153,7 +153,7 @@ namespace pp {
         return a;
     }
 
-    /// @ref coder for fixed-length signed/unsigned integer
+    /// A @ref coder for fixed-length signed/unsigned integer
     template <typename>
     class integer_coder;
 
