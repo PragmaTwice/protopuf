@@ -404,7 +404,7 @@ namespace pp {
     template <typename T>
     struct wire_type_impl<embedded_message_coder<T>> : std::integral_constant<uint<1>, 2> {};
 
-    /// The type alias for embedded message field
+    /// The type alias for embedded message fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using message_field = field<S, N, embedded_message_coder<T>, A, Container>;
 }

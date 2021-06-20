@@ -129,72 +129,93 @@ namespace pp {
         }
     };
 
+    /// The type alias for fixed-length integer fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using integer_field = field<S, N, integer_coder<T>, A, Container>;
 
+    /// The type alias for fixed32 (fixed-length uint32) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint<4>>>
     using fixed32_field = integer_field<S, N, uint<4>, A, Container>;
 
+    /// The type alias for sfixed32 (fixed-length int32) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint<4>>>
     using sfixed32_field = integer_field<S, N, sint<4>, A, Container>;
 
+    /// The type alias for fixed64 (fixed-length uint64) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint<8>>>
     using fixed64_field = integer_field<S, N, uint<8>, A, Container>;
 
+    /// The type alias for sfixed64 (fixed-length int64) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint<8>>>
     using sfixed64_field = integer_field<S, N, sint<8>, A, Container>;
 
+    /// The type alias for varint fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using varint_field = field<S, N, varint_coder<T>, A, Container>;
 
     using int32 = sint<4>;
+    /// The type alias for int32 (varint) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<int32>>
     using int32_field = varint_field<S, N, int32, A, Container>;
 
     using uint32 = uint<4>;
+    /// The type alias for uint32 (varint) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint32>>
     using uint32_field = varint_field<S, N, uint32, A, Container>;
 
     using sint32 = sint_zigzag<4>;
+    /// The type alias for sint32 (varint, Zigzag) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint32>>
     using sint32_field = varint_field<S, N, sint32, A, Container>;
 
     using int64 = sint<8>;
+    /// The type alias for int64 (varint) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<int64>>
     using int64_field = varint_field<S, N, int64, A, Container>;
 
     using uint64 = uint<8>;
+    /// The type alias for uint64 (varint) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<uint64>>
     using uint64_field = varint_field<S, N, uint64, A, Container>;
 
     using sint64 = sint_zigzag<8>;
+    /// The type alias for sint64 (varint, Zigzag) fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<sint64>>
     using sint64_field = varint_field<S, N, sint64, A, Container>;
 
+    /// The type alias for floating point type fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using floating_field = field<S, N, float_coder<T>, A, Container>;
 
+    /// The type alias for float fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<floating<4>>>
     using float_field = floating_field<S, N, floating<4>, A, Container>;
 
+    /// The type alias for double fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<floating<8>>>
     using double_field = floating_field<S, N, floating<8>, A, Container>;
 
+    /// The type alias for range type fields
     template <basic_fixed_string S, uint<4> N, coder T, attribute A = singular, typename Container = std::vector<typename T::value_type>>
     using array_field = field<S, N, array_coder<T>, A, Container>;
 
+    /// The type alias for `std::basic_string` fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<std::basic_string<T>>>
     using basic_string_field = field<S, N, basic_string_coder<T>, A, Container>;
 
+    /// The type alias for string fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<std::string>>
     using string_field = field<S, N, string_coder, A, Container>;
 
+    /// The type alias for bytes fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<std::byte>>>
     using bytes_field = field<S, N, bytes_coder, A, Container>;
 
+    /// The type alias for boolean fields
     template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<bool>>
     using bool_field = field<S, N, bool_coder, A, Container>;
 
+    /// The type alias for enumeration fields
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using enum_field = field<S, N, enum_coder<T>, A, Container>;
 
