@@ -15,7 +15,14 @@ jobs:
           submodules: true
       - name: install deps
         run: |
-          sudo apt install doxygen -y
+          git clone https://github.com/doxygen/doxygen doxygen-tool
+          cd doxygen-tool
+          mkdir build
+          cd build
+          cmake ..
+          make
+          sudo make install
+          cd ../..
           sudo npm install -g surge
       - name: fix
         run: |
