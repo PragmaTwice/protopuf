@@ -8,6 +8,7 @@ on:
       - 'Doxyfile'
       - 'asset/**'
       - 'LICENSE'
+      - '.github/workflows/doc.yml'
   pull_request:
     paths-ignore:
       - 'README.md'
@@ -15,6 +16,7 @@ on:
       - 'Doxyfile'
       - 'asset/**'
       - 'LICENSE'
+      - '.github/workflows/doc.yml'
 
 jobs:
   build:
