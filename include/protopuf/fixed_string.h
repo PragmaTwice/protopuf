@@ -20,16 +20,25 @@
 
 namespace pp {
 
+    /// @brief A fixed string type, which can be put into non-type template parameters (NTTP).
+    /// 
+    /// Reference:
+    /// - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0732r0.pdf
     template <typename CharT, std::size_t N>
     struct basic_fixed_string
     {
+        /// Construct the string from `const CharT[N]`
         constexpr basic_fixed_string(const CharT (&foo)[N]) {
             std::copy(foo, foo + N, data);
         }
 
+        /// The element type of the string
         using value_type = CharT;
+
+        /// The length of the string
         static constexpr auto size = N;
 
+        /// Type cast to `std::basic_string_view<CharT>`
         constexpr operator std::basic_string_view<CharT>() const {
             return data;
         };
@@ -63,9 +72,11 @@ namespace pp {
         return N <=> M;
     }
 
+    /// Type alias for `basic_fixed_string<char, N>` where `N` is length of the string
     template <std::size_t N>
     using fixed_string = basic_fixed_string<char, N>;
 
+    /// A constant type with a constant as NTTP
     template<auto v>
     struct constant {
         static constexpr auto value = v;
@@ -90,6 +101,7 @@ namespace pp {
         static constexpr auto value = v1;
     };
 
+    /// Get element value by index `N` from a NTTP list `v...` 
     template <std::size_t N, auto... v>
     constexpr auto constant_get = constant_get_impl<N, v...>::value;
 
@@ -106,9 +118,11 @@ namespace pp {
         using type = T;
     };
 
+    /// Get element type by index `N` from a type list `Ts...` 
     template <std::size_t N, typename... Ts>
     using type_get = typename type_get_impl<N, Ts...>::type;
 
+    /// A constant tuple with constants as NTTPs.
     template <auto... v>
     struct constant_tuple {
         using type = constant_tuple;
@@ -127,6 +141,7 @@ namespace pp {
         }
     };
 
+    /// A constant array with constants of type `T` as NTTPs.
     template <typename T, T... v>
     struct constant_array {
         using type = constant_array;
@@ -144,11 +159,13 @@ namespace pp {
         }
     };
 
+    /// Expand the elements of @ref basic_fixed_string to NTTPs, i.e. `expand_fixed_string<"hello">` as `constant_array<char, 'h', 'e', 'l', 'l', 'o', 0>`
     template <basic_fixed_string S>
     constexpr auto expand_fixed_string = []<std::size_t... I>(std::index_sequence<I...>) {
         return constant_array<typename decltype(S)::value_type, S.data[I]...>{};
     }(std::make_index_sequence<decltype(S)::size>{});
 
+    /// @ref basic_fixed_string constant literals, i.e. `"hello"_f` as `constant<basic_fixed_string<char, 6>{"hello"}>`
     template <basic_fixed_string S>
     constexpr auto operator ""_f() {
         return constant<S>{};

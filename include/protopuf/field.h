@@ -53,11 +53,19 @@ namespace pp {
     template <typename T>
     struct wire_type_impl<enum_coder<T>> : std::integral_constant<uint<1>, 0> {};
 
+    /// @brief A wire type that provides just enough information to find the length of the following value
+    /// @param T the input @ref coder type
+    /// @returns A wire type number (in `uint<1>`) corresponding to the coder type
+    ///
+    /// Ref to https://developers.google.com/protocol-buffers/docs/encoding#structure
     template <typename T>
     constexpr uint<1> wire_type = wire_type_impl<T>::value;
 
+    /// An attribute of the fields, to represent whether the field can repeat in message
     enum attribute {
+        /// Represents a singular field, which can appear zero times or once in a message
         singular,
+        /// Represents a repeated field, which can appear zero times, once or many times in a message
         repeated
     };
 
@@ -71,31 +79,51 @@ namespace pp {
         using type = C;
     };
 
+    /// @brief The underlying container type of a field
+    /// @param A the @ref attribute of the field
+    /// @param T the underlying object type (to store data) of the field
+    /// @param Container the underlying container to store repeated objects, 
+    /// it will be used while the attribute `A` is @ref repeated
     template <attribute A, typename T, std::ranges::sized_range Container = std::vector<T>>
     using field_container = typename field_container_impl<A, T, Container>::type;
 
+    /// @brief The field type
+    /// @param S the name of the field
+    /// @param N the field number, ref to https://developers.google.com/protocol-buffers/docs/encoding#structure
+    /// @param C the @ref coder of the field
+    /// @param A the @ref attribute of the field
+    /// @param Container the container used in @ref field_container, enabled while `A` is @ref repeated.
     template <basic_fixed_string S, uint<4> N, coder C, attribute A = singular, std::ranges::sized_range Container = std::vector<typename C::value_type>>
     struct field : field_container<A, typename C::value_type, Container>{
+        /// name of the field
         static constexpr basic_fixed_string name = S;
 
+        /// type of name of the field
         using name_type = decltype(name);
 
+        /// the field number
         static constexpr uint<4> number = N;
 
+        /// key of the field, ref to https://developers.google.com/protocol-buffers/docs/encoding#structure
         static constexpr uint<4> key = (N << 3u) | wire_type<C>;
 
+        /// @ref coder of the field 
         using coder = C;
 
+        /// attribute of the field
         static constexpr attribute attr = A;
 
+        /// the underlying type (to store data of the field), which the field is derived from
         using base_type = field_container<A, typename C::value_type, Container>;
 
         using base_type::base_type;
 
+        /// cast the field to @ref base_type
         constexpr decltype(auto) cast_to_base() {
             return static_cast<base_type&>(*this);
         }
 
+        /// cast the const field to const @ref base_type
         constexpr decltype(auto) cast_to_base() const {
             return static_cast<const base_type&>(*this);
         }
@@ -170,15 +198,18 @@ namespace pp {
     template <basic_fixed_string S, uint<4> N, typename T, attribute A = singular, typename Container = std::vector<T>>
     using enum_field = field<S, N, enum_coder<T>, A, Container>;
 
+    /// Checks whether the type is a field type.
     template <typename>
     constexpr bool is_field = false;
 
     template <basic_fixed_string S, uint<4> N, coder C, attribute A, typename Container>
     constexpr bool is_field <field<S, N, C, A, Container>> = true;
 
+    /// The concept satisfied while type `T` is a field type.
     template <typename T>
     concept field_c = is_field<T>;
 
+    /// Represents the specific field is not found, used in @ref field_number_selector and @ref field_name_selector
     struct field_not_found;
 
     template <uint<4>, field_c...>
@@ -194,6 +225,7 @@ namespace pp {
         using type = field_not_found;
     };
 
+    /// Find the first field in `C...` whose field number is `I`
     template <uint<4> I, field_c... C>
     using field_number_selector = typename field_number_selector_impl<I, C...>::type;
 
@@ -210,9 +242,11 @@ namespace pp {
         using type = field_not_found;
     };
 
+    /// Find the first field in `C...` whose field name is `S`
     template <basic_fixed_string S, field_c... C>
     using field_name_selector = typename field_name_selector_impl<S, C...>::type;
 
+    /// Checks whether a field is empty
     template <field_c T>
     constexpr bool empty_field(const T& v) {
         if constexpr (T::attr == singular) {
@@ -228,6 +262,7 @@ namespace pp {
     template <uint<4> V, char D1, char ... Dn>
     constexpr auto field_literal_helper<V, D1, Dn...> = field_literal_helper<V * 10 + (D1 - '0'), Dn...>;
 
+    /// Constant integer literals, i.e. `233_i` as `std::integral_constant<uint<4>, 233>`
     template <char ... D>
     constexpr auto operator"" _i() {
         return std::integral_constant<uint<4>, field_literal_helper<0, D...>>{};

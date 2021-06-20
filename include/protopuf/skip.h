@@ -59,7 +59,7 @@ namespace pp {
     template <typename T>
     concept skipper_c = encode_skipper<T> && decode_skipper<T>;
 
-    /// @brief The implementations of @ref skipper_C
+    /// @brief The implementations of @ref skipper_c
     /// @param C the corresponding @ref coder to the skipper
     template <coder C>
     struct skipper;
