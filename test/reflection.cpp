@@ -19,7 +19,7 @@
 using namespace pp;
 using namespace std;
 
-GTEST_TEST(reflection, dynamic_get_by_name) {
+GTEST_TEST(reflection, dynamic_visit_by_name) {
     using Student = message<uint32_field<"id", 1>, string_field<"name", 3>>;
     using Class = message<string_field<"name", 8>, message_field<"students", 3, Student, repeated>>;
 
@@ -27,7 +27,7 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
     Class myClass {"class 101", {tom, jerry}};
     myClass["students"_f].push_back(twice);
 
-    EXPECT_TRUE(dynamic_get_by_name([](auto&& x){
+    EXPECT_TRUE(dynamic_visit_by_name([](auto&& x){
         if constexpr (remove_reference_t<decltype(x)>::name == "name"_f()) {
             EXPECT_EQ(x.value(), "class 101");
         } else {
@@ -35,7 +35,7 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
         }
     }, myClass, "name"));
 
-    EXPECT_TRUE(dynamic_get_by_name([](auto&& x){
+    EXPECT_TRUE(dynamic_visit_by_name([](auto&& x){
         if constexpr (remove_reference_t<decltype(x)>::name == "name"_f()) {
             return x.value() == "class 101";
         } else {
@@ -43,7 +43,7 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
         }
     }, myClass, "name").value_or(false));
 
-    EXPECT_TRUE(dynamic_get_by_name([](auto&& x){
+    EXPECT_TRUE(dynamic_visit_by_name([](auto&& x){
         if constexpr (remove_reference_t<decltype(x)>::name == "students"_f()) {
             EXPECT_EQ(x.size(), 3);
         } else {
@@ -59,14 +59,14 @@ GTEST_TEST(reflection, dynamic_get_by_name) {
         EXPECT_EQ(x.size(), 3);
     }};
 
-    EXPECT_TRUE(dynamic_get_by_name(f, myClass, "name"));
-    EXPECT_TRUE(dynamic_get_by_name(f, myClass, "students"));
+    EXPECT_TRUE(dynamic_visit_by_name(f, myClass, "name"));
+    EXPECT_TRUE(dynamic_visit_by_name(f, myClass, "students"));
 
-    EXPECT_FALSE(dynamic_get_by_name([](auto&&){}, myClass, "unknown"));
-    EXPECT_FALSE(dynamic_get_by_name([](auto&&){ return 0; }, myClass, "unknown"));
+    EXPECT_FALSE(dynamic_visit_by_name([](auto&&){}, myClass, "unknown"));
+    EXPECT_FALSE(dynamic_visit_by_name([](auto&&){ return 0; }, myClass, "unknown"));
 
-    EXPECT_TRUE(dynamic_get_by_number(f, myClass, 3));
-    EXPECT_TRUE(dynamic_get_by_number(f, myClass, 8));
+    EXPECT_TRUE(dynamic_visit_by_number(f, myClass, 3));
+    EXPECT_TRUE(dynamic_visit_by_number(f, myClass, 8));
 
-    EXPECT_FALSE(dynamic_get_by_number(f, myClass, 999));
+    EXPECT_FALSE(dynamic_visit_by_number(f, myClass, 999));
 }
