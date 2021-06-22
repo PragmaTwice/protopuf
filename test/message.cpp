@@ -358,3 +358,26 @@ GTEST_TEST(message, fold) {
 
     EXPECT_EQ(count2, 2);
 }
+
+GTEST_TEST(message, static) {
+    static_assert(std::is_same_v<type_forward<int, const float>, const int>);
+    static_assert(std::is_same_v<type_forward<int, volatile float>, volatile int>);
+    static_assert(std::is_same_v<type_forward<int, const volatile float>, const volatile int>);
+    static_assert(std::is_same_v<type_forward<int, float&>, int&>);
+    static_assert(std::is_same_v<type_forward<int, float&&>, int&&>);
+    static_assert(std::is_same_v<type_forward<int, volatile float&&>, volatile int&&>);
+    static_assert(std::is_same_v<type_forward<int, const float&>, const int&>);
+}
+
+GTEST_TEST(message, merge) {
+    using Person = message<string_field<"name", 11>, string_field<"titles", 22, repeated>, int32_field<"age", 33>>;
+
+    Person john {"John", {"student", "volunteer", "driver"}, 88}, lihua{"Li Hua", {"teacher"}, {}};
+
+    john.merge(lihua);
+
+    EXPECT_EQ(john["name"_f], "Li Hua");
+    EXPECT_EQ(john["titles"_f], (vector<string>{"student", "volunteer", "driver", "teacher"}));
+    EXPECT_EQ(john["age"_f], 88);
+
+}

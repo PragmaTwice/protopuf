@@ -277,6 +277,34 @@ namespace pp {
         }
     }
 
+    /// Push a value into a field: overwrite if it is singular, insert to end otherwise
+    template <field_c F, typename T>
+    constexpr void push_field(F& f, T&& v) {
+        if constexpr (F::attr == singular) {
+            f = std::forward<T>(v);
+        } else {
+            *std::inserter(f, f.end()) = std::forward<T>(v);
+        }
+    }
+
+    // Merge a field into another field: overwrite if it is singular, merge to end otherwise
+    template <field_c D, typename S> requires field_c<std::remove_cvref_t<S>>
+    constexpr void merge_field(D& f, S&& v) {
+        if constexpr (D::attr == singular) {
+            if (!empty_field(v)) {
+                f = std::forward<S>(v);
+            }
+        } else {
+            auto inserter = std::inserter(f, f.end());
+
+            if constexpr (std::is_rvalue_reference_v<S&&>) {
+                std::move(v.begin(), v.end(), inserter);
+            } else {
+                std::copy(v.begin(), v.end(), inserter);
+            }
+        }
+    }
+
     template <uint<4> V, char ... D> requires (('0' <= D <= '9') && ...)
     constexpr auto field_literal_helper = V;
 
