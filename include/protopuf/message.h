@@ -34,7 +34,7 @@ namespace pp {
     template <typename U, typename F>
     struct fold_impl {
 
-        template <typename V>
+        template <typename V> requires std::invocable<F, U&&, V&&>
         constexpr auto operator+(V&& other) {
             return pp::fold_impl {
                 std::forward<F>(f)(static_cast<U&&>(v), std::forward<V>(other)), std::forward<F>(f)
@@ -47,6 +47,34 @@ namespace pp {
 
     template <typename U, typename F>
     fold_impl(U&&, F&&) -> fold_impl<U, F>;
+
+    namespace type_forward_impl {
+        template <typename V, typename W>
+        using forward_const = std::conditional_t<std::is_const_v<W>, std::add_const_t<V>, V>;
+
+        template <typename V, typename W>
+        using forward_volatile = std::conditional_t<std::is_volatile_v<W>, std::add_volatile_t<V>, V>;
+
+        template <typename V, typename W>
+        using forward_cv = forward_volatile<forward_const<V, W>, W>;
+
+        template <typename V, typename W>
+        using forward_lvref = std::conditional_t<std::is_lvalue_reference_v<W>, std::add_lvalue_reference_t<V>, V>;
+
+        template <typename V, typename W>
+        using forward_rvref = std::conditional_t<std::is_rvalue_reference_v<W>, std::add_rvalue_reference_t<V>, V>;
+
+        
+        template <typename V, typename W>
+        using forward_ref = forward_rvref<forward_lvref<V, W>, W>;
+
+        template <typename T, typename U>
+        using type = forward_ref<forward_cv<T, std::remove_reference_t<U>>, U>;
+    }
+    
+    /// Copy cvref (`const`, `volatile` and lvalue/rvalue reference) of `U` to `T`
+    template <typename T, typename U>
+    using type_forward = type_forward_impl::type<T, U>;
 
     /// @brief The message type
     /// @param T the field types of the message, where all `T::name_type::value_type` are equal
@@ -193,6 +221,13 @@ namespace pp {
             return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<T&>(*this)).v;
         }
 
+        /// @brief Merge another message into this message, for all fields: overwrite if it is singular and non-empty, merge to end otherwise
+        ///
+        /// same as `merge_field(field1, other.field1), ..., merge_field(fieldN, other.fieldN)`, ref to @ref merge_field
+        template <typename M> requires std::same_as<std::remove_cvref_t<M>, message>
+        constexpr void merge(M&& other) {
+            (merge_field(static_cast<T&>(*this), static_cast<type_forward<T, M&&>>(other)), ...);
+        }
     };
 
     /// Checks whether the type is a @ref message type
@@ -269,11 +304,7 @@ namespace pp {
                     const auto &[v, np] = F::coder::decode(b);
 
                     auto &f = m.template get<F::number>();
-                    if constexpr (F::attr == singular) {
-                        f = v;
-                    } else {
-                        *std::inserter(f, f.end()) = v;
-                    }
+                    push_field(f, std::move(v));
 
                     return np;
                 }}...

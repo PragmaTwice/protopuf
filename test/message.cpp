@@ -30,6 +30,16 @@ GTEST_TEST(message, function) {
     auto m2 = m;
     EXPECT_EQ(m2, m);
 
+    auto m5 = std::move(m2);
+    EXPECT_EQ(m5, m);
+
+    decltype(m5) m6, m7;
+    m6 = m5;
+    EXPECT_EQ(m6, m);
+
+    m7 = std::move(m6);
+    EXPECT_EQ(m7, m);
+
     message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>> m3{
         12, "345", 6.78, sint_zigzag<4>(90)
     };
@@ -357,4 +367,35 @@ GTEST_TEST(message, fold) {
     });
 
     EXPECT_EQ(count2, 2);
+}
+
+GTEST_TEST(message, static) {
+    static_assert(std::is_same_v<type_forward<int, const float>, const int>);
+    static_assert(std::is_same_v<type_forward<int, volatile float>, volatile int>);
+    static_assert(std::is_same_v<type_forward<int, const volatile float>, const volatile int>);
+    static_assert(std::is_same_v<type_forward<int, float&>, int&>);
+    static_assert(std::is_same_v<type_forward<int, float&&>, int&&>);
+    static_assert(std::is_same_v<type_forward<int, volatile float&&>, volatile int&&>);
+    static_assert(std::is_same_v<type_forward<int, const float&>, const int&>);
+}
+
+GTEST_TEST(message, merge) {
+    using Person = message<string_field<"name", 11>, string_field<"titles", 22, repeated>, int32_field<"age", 33>>;
+
+    Person john {"John", {"student", "volunteer", "driver"}, 88}, lihua{"Li Hua", {"teacher"}, {}};
+
+    john.merge(lihua);
+
+    EXPECT_EQ(john["name"_f], "Li Hua");
+    EXPECT_EQ(john["titles"_f], (vector<string>{"student", "volunteer", "driver", "teacher"}));
+    EXPECT_EQ(john["age"_f], 88);
+
+    EXPECT_EQ(lihua["name"_f], "Li Hua");
+
+    
+    john.merge(Person{{}, {"unknown"}, 99});
+    
+    EXPECT_EQ(john["name"_f], "Li Hua");
+    EXPECT_EQ(john["titles"_f], (vector<string>{"student", "volunteer", "driver", "teacher", "unknown"}));
+    EXPECT_EQ(john["age"_f], 99);
 }

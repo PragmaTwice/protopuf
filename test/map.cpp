@@ -39,3 +39,14 @@ GTEST_TEST(map, decode) {
     EXPECT_EQ(map["map"_f].at("b"), 2);
     EXPECT_EQ(map["map"_f].at("c"), 3);
 }
+
+GTEST_TEST(map, utility) {
+    using Msg = message<map_field<"data", 11, string_coder, varint_coder<int>>>;
+
+    Msg msg1 {{{"one", 1}, {"two", 2}, {"three", 3}}}, msg2 {{{"four", 4}, {"five", 5}}};
+    
+    msg1.merge(msg2);
+
+    EXPECT_EQ(msg1["data"_f].size(), 5);
+    EXPECT_EQ(msg1["data"_f], (map<optional<string>, optional<int>>{{"one", 1}, {"two", 2}, {"three", 3}, {"four", 4}, {"five", 5}}));
+}
