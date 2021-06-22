@@ -287,7 +287,7 @@ namespace pp {
         }
     }
 
-    // Merge a field into another field: overwrite if it is singular, merge to end otherwise
+    /// Merge a field into another field: overwrite if it is singular and non-empty, merge to end otherwise
     template <field_c D, typename S> requires field_c<std::remove_cvref_t<S>>
     constexpr void merge_field(D& f, S&& v) {
         if constexpr (D::attr == singular) {

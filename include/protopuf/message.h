@@ -72,7 +72,7 @@ namespace pp {
         using type = forward_ref<forward_cv<T, std::remove_reference_t<U>>, U>;
     }
     
-    // Copy cvref (const, volatile, lvalue/rvalue reference) of `U` to `T`
+    /// Copy cvref (`const`, `volatile` and lvalue/rvalue reference) of `U` to `T`
     template <typename T, typename U>
     using type_forward = type_forward_impl::type<T, U>;
 
@@ -221,8 +221,11 @@ namespace pp {
             return (fold_impl{ std::forward<U>(init), std::forward<F>(f) } + ... + static_cast<T&>(*this)).v;
         }
 
+        /// @brief Merge another message into this message, for all fields: overwrite if it is singular and non-empty, merge to end otherwise
+        ///
+        /// same as `merge_field(field1, other.field1), ..., merge_field(fieldN, other.fieldN)`, ref to @ref merge_field
         template <typename M> requires std::same_as<std::remove_cvref_t<M>, message>
-        void merge(M&& other) {
+        constexpr void merge(M&& other) {
             (merge_field(static_cast<T&>(*this), static_cast<type_forward<T, M&&>>(other)), ...);
         }
     };
