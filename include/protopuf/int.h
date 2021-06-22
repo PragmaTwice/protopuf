@@ -142,8 +142,7 @@ namespace pp {
 
     /// @brief Convert an unsigned integer (with byte length `N`) into an byte array with length `N` (with ownership).
     /// @param i the unsigned integer to be converted
-    /// @returns 
-    /// @warning NRVO is expected here to optimize the function template.
+    /// @returns a byte array which contains the coverted integer (with length `N` and ownership)
     template <std::size_t N>
     constexpr auto int_to_bytes(uint<N> i) {
         std::array<std::byte, N> a;
