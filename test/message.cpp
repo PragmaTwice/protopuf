@@ -30,6 +30,16 @@ GTEST_TEST(message, function) {
     auto m2 = m;
     EXPECT_EQ(m2, m);
 
+    auto m5 = std::move(m2);
+    EXPECT_EQ(m5, m);
+
+    decltype(m5) m6, m7;
+    m6 = m5;
+    EXPECT_EQ(m6, m);
+
+    m7 = std::move(m6);
+    EXPECT_EQ(m7, m);
+
     message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>> m3{
         12, "345", 6.78, sint_zigzag<4>(90)
     };
@@ -380,4 +390,12 @@ GTEST_TEST(message, merge) {
     EXPECT_EQ(john["titles"_f], (vector<string>{"student", "volunteer", "driver", "teacher"}));
     EXPECT_EQ(john["age"_f], 88);
 
+    EXPECT_EQ(lihua["name"_f], "Li Hua");
+
+    
+    john.merge(Person{{}, {"unknown"}, 99});
+    
+    EXPECT_EQ(john["name"_f], "Li Hua");
+    EXPECT_EQ(john["titles"_f], (vector<string>{"student", "volunteer", "driver", "teacher", "unknown"}));
+    EXPECT_EQ(john["age"_f], 99);
 }
