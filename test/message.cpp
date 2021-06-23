@@ -403,4 +403,9 @@ GTEST_TEST(message, merge) {
     EXPECT_EQ(merged["name"_f], "a");
     EXPECT_EQ(merged["titles"_f], (vector<string>{"b", "c", "d"}));
     EXPECT_EQ(merged["age"_f], 124);
+
+    merged = merge(merged, Person{"e", {"f"}, {}});
+    EXPECT_EQ(merged["name"_f], "e");
+    EXPECT_EQ(merged["titles"_f], (vector<string>{"b", "c", "d", "f"}));
+    EXPECT_EQ(merged["age"_f], 124);
 }

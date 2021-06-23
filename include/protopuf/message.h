@@ -241,6 +241,7 @@ namespace pp {
     template <typename T>
     concept message_c = is_message<T>;
 
+    /// Merge multiple messages into one message, and return the merged message
     template <typename M1, typename... MN> 
     requires message_c<std::remove_cvref_t<M1>> && 
              are_same<std::remove_cvref_t<M1>, std::remove_cvref_t<MN>...>
