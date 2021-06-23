@@ -398,4 +398,14 @@ GTEST_TEST(message, merge) {
     EXPECT_EQ(john["name"_f], "Li Hua");
     EXPECT_EQ(john["titles"_f], (vector<string>{"student", "volunteer", "driver", "teacher", "unknown"}));
     EXPECT_EQ(john["age"_f], 99);
+
+    auto merged = merge(Person{"a", {}, {}}, Person{{}, {"b"}, 123}, Person{{}, {"c", "d"}, 124}, Person{{}, {}, {}});
+    EXPECT_EQ(merged["name"_f], "a");
+    EXPECT_EQ(merged["titles"_f], (vector<string>{"b", "c", "d"}));
+    EXPECT_EQ(merged["age"_f], 124);
+
+    merged = merge(merged, Person{"e", {"f"}, {}});
+    EXPECT_EQ(merged["name"_f], "e");
+    EXPECT_EQ(merged["titles"_f], (vector<string>{"b", "c", "d", "f"}));
+    EXPECT_EQ(merged["age"_f], 124);
 }

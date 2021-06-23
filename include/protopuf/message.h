@@ -241,6 +241,18 @@ namespace pp {
     template <typename T>
     concept message_c = is_message<T>;
 
+    /// Merge multiple messages into one message, and return the merged message
+    template <typename M1, typename... MN> 
+    requires message_c<std::remove_cvref_t<M1>> && 
+             are_same<std::remove_cvref_t<M1>, std::remove_cvref_t<MN>...>
+    constexpr auto merge(M1&& msg1, MN&& ... msgN) {
+        std::remove_cvref_t<M1> res = std::forward<M1>(msg1);
+
+        (res.merge(std::forward<MN>(msgN)), ...);
+
+        return res;
+    }
+
     /// Get the wire type from a field key, ref to @ref field::key and @ref wire_type
     inline constexpr uint<1> to_wire_key(uint<4> field_key) {
         return field_key & 0b111u;
