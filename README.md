@@ -4,7 +4,7 @@
 [![Vcpkg Port](https://img.shields.io/badge/vcpkg-protopuf-blue)](https://github.com/microsoft/vcpkg/blob/master/ports/protopuf/vcpkg.json)
 [![Codecov](https://codecov.io/gh/PragmaTwice/protopuf/branch/master/graph/badge.svg?token=4EPLZ6Z4J5)](https://codecov.io/gh/PragmaTwice/protopuf)
 
-A little, highly templated, and protobuf-compatible serialization/deserialization library written in C++20
+*A little, highly templated, and protobuf-compatible serialization/deserialization library written in C++20*
 
 :closed_book: [Documentation](https://protopuf.surge.sh)
 
