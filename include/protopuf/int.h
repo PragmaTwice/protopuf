@@ -115,7 +115,7 @@ namespace pp {
         }(std::make_index_sequence<N>{});
     }
 
-    /// copy values of a `std::array<T, N>` to a `std::span<T, N>`
+    /// Copy values of a `std::array<T, N>` to a `std::span<T, N>`
     template <typename T, std::size_t N>
     constexpr void copy_to_span(const std::array<T, N>& a, std::span<T, N> s) {
         [&a, &s] <std::size_t ...I> (std::index_sequence<I...>) {
