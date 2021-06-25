@@ -107,17 +107,36 @@ namespace pp {
     template <typename T>
     concept integral64 = sized_integral<T, 8>;
 
+    /// Construct a `std::array<T, N>` from values of a `std::span<T, N>`
+    template <typename T, std::size_t N>
+    constexpr auto make_array(std::span<T, N> s) {
+        return [&s] <std::size_t ...I> (std::index_sequence<I...>) {
+            return std::array<T, N> { s[I]... };
+        }(std::make_index_sequence<N>{});
+    }
+
+    /// Copy values of a `std::array<T, N>` to a `std::span<T, N>`
+    template <typename T, std::size_t N>
+    constexpr void copy_to_span(const std::array<T, N>& a, std::span<T, N> s) {
+        [&a, &s] <std::size_t ...I> (std::index_sequence<I...>) {
+            ((s[I] = a[I]), ...);
+        }(std::make_index_sequence<N>{});
+    }
+
     /// @brief Convert some bytes (with length `N`) to an unsigned integer `uint<N>`.
     ///
     /// @param bytes the input bytes (with length `N`) to be coverted
     /// @returns the coverted unsigned integer `uint<N>`
-    /// 
-    /// Direct way to implement `bytes_to_int` is:
-    /// 1. `*(uint<N> *)bytes.data()` but it generates an UB while `N > 1`
-    /// 2. `std::bit_cast(std::to_array(bytes))` but libstdc++ has not implemented bit_cast yet
     template <std::size_t N>
     constexpr uint<N> bytes_to_int(sized_bytes<N> bytes) {
+    #if defined(INT_CONVERSION_RECURSIVE_IMPL) || !(__cpp_lib_bit_cast >= 201806L)
         return bytes_to_int(bytes.template subspan<0, N/2>()) | bytes_to_int(bytes.template subspan<N/2>()) << N*4;
+    #elif defined(INT_CONVERSION_UB_IMPL)
+        return *reinterpret_cast<uint<N>*>(bytes.data());
+    #else
+        auto arr = make_array(bytes);
+        return std::bit_cast<uint<N>>(arr);
+    #endif
     }
     template <>
     constexpr uint<1> bytes_to_int(sized_bytes<1> bytes) {
@@ -128,12 +147,17 @@ namespace pp {
     ///
     /// @param i the unsigned integer to be converted
     /// @param bytes the byte sequence which the integer is converted into (with length `N`)
-    ///
-    /// Like @ref bytes_to_int, we cannot find a direct solution to convert without excess overhead and UB yet.
     template <std::size_t N>
     constexpr void int_to_bytes(uint<N> i, sized_bytes<N> bytes) {
+    #if defined(INT_CONVERSION_RECURSIVE_IMPL) || !(__cpp_lib_bit_cast >= 201806L)
         int_to_bytes<N/2>(i, bytes.template subspan<0, N/2>());
         int_to_bytes<N/2>(i >> N*4, bytes.template subspan<N/2>());
+    #elif defined(INT_CONVERSION_UB_IMPL)
+        *reinterpret_cast<uint<N>*>(bytes.data()) = i;
+    #else
+        auto arr = std::bit_cast<std::array<std::byte, N>>(i);
+        copy_to_span(arr, bytes);
+    #endif
     }
     template <>
     constexpr void int_to_bytes(uint<1> i, sized_bytes<1> bytes) {
@@ -145,11 +169,13 @@ namespace pp {
     /// @returns a byte array which contains the coverted integer (with length `N` and ownership)
     template <std::size_t N>
     constexpr auto int_to_bytes(uint<N> i) {
+    #if __cpp_lib_bit_cast >= 201806L && !(defined(INT_CONVERSION_RECURSIVE_IMPL) || defined(INT_CONVERSION_UB_IMPL))
+        return std::bit_cast<std::array<std::byte, N>>(i);
+    #else
         std::array<std::byte, N> a;
-
         int_to_bytes(i, std::span(a));
-
         return a;
+    #endif
     }
 
     /// A @ref coder for fixed-length signed/unsigned integer
