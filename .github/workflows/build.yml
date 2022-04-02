@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: install build tools (gcc)
         run: |
-          sudo apt-get install g++-11 -y
+          sudo apt install g++-11 -y
           echo "CC=gcc-11" >> $GITHUB_ENV
           echo "CXX=g++-11" >> $GITHUB_ENV
           sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-11 90
