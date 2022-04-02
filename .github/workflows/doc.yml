@@ -15,6 +15,7 @@ jobs:
           submodules: true
       - name: install deps
         run: |
+          sudo apt update
           sudo apt install -y libclang-12-dev
           git clone https://github.com/doxygen/doxygen doxygen-tool
           cd doxygen-tool
