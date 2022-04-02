@@ -15,7 +15,6 @@ jobs:
           submodules: true
       - name: install deps
         run: |
-          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
           sudo apt install -y libclang-12-dev
           git clone https://github.com/doxygen/doxygen doxygen-tool
           cd doxygen-tool
