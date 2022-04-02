@@ -449,6 +449,26 @@ namespace pp {
     };
 
     template <typename T>
+    struct skipper<embedded_message_coder<T>> {
+        using value_type = T;
+
+        static constexpr std::size_t encode_skip(const T& v) {
+            uint<8> n = skipper<message_coder<T>>::encode_skip(v);
+
+            n += skipper<varint_coder<uint<8>>>::encode_skip(n);
+
+            return n;
+        }
+
+        static constexpr bytes decode_skip(bytes b) {
+            uint<8> n = 0;
+            std::tie(n, b) = varint_coder<uint<8>>::decode(b);
+
+            return b.subspan(n);
+        }
+    };
+
+    template <typename T>
     struct wire_type_impl<embedded_message_coder<T>> : std::integral_constant<uint<1>, 2> {};
 
     /// Type alias for embedded message fields
