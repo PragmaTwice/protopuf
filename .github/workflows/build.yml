@@ -57,7 +57,6 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
       - name: install build tools (clang)
         run: |
-          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
           sudo apt install clang-12 -y
           sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/11 /usr/include/c++/11
           echo "CC=clang-12" >> $GITHUB_ENV
