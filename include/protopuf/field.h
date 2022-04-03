@@ -118,6 +118,9 @@ namespace pp {
 
         using base_type::base_type;
 
+        field(const base_type& base) : base_type(base) {}
+        field(base_type&& base) : base_type(std::move(base)) {}
+
         /// cast the field to @ref base_type
         constexpr decltype(auto) cast_to_base() {
             return static_cast<base_type&>(*this);
