@@ -41,8 +41,15 @@ We can use *protopuf* to describe it as C++ types:
 ```c++
 using namespace pp;
 
-using Student = message<uint32_field<"id", 1>, string_field<"name", 3>>;
-using Class = message<string_field<"name", 8>, message_field<"students", 3, Student, repeated>>;
+using Student = message<
+    uint32_field<"id", 1>, 
+    string_field<"name", 3>
+>;
+
+using Class = message<
+    string_field<"name", 8>, 
+    message_field<"students", 3, Student, repeated>
+>;
 ```
 Subsequently, both serialization and deserialization become so easy to do:
 ```c++
