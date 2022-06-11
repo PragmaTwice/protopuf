@@ -26,7 +26,7 @@ target_include_directories(protopuf INTERFACE
         $<INSTALL_INTERFACE:include>)
 target_compile_features(protopuf INTERFACE cxx_std_20)
 
-set(GTEST_REPO "https://github.com/google/googletest.git" CACHE STRING "url of GoogleTest repository")
+set(GTEST_REPO "https://github.com/google/googletest" CACHE STRING "url of GoogleTest repository")
 
 option(DOWNLOAD_GTEST "Download the git repo of GoogleTest, build and use the master branch version" ON)
 option(BUILD_TESTS "Build unit testings" ON)
@@ -37,12 +37,12 @@ if(BUILD_TESTS)
     if(DOWNLOAD_GTEST)
         include(FetchContent)
         FetchContent_Declare(googletest
-            URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+            URL ${GTEST_REPO}/archive/refs/tags/release-1.11.0.zip
         )
 
         set(BUILD_GMOCK OFF CACHE BOOL "")
         set(INSTALL_GTEST OFF CACHE BOOL "")
-        
+
         # For Windows: Prevent overriding the parent project's compiler/linker settings
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
