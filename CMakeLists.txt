@@ -35,30 +35,18 @@ option(ENABLE_BENCHMARK "Build benchmark testing between protopuf and protobuf (
 
 if(BUILD_TESTS)
     if(DOWNLOAD_GTEST)
-        # Download and unpack googletest at configure time
-        configure_file(googletest/CMakeLists.txt.in googletest/CMakeLists.txt)
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                RESULT_VARIABLE result
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
-        if(result)
-            message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-        endif()
-        execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                RESULT_VARIABLE result
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest )
-        if(result)
-            message(FATAL_ERROR "Build step for googletest failed: ${result}")
-        endif()
+        include(FetchContent)
+        FetchContent_Declare(googletest
+            URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+        )
 
-        # Prevent overriding the parent project's compiler/linker
-        # settings on Windows
+        set(BUILD_GMOCK OFF CACHE BOOL "")
+        set(INSTALL_GTEST OFF CACHE BOOL "")
+        
+        # For Windows: Prevent overriding the parent project's compiler/linker settings
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-        # Add googletest directly to our build. This defines
-        # the gtest and gtest_main targets.
-        add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-                ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-                EXCLUDE_FROM_ALL)
+        FetchContent_MakeAvailable(googletest)
 
         set(GTEST_LIBS gtest gtest_main)
     else()
