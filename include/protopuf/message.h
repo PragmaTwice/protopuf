@@ -313,7 +313,7 @@ namespace pp {
     public:
         message_decode_map() : std::unordered_map<uint<4>, std::function<bytes(T&, bytes)>> {
                 {F::key, [](T& m, bytes b){
-                    const auto &[v, np] = F::coder::decode(b);
+                    auto [v, np] = F::coder::decode(b);
 
                     auto &f = m.template get<F::number>();
                     push_field(f, std::move(v));
