@@ -403,7 +403,7 @@ namespace pp {
                 } else {
                     for(const auto &i : f) {
                         n += skipper<varint_coder<uint<4>>>::encode_skip(F::key);
-                        n += skipper<typename F::coder>::encode_skip(f.value());
+                        n += skipper<typename F::coder>::encode_skip(i);
                     }
                 }
             });
