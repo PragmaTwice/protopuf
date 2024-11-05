@@ -91,7 +91,7 @@ namespace pp {
 
         template <typename... U>
             requires (sizeof...(T) == sizeof...(U) && !are_same<message, std::remove_reference_t<U>...> )
-        constexpr explicit message(U&& ...v) : T(std::forward<U>(v))... {};
+        constexpr explicit message(U&& ...v) : T(std::forward<U>(v))... {}
 
         constexpr message& operator=(const message& other) {
             ((static_cast<T&>(*this) = static_cast<const T&>(other)), ...);

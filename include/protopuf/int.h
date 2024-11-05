@@ -17,6 +17,12 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <version>
+
+#if defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L
+#include <bit>
+#endif
+
 #include "coder.h"
 #include "byte.h"
 
