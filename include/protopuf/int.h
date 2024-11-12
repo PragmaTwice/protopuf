@@ -197,13 +197,23 @@ namespace pp {
 
         static constexpr std::size_t N = sizeof(T);
 
-        static constexpr bytes encode(T i, bytes b) {
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr encode_result<Mode> encode(T i, bytes b) {
+            if (!Mode::check_bytes_span(b, N)) {
+                return {};
+            }
+            
             int_to_bytes<N>(i, b.subspan<0, N>());
-            return b.subspan<N>();
+            return encode_result<Mode>{b.subspan<N>()};
         }
 
-        static constexpr decode_result<T> decode(bytes b) {
-            return {bytes_to_int<N>(b.subspan<0, N>()), b.subspan<N>()};
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_result<T, Mode> decode(bytes b) {
+            if (!Mode::check_bytes_span(b, N)) {
+                return {};
+            }
+
+            return Mode::template make_result<decode_result<T, Mode>>(bytes_to_int<N>(b.subspan<0, N>()), b.subspan<N>());
         }
     };
 
@@ -214,12 +224,14 @@ namespace pp {
 
         integer_coder() = delete;
 
-        static constexpr bytes encode(T i, bytes b) {
-            return integer_coder<std::make_unsigned_t<T>>::encode(i, b);
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr encode_result<Mode> encode(T i, bytes b) {
+            return integer_coder<std::make_unsigned_t<T>>::template encode<Mode>(static_cast<std::make_unsigned_t<T>>(i), b);
         }
 
-        static constexpr decode_result<T> decode(bytes b) {
-            return integer_coder<std::make_unsigned_t<T>>::decode(b);
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_result<T, Mode> decode(bytes b) {
+            return integer_coder<std::make_unsigned_t<T>>::template decode<Mode>(b);
         }
     };
 

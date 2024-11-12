@@ -32,13 +32,19 @@ namespace pp {
 
         enum_coder() = delete;
 
-        static constexpr bytes encode(T i, bytes b) {
-            return varint_coder<std::underlying_type_t<T>>::encode(static_cast<std::underlying_type_t<T>>(i), b);
+        template<coder_mode Mode>
+        static constexpr encode_result<Mode> encode(T i, bytes b) {
+            return varint_coder<std::underlying_type_t<T>>::template encode<Mode>(static_cast<std::underlying_type_t<T>>(i), b);
         }
 
-        static constexpr decode_result<T> decode(bytes b) {
-            auto [res, bytes] = varint_coder<std::underlying_type_t<T>>::decode(b);
-            return {static_cast<T>(res), bytes};
+        template<coder_mode Mode>
+        static constexpr decode_result<T, Mode> decode(bytes b) {
+            decode_value<std::underlying_type_t<T>> decode_v;
+            if (Mode::get_value_from_result(varint_coder<std::underlying_type_t<T>>::template decode<Mode>(b), decode_v)) {
+                return Mode::template make_result<decode_result<T, Mode>>(static_cast<T>(decode_v.first), decode_v.second);
+            }
+
+            return {};
         }
     };
 

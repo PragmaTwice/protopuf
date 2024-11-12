@@ -43,30 +43,48 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr bytes encode(T n, bytes s) {
+        template<coder_mode Mode>
+        static constexpr encode_result<Mode> encode(T n, bytes s) {
             auto iter = s.begin();
+            const auto end = s.end();
+
             do {
+                if (!Mode::check_iterator(iter, end)) {
+                    return {};
+                }
+
                 *iter = 0b1000'0000_b | std::byte(n);
                 n >>= 7, ++iter;
             } while(n != 0);
 
             *(iter - 1) &= 0b0111'1111_b;
 
-            return {iter, s.end()};
+            return Mode::template make_result<encode_result<Mode>>(iter, s.end());
         }
 
-        static constexpr decode_result<T> decode(bytes s) {
+        template<coder_mode Mode>
+        static constexpr decode_result<T, Mode> decode(bytes s) {
             T n = 0;
 
             auto iter = s.begin();
+            const auto end = s.end();
+
+            if (!Mode::check_iterator(iter, end)) {
+                return {};
+            }
+
             std::size_t i = 0;
             while((*iter >> 7) == 1_b) {
-                n |= static_cast<T>(*iter & 0b0111'1111_b) << 7*i;
+                n |= static_cast<T>(static_cast<T>(*iter & 0b0111'1111_b) << 7*i);
                 ++iter, ++i;
-            }
-            n |= static_cast<T>(*iter++) << 7 * i;
 
-            return {n, {iter, s.end()}};
+                if (!Mode::check_iterator(iter, end)) {
+                    return {};
+                }
+            }
+            n |= static_cast<T>(static_cast<T>(*iter++) << 7 * i);
+
+            return Mode::template make_result<decode_result<T, Mode>>(std::move(n), bytes{iter, s.end()});
         }
     };
 
@@ -77,12 +95,14 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr bytes encode(T n, bytes s) {
-            return varint_coder<std::make_unsigned_t<T>>::encode(n, s);
+        template<coder_mode Mode>
+        static constexpr encode_result<Mode> encode(T n, bytes s) {
+            return varint_coder<std::make_unsigned_t<T>>::template encode<Mode>(n, s);
         }
 
-        static constexpr decode_result<T> decode(bytes s) {
-            return varint_coder<std::make_unsigned_t<T>>::decode(s);
+        template<coder_mode Mode>
+        static constexpr decode_result<T, Mode> decode(bytes s) {
+            return varint_coder<std::make_unsigned_t<T>>::template decode<Mode>(s);
         }
     };
 

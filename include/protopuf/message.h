@@ -18,6 +18,8 @@
 #include "coder.h"
 #include "field.h"
 #include "float.h"
+#include "byte.h"
+#include "coder_mode.h"
 
 #include <unordered_map>
 #include <functional>
@@ -290,58 +292,80 @@ namespace pp {
     template <uint<1> N>
     using wire_skip = typename wire_skip_impl<N>::type;
 
-    template <uint<1>... I>
-    struct message_skip_map_impl : std::unordered_map<uint<4>, std::function<bytes(bytes)>> {
-        message_skip_map_impl() : std::unordered_map<uint<4>, std::function<bytes(bytes)>> {
+    template <coder_mode Mode, uint<1>... I>
+    struct message_skip_map_impl : std::unordered_map<uint<4>, std::function<decode_skip_result<Mode>(bytes)>> {
+        message_skip_map_impl() : std::unordered_map<uint<4>, std::function<decode_skip_result<Mode>(bytes)>> {
                 {I, [](bytes b){
-                    return wire_skip<I>::decode_skip(b);
+                    return wire_skip<I>::template decode_skip<Mode>(b);
                 }}...
         } {}
     };
 
-    using message_skip_map = message_skip_map_impl<0, 1, 2, 5>;
-    inline const message_skip_map skip_map;
+    template <coder_mode Mode = unsafe_mode>
+    using message_skip_map = message_skip_map_impl<Mode, 0, 1, 2, 5>;
+    template <coder_mode Mode = unsafe_mode>
+    inline const message_skip_map<Mode> skip_map;
 
-    template <message_c>
+    template <coder_mode Mode = unsafe_mode>
+    using message_decode_map_result = typename Mode::template result_type<std::pair<bytes, bool>>;
+
+    template <coder_mode Mode = unsafe_mode>
+    using message_decode_map_function_result = typename Mode::template result_type<bytes>;
+
+    template <coder_mode, message_c>
     struct message_decode_map;
 
-    template <field_c... F>
-    struct message_decode_map<message<F...>> : std::unordered_map<uint<4>, std::function<bytes(message<F...>&, bytes)>> {
+    template <coder_mode Mode, field_c... F>
+    struct message_decode_map<Mode, message<F...>> :
+        std::unordered_map<uint<4>, std::function<message_decode_map_function_result<Mode>(message<F...>&, bytes)>> {
     private:
         using T = message<F...>;
+        using function_result = message_decode_map_function_result<Mode>;
 
     public:
-        message_decode_map() : std::unordered_map<uint<4>, std::function<bytes(T&, bytes)>> {
+        message_decode_map() : std::unordered_map<uint<4>, std::function<function_result(T&, bytes)>> {
                 {F::key, [](T& m, bytes b){
-                    auto [v, np] = F::coder::decode(b);
+                    decode_value<typename F::coder::value_type> decode_v;
+                    if (Mode::get_value_from_result(F::coder::template decode<Mode>(b), decode_v)) {
+                        auto &f = m.template get<F::number>();
+                        push_field(f, std::move(decode_v.first));
 
-                    auto &f = m.template get<F::number>();
-                    push_field(f, std::move(v));
-
-                    return np;
+                        return function_result{decode_v.second};
+                    }
+                    return function_result{};
                 }}...
         } {}
 
-        constexpr std::pair<bytes, bool> decode(T& v, bytes b) const {
-            const auto &[n, nb] = varint_coder<uint<4>>::decode(b);
+        constexpr message_decode_map_result<Mode> decode(T& v, bytes b) const {
+            decode_value<uint<4>> decode_v;
+            if (!Mode::get_value_from_result(varint_coder<uint<4>>::decode<Mode>(b), decode_v)) {
+                return {};
+            }
+
+            const auto &[n, nb] = decode_v;
 
             if(to_field_number(n) == 0) {
-                return {b, false};
+                return Mode::template make_result<message_decode_map_result<Mode>>(b, false);
             }
 
-            auto iter = this->find(n);
+            const auto iter = this->find(n);
             if (iter != this->end()) {
-                b = iter->second(v, nb);
+                if (!Mode::get_value_from_result(iter->second(v, nb), b)) {
+                    return {};
+                }
             } else {
-                b = skip_map.at(to_wire_key(n))(nb);
+                if (!Mode::get_value_from_result(
+                        skip_map<Mode>.at(to_wire_key(n))(nb), b)) {
+                    return {};
+                }
             }
 
-            return {b, true};
+            return Mode::template make_result<message_decode_map_result<Mode>>(b, true);
         }
     };
 
-    template <message_c T>
-    inline const message_decode_map<T> decode_map;
+    template <coder_mode Mode, message_c T>
+    inline const message_decode_map<Mode, T> decode_map;
 
     /// A @ref coder for @ref message type
     template <message_c T>
@@ -350,38 +374,59 @@ namespace pp {
 
         message_coder() = delete;
 
-        static constexpr bytes encode(const T& msg, bytes b) {
-            msg.for_each([&b]<field_c F> (const F& f) {
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr encode_result<Mode> encode(const T& msg, bytes b) {
+            encode_result<Mode> result{b};
+            msg.for_each([&result]<field_c F> (const F& f) {
                 if(empty_field(f)) {
                     return;
                 }
 
+                bytes safe_b;
+                if (!Mode::get_value_from_result(result, safe_b)) {
+                    return;
+                }
 
                 if constexpr (F::attr == singular) {
-                    b = varint_coder<uint<4>>::encode(F::key, b);
-                    b = F::coder::encode(f.value(), b);
+                    result = varint_coder<uint<4>>::encode<Mode>(F::key, safe_b);
+                    if (Mode::get_value_from_result(result, safe_b)) {
+                        result = F::coder::template encode<Mode>(f.value(), safe_b);
+                    }
                 } else {
                     for(const auto &i : f) {
-                        b = varint_coder<uint<4>>::encode(F::key, b);
-                        b = F::coder::encode(i, b);
+                        result = varint_coder<uint<4>>::encode<Mode>(F::key, safe_b);
+                        if (Mode::get_value_from_result(result, safe_b)) {
+                            result = F::coder::template encode<Mode>(i, safe_b);
+                            if (!Mode::get_value_from_result(result, safe_b)) {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
                     }
                 }
             });
 
-            return b;
+            return result;
         }
-
-        static constexpr decode_result<T> decode(bytes b) {
+        
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_result<T, Mode> decode(bytes b) {
             T v;
 
             while(b.end() > b.begin()) {
+                std::pair<bytes, bool> bytes_with_next;
+                if (!Mode::get_value_from_result(decode_map<Mode, T>.decode(v, b), bytes_with_next)) {
+                    return {};
+                }
+
                 bool next = true;
-                std::tie(b, next) = decode_map<T>.decode(v, b);
+                std::tie(b, next) = bytes_with_next;
 
                 if(!next) break;
             }
 
-            return {v, b};
+            return Mode::template make_result<decode_result<T, Mode>>(std::move(v), b);
         }
     };
 
@@ -421,30 +466,43 @@ namespace pp {
 
         embedded_message_coder() = delete;
 
-        static constexpr bytes encode(const T& msg, bytes b) {
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr encode_result<Mode> encode(const T& msg, bytes b) {
             auto n = skipper<message_coder<T>>::encode_skip(msg);
 
-            b = varint_coder<uint<8>>::encode(n, b);
-            b = message_coder<T>::encode(msg, b);
+            if (Mode::get_value_from_result(varint_coder<uint<8>>::encode<Mode>(n, b), b)) {
+                return message_coder<T>::template encode<Mode>(msg, b);
+            }
 
-            return b;
+            return {};
         }
 
-        static constexpr decode_result<T> decode(bytes b) {
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_result<T, Mode> decode(bytes b) {
             T v;
 
-            std::size_t len = 0;
-            std::tie(len, b) = varint_coder<uint<8>>::decode(b);
+            decode_value<uint<8>> decod_len;
+            if (!Mode::get_value_from_result(varint_coder<uint<8>>::decode<Mode>(b), decod_len)) {
+                return {};
+            }
 
-            auto origin_b = b;
+            std::size_t len = 0;
+            std::tie(len, b) = decod_len;
+
+            const auto origin_b = b;
             while(begin_diff(b, origin_b) < len) {
+                std::pair<bytes, bool> bytes_with_next;
+                if (!Mode::get_value_from_result(decode_map<Mode, T>.decode(v, b), bytes_with_next)) {
+                    return {};
+                }
+
                 bool next = true;
-                std::tie(b, next) = decode_map<T>.decode(v, b);
+                std::tie(b, next) = bytes_with_next;
 
                 if(!next) break;
             }
 
-            return {v, b};
+            return Mode::template make_result<decode_result<T, Mode>>(std::move(v), b);
         }
     };
 
@@ -460,11 +518,21 @@ namespace pp {
             return n;
         }
 
-        static constexpr bytes decode_skip(bytes b) {
-            uint<8> n = 0;
-            std::tie(n, b) = varint_coder<uint<8>>::decode(b);
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
+            decode_value<uint<8>> decode_len;
+            if (!Mode::get_value_from_result(varint_coder<uint<8>>::decode<Mode>(b), decode_len)) {
+                return {};
+            }
 
-            return b.subspan(n);
+            uint<8> n = 0;
+            std::tie(n, b) = decode_len;
+
+            if (!Mode::check_bytes_span(b, n)) {
+                return {};
+            }
+
+            return Mode::template make_result<decode_skip_result<Mode>>(b.subspan(n));
         }
     };
 

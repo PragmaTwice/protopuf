@@ -44,33 +44,53 @@ namespace pp {
 
         array_coder() = delete;
 
-        static constexpr bytes encode(const R& con, bytes b) {
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr encode_result<Mode> encode(const R& con, bytes b) {
             uint<8> n = 0;
 
             for(const auto &i : con) {
                 n += skipper<C>::encode_skip(i);
             }
 
-            b = varint_coder<uint<8>>::encode(n, b);
+            bytes safe_b;
+            if (!Mode::get_value_from_result(varint_coder<uint<8>>::encode<Mode>(n, b), safe_b)) {
+                return {};
+            }
 
             for(const auto& i : con) {
-                b = C::encode(i, b);
+                if (!Mode::get_value_from_result(C::template encode<Mode>(i, safe_b), safe_b)) {
+                    return {};
+                }
             }
-
-            return b;
+            return encode_result<Mode>{safe_b};
         }
 
-        static constexpr decode_result<R> decode(bytes b) {
-            uint<8> len = 0;
-            std::tie(len, b) = varint_coder<uint<8>>::decode(b);
-            R con;
-
-            auto origin_b = b;
-            while(begin_diff(b, origin_b) < len) {
-                std::tie(*std::inserter(con, con.end()), b) = C::decode(b);
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_result<R, Mode> decode(bytes b) {
+            decode_value<uint<8>> decode_len;
+            if (!Mode::get_value_from_result(varint_coder<uint<8>>::decode<Mode>(b), decode_len)) {
+                return {};
             }
 
-            return {con, b};
+            uint<8> len = 0;
+            std::tie(len, b) = decode_len;
+            R con;
+
+            if constexpr (requires { con.reserve(); }) {
+                con.reserve(len);
+            }
+
+            const auto origin_b = b;
+            decode_value<typename C::value_type> decode_v;
+            while(begin_diff(b, origin_b) < len) {
+                if (Mode::get_value_from_result(C::template decode<Mode>(b), decode_v)) {
+                    std::tie(*std::inserter(con, con.end()), b) = std::move(decode_v);
+                } else {
+                    return {};
+                }
+            }
+
+            return Mode::template make_result<decode_result<R, Mode>>(std::move(con), b);
         }
     };
 
@@ -91,11 +111,21 @@ namespace pp {
             return n;
         }
 
-        static constexpr bytes decode_skip(bytes b) {
-            uint<8> n = 0;
-            std::tie(n, b) = varint_coder<uint<8>>::decode(b);
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
+            decode_value<uint<8>> decode_len;
+            if (!Mode::get_value_from_result(varint_coder<uint<8>>::decode<Mode>(b), decode_len)) {
+                return {};
+            }
 
-            return b.subspan(n);
+            uint<8> n = 0;
+            std::tie(n, b) = decode_len;
+
+            if (!Mode::check_bytes_span(b, n)) {
+                return {};
+            }
+
+            return Mode::template make_result<decode_skip_result<Mode>>(b.subspan(n));
         }
     };
 
