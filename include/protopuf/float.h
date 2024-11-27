@@ -16,6 +16,12 @@
 #define PROTOPUF_FLOAT_H
 
 #include <concepts>
+#include <version>
+
+#if defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L
+#include <bit>
+#endif
+
 #include "coder.h"
 #include "int.h"
 
@@ -30,24 +36,37 @@ namespace pp {
         using underlying_type = uint<sizeof(T)>;
 
         static constexpr underlying_type underlying_cast(value_type t) {
-            return *(underlying_type*)&t;
+        #if defined(FLOAT_CAST_UB_IMPL) || !(__cpp_lib_bit_cast >= 201806L)
+            return *reinterpret_cast<underlying_type*>(&t);
+        #else
+            return std::bit_cast<underlying_type>(t);
+        #endif
         }
 
         static constexpr value_type value_cast(underlying_type t) {
-            return *(value_type*)&t;
+        #if defined(FLOAT_CAST_UB_IMPL) || !(__cpp_lib_bit_cast >= 201806L)
+            return *reinterpret_cast<value_type*>(&t);
+        #else
+            return std::bit_cast<value_type>(t);
+        #endif
         }
 
     public:
         float_coder() = delete;
 
-        static constexpr bytes encode(T v, bytes b) {
-            return integer_coder<underlying_type>::encode(underlying_cast(v), b);
+        template<coder_mode Mode>
+        static constexpr encode_result<Mode> encode(T v, bytes b) {
+            return integer_coder<underlying_type>::template encode<Mode>(underlying_cast(v), b);
         }
 
-        static constexpr decode_result<T> decode(bytes b) {
-            auto p = integer_coder<underlying_type>::decode(b);
-
-            return {value_cast(p.first), p.second};
+        template<coder_mode Mode>
+        static constexpr decode_result<T, Mode> decode(bytes b) {
+            decode_value<underlying_type> decode_v;
+            if (Mode::get_value_from_result(integer_coder<underlying_type>::template decode<Mode>(b), decode_v)) {
+                return Mode::template make_result<decode_result<T, Mode>>(value_cast(decode_v.first), decode_v.second);
+            }
+            
+            return {};
         }
     };
 

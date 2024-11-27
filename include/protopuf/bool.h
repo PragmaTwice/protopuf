@@ -17,7 +17,7 @@
 
 #include "coder.h"
 #include "byte.h"
-#include "varint.h"
+#include "int.h"
 
 namespace pp {
 
@@ -27,12 +27,14 @@ namespace pp {
 
         bool_coder() = delete;
 
-        static constexpr bytes encode(bool i, bytes b) {
-            return integer_coder<uint<1>>::encode(i, b);
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr encode_result<Mode> encode(bool i, bytes b) {
+            return integer_coder<uint<1>>::encode<Mode>(i, b);
         }
 
-        static constexpr decode_result<bool> decode(bytes b) {
-            return integer_coder<uint<1>>::decode(b);
+        template <coder_mode Mode = unsafe_mode>
+        static constexpr decode_result<bool, Mode> decode(bytes b) {
+            return integer_coder<uint<1>>::decode<Mode>(b);
         }
     };
 

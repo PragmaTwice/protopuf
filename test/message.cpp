@@ -17,15 +17,17 @@
 #include <protopuf/message.h>
 #include <array>
 
+#include "test_fixture.h"
+
 using namespace pp;
 using namespace std;
 
 GTEST_TEST(message, function) {
-    message<integer_field<"", 1, int>, floating_field<"", 3, float>> m{12, 1.23};
+    message<integer_field<"", 1, int>, floating_field<"", 3, float>> m{12, 1.23f};
     static_assert(m.size == 2);
 
     EXPECT_EQ(m.get<1>(), 12);
-    EXPECT_FLOAT_EQ(m.get<3>().value(), 1.23);
+    EXPECT_FLOAT_EQ(m.get<3>().value(), 1.23f);
 
     auto m2 = m;
     EXPECT_EQ(m2, m);
@@ -47,10 +49,10 @@ GTEST_TEST(message, function) {
 
     EXPECT_EQ(m3.get<1>(), 12);
     EXPECT_EQ(m3.get<2>(), "345");
-    EXPECT_FLOAT_EQ(m3.get<4>().value(), 6.78);
+    EXPECT_FLOAT_EQ(m3.get<4>().value(), 6.78f);
     EXPECT_EQ(m3.get<100>(), sint_zigzag<4>(90));
 
-    message<integer_field<"", 1, int, repeated>, floating_field<"", 0, float, repeated>> m4{{1, 2, 3}, {1., 1.2, 1.23}};
+    message<integer_field<"", 1, int, repeated>, floating_field<"", 0, float, repeated>> m4{{1, 2, 3}, {1., 1.2f, 1.23f}};
     static_assert(m4.size == 2);
 
     EXPECT_EQ(m4.get_base<1>(), (vector{1,2,3}));
@@ -58,11 +60,17 @@ GTEST_TEST(message, function) {
 
 }
 
-GTEST_TEST(message_coder, encode) {
+template<typename T>
+struct test_message_coder : test_fixture<T> {};
+TYPED_TEST_SUITE(test_message_coder, coder_mode_types, test_name_generator);
+
+TYPED_TEST(test_message_coder, encode) {
     {
         message<varint_field<"", 1, int>> m{150};
         array<byte, 10> a{};
-        auto n = message_coder<decltype(m)>::encode(m, a);
+        bytes n;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            message_coder<decltype(m)>::encode<typename TestFixture::mode>(m, a), n));
         EXPECT_EQ(begin_diff(n, a), 3);
         EXPECT_EQ(a, (array<byte, 10>{0x08_b, 0x96_b, 0x01_b}));
     }
@@ -72,16 +80,19 @@ GTEST_TEST(message_coder, encode) {
                 12, "345", 6.78f, sint_zigzag<4>(90)
         };
         array<byte, 20> a{};
-        auto n = message_coder<decltype(m)>::encode(m, a);
+        bytes n;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            message_coder<decltype(m)>::encode<typename TestFixture::mode>(m, a), n));
         EXPECT_EQ(begin_diff(n, a), 19);
         EXPECT_EQ(a, (array<byte, 20>{0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b, 0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,
                                       0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b}));
     }
 
     {
-        message<integer_field<"", 10, int, repeated>, floating_field<"", 5, float, repeated>> m{{1, 2, 3}, {1.2, 3.4e5}};
+        message<integer_field<"", 10, int, repeated>, floating_field<"", 5, float, repeated>> m{{1, 2, 3}, {1.2f, 3.4e5}};
         array<byte, 30> a{};
-        auto n = message_coder<decltype(m)>::encode(m, a);
+        bytes n;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::encode<typename TestFixture::mode>(m, a), n));
         EXPECT_EQ(begin_diff(n, a), 25);
         EXPECT_EQ(a, (array<byte, 30>{0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
                                            0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
@@ -91,7 +102,8 @@ GTEST_TEST(message_coder, encode) {
     {
         message<array_field<"", 2, varint_coder<pp::uint<8>>>, string_field<"", 20>> m{vector<pp::uint<8>>{1,123,456789,0}, "hello"};
         array<byte, 30> a{};
-        auto n = message_coder<decltype(m)>::encode(m, a);
+        bytes n;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::encode<typename TestFixture::mode>(m, a), n));
         EXPECT_EQ(begin_diff(n, a), 16);
         EXPECT_EQ(a, (array<byte, 30>{0x12_b, 0x06_b, 0x01_b, 0x7b_b, 0xd5_b, 0xf0_b, 0x1b_b, 0x00_b, 0xa2_b, 0x01_b,
                                           0x05_b, 0x68_b, 0x65_b, 0x6c_b, 0x6c_b, 0x6f_b}));
@@ -112,16 +124,19 @@ GTEST_TEST(message_coder, encode) {
 
         std::array<std::byte, 64> buffer{};
         Class c;
-        message_coder<Class>::encode(c, buffer);
+        bytes n;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<Class>::encode<typename TestFixture::mode>(c, buffer), n));
     }
 
 }
 
-GTEST_TEST(message_coder, decode) {
+TYPED_TEST(test_message_coder, decode) {
     {
         message<varint_field<"", 1, int>> m;
         array<byte, 10> a{0x08_b, 0x96_b, 0x01_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 3);
         EXPECT_EQ(v.get<1>(), 150);
     }
@@ -130,7 +145,9 @@ GTEST_TEST(message_coder, decode) {
         message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>> m;
         array<byte, 20> a{0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b, 0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,
                          0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 19);
         EXPECT_EQ(v.get<1>(), 12);
         EXPECT_EQ(v.get<2>(), "345");
@@ -142,7 +159,9 @@ GTEST_TEST(message_coder, decode) {
         message<string_field<"", 2>, varint_field<"", 100, sint_zigzag<4>>, integer_field<"", 1, int>, floating_field<"", 4, float>> m;
         array<byte, 20> a{0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b, 0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,
                           0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 19);
         EXPECT_EQ(v.get<1>(), 12);
         EXPECT_EQ(v.get<2>(), "345");
@@ -155,7 +174,9 @@ GTEST_TEST(message_coder, decode) {
         array<byte, 30>a {0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
                           0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
                           0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 25);
         EXPECT_EQ(v.get_base<10>(), (vector {1, 2, 3}));
         EXPECT_EQ(v.get_base<5>(), (vector {1.2f, 3.4e5f}));
@@ -166,7 +187,9 @@ GTEST_TEST(message_coder, decode) {
         array<byte, 30>a {0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
                           0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
                           0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b,0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b };
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 25);
         EXPECT_EQ(v.get_base<10>(), (vector {2, 3, 1}));
         EXPECT_EQ(v.get_base<5>(), (vector {1.2f, 3.4e5f}));
@@ -176,20 +199,24 @@ GTEST_TEST(message_coder, decode) {
         message<array_field<"", 2, varint_coder<pp::uint<8>>>, string_field<"", 20>> m;
         array<byte, 30> a{0x12_b, 0x06_b, 0x01_b, 0x7b_b, 0xd5_b, 0xf0_b, 0x1b_b, 0x00_b, 0xa2_b, 0x01_b,
                           0x05_b, 0x68_b, 0x65_b, 0x6c_b, 0x6c_b, 0x6f_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 16);
         EXPECT_EQ(v.get_base<2>(), (vector<pp::uint<8>>{1,123,456789,0}));
         EXPECT_EQ(v.get<20>(), "hello");
     }
 }
 
-GTEST_TEST(message_coder, decode_with_unknown_fields) {
+TYPED_TEST(test_message_coder, decode_with_unknown_fields) {
     {
         message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>> m;
         array<byte, 30> a{0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b, 0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b,
                           0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
                           0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 24);
         EXPECT_EQ(v.get<1>(), 12);
         EXPECT_EQ(v.get<2>(), "345");
@@ -203,7 +230,9 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
                           0x70_b, 0x81_b,0x82_b,0x83_b,0x84_b,0x85_b,0x86_b,0x87_b,0x88_b,0x09_b,
                           0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
                           0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 34);
         EXPECT_EQ(v.get<1>(), 12);
         EXPECT_EQ(v.get<2>(), "345");
@@ -218,7 +247,9 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
                           0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b,
                           0x62_b, 0x07_b, 0x00_b, 0xff_b, 0x00_b, 0xff_b,0x00_b, 0xff_b, 0x00_b,
                           0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 43);
         EXPECT_EQ(v.get<1>(), 12);
         EXPECT_EQ(v.get<2>(), "345");
@@ -227,12 +258,13 @@ GTEST_TEST(message_coder, decode_with_unknown_fields) {
     }
 }
 
-GTEST_TEST(message_coder, nested_encode) {
+TYPED_TEST(test_message_coder, nested_encode) {
     {
         message<varint_field<"", 1, int>> m{150};
         message<message_field<"", 3, decltype(m)>> m2(m);
         array<byte, 10> a{};
-        auto n = message_coder<decltype(m2)>::encode(m2, a);
+        bytes n;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m2)>::encode<typename TestFixture::mode>(m2, a), n));
         EXPECT_EQ(begin_diff(n, a), 5);
         EXPECT_EQ(a, (array<byte, 10>{0x1a_b, 0x03_b, 0x08_b, 0x96_b, 0x01_b}));
     }
@@ -241,7 +273,8 @@ GTEST_TEST(message_coder, nested_encode) {
         message<varint_field<"", 1, int>, string_field<"", 3>> m1{150, "alice"},  m2{22, "bob"}, m3{444456, "tom"};
         message<message_field<"", 3, decltype(m1), repeated>, string_field<"", 8>> m({m1, m2, m3}, "class 102");
         array<byte, 50> a{};
-        auto n = message_coder<decltype(m)>::encode(m, a);
+        bytes n;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::encode<typename TestFixture::mode>(m, a), n));
         EXPECT_EQ(begin_diff(n, a), 43);
         EXPECT_EQ(a, (array<byte, 50>{0x1a_b, 0x0a_b, 0x08_b, 0x96_b, 0x01_b, 0x1a_b, 0x05_b, 0x61_b, 0x6c_b, 0x69_b,
                                       0x63_b, 0x65_b, 0x1a_b, 0x07_b, 0x08_b, 0x16_b, 0x1a_b, 0x03_b, 0x62_b, 0x6f_b,
@@ -260,11 +293,14 @@ GTEST_TEST(message_coder, nested_encode) {
         myClass.get<3>().push_back(twice);
 
         array<byte, 64> buffer{};
-        auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
+        bytes bufferEnd;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<Class>::encode<typename TestFixture::mode>(myClass, buffer), bufferEnd));
         EXPECT_EQ(begin_diff(bufferEnd, buffer), 45);
 
         // deserialization
-        auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
+        decode_value<Class> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<Class>::decode<typename TestFixture::mode>(buffer), value));
+        const auto& [yourClass, bufferEnd2] = value;
         EXPECT_EQ(yourClass.get<8>(), "class 101");
         EXPECT_EQ(yourClass.get<3>()[2].get<3>(), "twice");
         EXPECT_EQ(yourClass.get<3>()[1], (Student{123456, "jerry"}));
@@ -282,11 +318,14 @@ GTEST_TEST(message_coder, nested_encode) {
         myClass[3_i].push_back(twice);
 
         array<byte, 64> buffer{};
-        auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
+        bytes bufferEnd;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<Class>::encode<typename TestFixture::mode>(myClass, buffer), bufferEnd));
         EXPECT_EQ(begin_diff(bufferEnd, buffer), 45);
 
         // deserialization
-        auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
+        decode_value<Class> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<Class>::decode<typename TestFixture::mode>(buffer), value));
+        const auto& [yourClass, bufferEnd2] = value;
         EXPECT_EQ(yourClass[8_i], "class 101");
         EXPECT_EQ(yourClass[3_i][2][3_i], "twice");
         EXPECT_EQ(yourClass[3_i][2][1_i], 123);
@@ -305,11 +344,14 @@ GTEST_TEST(message_coder, nested_encode) {
         myClass["students"_f].push_back(twice);
 
         array<byte, 64> buffer{};
-        auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
+        bytes bufferEnd;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<Class>::encode<typename TestFixture::mode>(myClass, buffer), bufferEnd));
         EXPECT_EQ(begin_diff(bufferEnd, buffer), 45);
 
         // deserialization
-        auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
+        decode_value<Class> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<Class>::decode<typename TestFixture::mode>(buffer), value));
+        const auto& [yourClass, bufferEnd2] = value;
         EXPECT_EQ(yourClass["name"_f], "class 101");
         EXPECT_EQ(yourClass["students"_f][2]["name"_f], "twice");
         EXPECT_EQ(yourClass["students"_f][2]["id"_f], 123);
@@ -319,12 +361,14 @@ GTEST_TEST(message_coder, nested_encode) {
     }
 }
 
-GTEST_TEST(message_coder, nested_decode) {
+TYPED_TEST(test_message_coder, nested_decode) {
     {
         message<varint_field<"", 1, int>> m;
         message<message_field<"", 3, decltype(m)>> m2;
         array<byte, 10> a{0x1a_b, 0x03_b, 0x08_b, 0x96_b, 0x01_b};
-        auto[v, n] = message_coder<decltype(m2)>::decode(a);
+        decode_value<decltype(m2)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m2)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 5);
         EXPECT_EQ(v.get_base<3>().value().get<1>(), 150);
     }
@@ -337,7 +381,9 @@ GTEST_TEST(message_coder, nested_decode) {
                           0x62_b, 0x1a_b, 0x09_b, 0x08_b, 0xa8_b, 0x90_b, 0x1b_b, 0x1a_b, 0x03_b, 0x74_b,
                           0x6f_b, 0x6d_b, 0x42_b, 0x09_b, 0x63_b, 0x6c_b, 0x61_b, 0x73_b, 0x73_b, 0x20_b,
                           0x31_b, 0x30_b, 0x32_b};
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 43);
         EXPECT_EQ(v.get<8>(), "class 102");
         EXPECT_EQ(v.get_base<3>()[0].get<1>(), 150);
@@ -353,7 +399,9 @@ GTEST_TEST(message_coder, nested_decode) {
                           0x42_b, 0x09_b, 0x63_b, 0x6c_b, 0x61_b, 0x73_b, 0x73_b, 0x20_b,0x31_b, 0x30_b, 0x32_b,
                           0x1a_b, 0x07_b, 0x08_b, 0x16_b, 0x1a_b, 0x03_b, 0x62_b, 0x6f_b,0x62_b,
                           0x1a_b, 0x09_b, 0x1a_b, 0x03_b, 0x74_b, 0x6f_b, 0x6d_b, 0x08_b, 0xa8_b, 0x90_b, 0x1b_b };
-        auto [v, n] = message_coder<decltype(m)>::decode(a);
+        decode_value<decltype(m)> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(message_coder<decltype(m)>::decode<typename TestFixture::mode>(a), value));
+        const auto& [v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 43);
         EXPECT_EQ(v.get<8>(), "class 102");
         EXPECT_EQ(v.get_base<3>()[0].get<1>(), 150);
@@ -367,7 +415,7 @@ GTEST_TEST(message, fold) {
     message<int32_field<"int", 1>, string_field<"str", 2>> m {1, "hello"};
 
     auto tup = m.fold([]<typename T, typename U>(T&& x, U&& y){
-        return tuple_cat(forward<T>(x), make_tuple(forward<U>(y).cast_to_base()));
+        return tuple_cat(std::forward<T>(x), make_tuple(std::forward<U>(y).cast_to_base()));
     }, tuple{});
 
     static_assert(is_same_v<decltype(tup), tuple<optional<int32>, optional<string>>>);
@@ -426,4 +474,118 @@ GTEST_TEST(message, merge) {
     EXPECT_EQ(merged["name"_f], "e");
     EXPECT_EQ(merged["titles"_f], (vector<string>{"b", "c", "d", "f"}));
     EXPECT_EQ(merged["age"_f], 124);
+}
+
+GTEST_TEST(message_coder, encode_with_insufficient_buffer_size) {
+    {
+        message<varint_field<"", 1, int>> m{150};
+        run_safe_encode_tests_with_insufficient_buffer_size<message_coder<decltype(m)>, 3>(m);
+    }
+
+    {
+        message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>> m{
+                12, "345", 6.78f, sint_zigzag<4>(90)
+        };
+        run_safe_encode_tests_with_insufficient_buffer_size<message_coder<decltype(m)>, 19>(m);
+    }
+
+    {
+        message<integer_field<"", 10, int, repeated>, floating_field<"", 5, float, repeated>> m{{1, 2, 3}, {1.2f, 3.4e5}};
+        run_safe_encode_tests_with_insufficient_buffer_size<message_coder<decltype(m)>, 25>(m);
+    }
+
+    {
+        message<array_field<"", 2, varint_coder<pp::uint<8>>>, string_field<"", 20>> m{vector<pp::uint<8>>{1,123,456789,0}, "hello"};
+        run_safe_encode_tests_with_insufficient_buffer_size<message_coder<decltype(m)>, 16>(m);
+    }
+}
+
+GTEST_TEST(message_coder, decode_with_insufficient_buffer_size) {
+    {
+        message<varint_field<"", 1, int>> m;
+        array<byte, 3> a{0x08_b, 0x96_b, 0x01_b};
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 2>(a);
+    }
+
+    {
+        message<integer_field<"", 1, int>, string_field<"", 2>, floating_field<"", 4, float>, varint_field<"", 100, sint_zigzag<4>>> m;
+        array<byte, 19> a{0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b, 0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,
+                         0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 4>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 6>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 9>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 11>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 14>(a);
+    }
+
+    {
+        message<string_field<"", 2>, varint_field<"", 100, sint_zigzag<4>>, integer_field<"", 1, int>, floating_field<"", 4, float>> m;
+        array<byte, 19> a{0x0d_b, 0x0c_b, 0x00_b, 0x00_b, 0x00_b, 0x12_b, 0x03_b, 0x33_b, 0x34_b, 0x35_b,
+                          0x25_b, 0xc3_b, 0xf5_b, 0xd8_b, 0x40_b, 0xa0_b, 0x06_b, 0xb4_b, 0x01_b};
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 4>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 6>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 9>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 11>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 14>(a);
+    }
+
+    {
+        message<integer_field<"", 10, int, repeated>, floating_field<"", 5, float, repeated>> m;
+        array<byte, 25>a {0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b, 0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
+                          0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
+                          0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b};
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 9>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 11>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 14>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 16>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 19>(a);
+    }
+
+    {
+        message<integer_field<"", 10, int, repeated>, floating_field<"", 5, float, repeated>> m;
+        array<byte, 25>a {0x55_b, 0x02_b, 0x00_b, 0x00_b, 0x00_b,
+                          0x55_b, 0x03_b, 0x00_b, 0x00_b, 0x00_b, 0x2d_b, 0x9A_b, 0x99_b, 0x99_b, 0x3f_b,
+                          0x2d_b, 0x00_b, 0x04_b, 0xa6_b, 0x48_b,0x55_b, 0x01_b, 0x00_b, 0x00_b, 0x00_b };
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 9>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 11>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 14>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 16>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 19>(a);
+    }
+
+    {
+        message<array_field<"", 2, varint_coder<pp::uint<8>>>, string_field<"", 20>> m;
+        array<byte, 16> a{0x12_b, 0x06_b, 0x01_b, 0x7b_b, 0xd5_b, 0xf0_b, 0x1b_b, 0x00_b, 0xa2_b, 0x01_b,
+                          0x05_b, 0x68_b, 0x65_b, 0x6c_b, 0x6c_b, 0x6f_b};
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 3>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 5>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 7>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 9>(a);
+        run_safe_decode_test_with_insufficient_buffer_size<message_coder<decltype(m)>, 15>(a);
+    }
+}
+
+GTEST_TEST(message_coder, nested_encode_with_insufficient_buffer_size) {
+    {
+        message<varint_field<"", 1, int>> m{150};
+        message<message_field<"", 3, decltype(m)>> m2(m);
+        run_safe_encode_tests_with_insufficient_buffer_size<message_coder<decltype(m2)>, 5>(m2);
+    }
+
+    {
+        message<varint_field<"", 1, int>, string_field<"", 3>> m1{150, "alice"},  m2{22, "bob"}, m3{444456, "tom"};
+        message<message_field<"", 3, decltype(m1), repeated>, string_field<"", 8>> m({m1, m2, m3}, "class 102");
+        run_safe_encode_tests_with_insufficient_buffer_size<message_coder<decltype(m)>, 43>(m);
+    }
+
+    {
+        using Student = message<varint_field<"", 1, uint32_t>, string_field<"", 3>>;
+        using Class = message<string_field<"", 8>, message_field<"", 3, Student, repeated>>;
+
+        Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
+        Class myClass {"class 101", {tom, jerry}};
+        myClass.get<3>().push_back(twice);
+
+        run_safe_encode_tests_with_insufficient_buffer_size<message_coder<Class>, 45>(myClass);
+    }
 }

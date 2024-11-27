@@ -35,6 +35,18 @@ void BM_protopuf_encode(benchmark::State& state) {
 }
 BENCHMARK(BM_protopuf_encode);
 
+void BM_protopuf_safe_encode(benchmark::State& state) {
+    Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
+    Class myClass {"class 101", {tom, jerry, twice}};
+
+    array<byte, 64> buffer{};
+
+    for(auto _ : state) {
+        message_coder<Class>::encode<safe_mode>(myClass, buffer);
+    }
+}
+BENCHMARK(BM_protopuf_safe_encode);
+
 void BM_protobuf_encode(benchmark::State& state) {
     pb::Class yourClass;
     yourClass.set_name("class 101");
@@ -74,6 +86,14 @@ void BM_protopuf_decode(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_protopuf_decode);
+
+void BM_protopuf_safe_decode(benchmark::State& state) {
+    for(auto _ : state) {
+        auto [myClass, _2] = *message_coder<Class>::decode<safe_mode>(decode_buffer);
+        benchmark::DoNotOptimize(myClass);
+    }
+}
+BENCHMARK(BM_protopuf_safe_decode);
 
 void BM_protobuf_decode(benchmark::State& state) {
     for(auto _ : state) {

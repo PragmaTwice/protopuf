@@ -20,6 +20,8 @@
 #include <array>
 #include <algorithm>
 
+#include "test_fixture.h"
+
 using namespace pp;
 using namespace std;
 
@@ -55,46 +57,84 @@ GTEST_TEST(converter, int_to_byte) {
     EXPECT_EQ(int_to_bytes<4>(u3), a3);
 }
 
+template<typename T>
+struct test_integer_coder : test_fixture<T> {};
+TYPED_TEST_SUITE(test_integer_coder, coder_mode_types, test_name_generator);
+
 array a4{0b101010_b, 0b1011100_b, 0b1001_b, 0b0_b, 0b11_b, 0b1111_b, 0b111111_b};
 
-GTEST_TEST(integer_coder, encode) {
+TYPED_TEST(test_integer_coder, encode) {
     array<byte, 1024> a{};
     span<byte> s = a;
 
-    s = integer_coder<pp::uint<1>>::encode(u1, s);
-    s = integer_coder<pp::uint<2>>::encode(u2, s);
-    s = integer_coder<pp::uint<4>>::encode(u3, s);
+    ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+        integer_coder<pp::uint<1>>::encode<typename TestFixture::mode>(u1, s), s));
+    ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+        integer_coder<pp::uint<2>>::encode<typename TestFixture::mode>(u2, s), s));
+    ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+        integer_coder<pp::uint<4>>::encode<typename TestFixture::mode>(u3, s), s)); 
 
-    span b = span(a).subspan<0,7>();
+    span b = span(a).template subspan<0,7>();
 
     EXPECT_TRUE(equal(b.begin(), b.end(), a4.begin()));
 }
 
-GTEST_TEST(integer_coder, decode) {
+TYPED_TEST(test_integer_coder, decode) {
     span<byte> s = a4;
 
+    {
+        pp::uint<1> b1;
+        decode_value<pp::uint<1>> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            integer_coder<pp::uint<1>>::decode<typename TestFixture::mode>(s), value));
+        tie(b1, s) = value;
+        EXPECT_EQ(u1, b1);
+    }
 
-    pp::uint<1> b1;
-    tie(b1, s) = integer_coder<pp::uint<1>>::decode(s);
-    EXPECT_EQ(u1, b1);
-    pp::uint<2> b2;
-    tie(b2, s) = integer_coder<pp::uint<2>>::decode(s);
-    EXPECT_EQ(u2, b2);
-    pp::uint<4> b3;
-    tie(b3, s) = integer_coder<pp::uint<4>>::decode(s);
-    EXPECT_EQ(u3, b3);
+    {   
+        pp::uint<2> b2;
+        decode_value<pp::uint<2>> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            integer_coder<pp::uint<2>>::decode<typename TestFixture::mode>(s), value));
+        tie(b2, s) = value;
+        EXPECT_EQ(u2, b2);
+    }
+
+    {
+        pp::uint<4> b3;
+        decode_value<pp::uint<4>> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            integer_coder<pp::uint<4>>::decode<typename TestFixture::mode>(s), value));
+        tie(b3, s) = value;
+        EXPECT_EQ(u3, b3);
+    }
 }
 
-GTEST_TEST(integer_coder, signed) {
+TYPED_TEST(test_integer_coder, signed) {
     sint<4> m1 = -1;
     array<byte, 4> am1{};
+    bytes b;
 
-    integer_coder<sint<4>>::encode(m1, span(am1));
+    ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+        integer_coder<sint<4>>::encode<typename TestFixture::mode>(m1, span(am1)), b));
+
     EXPECT_EQ(am1[0], 0xff_b);
     EXPECT_EQ(am1[1], 0xff_b);
     EXPECT_EQ(am1[2], 0xff_b);
     EXPECT_EQ(am1[3], 0xff_b);
 
-    auto [m1e, _] = integer_coder<sint<4>>::decode(span(am1));
+    decode_value<sint<4>> value;
+     ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            integer_coder<sint<4>>::decode<typename TestFixture::mode>(span(am1)), value));
+    auto [m1e, _] = value;
     EXPECT_EQ(m1e, m1);
+}
+
+GTEST_TEST(integer_coder, encode_with_insufficient_buffer_size) {
+    run_safe_encode_tests_with_insufficient_buffer_size<integer_coder<sint<4>>, 4>(-1);
+}
+
+GTEST_TEST(integer_coder, decode_with_insufficient_buffer_size) {
+    array<byte, 4> a{0xff_b, 0xff_b, 0xff_b, 0xff_b};
+    run_safe_decode_tests_with_insufficient_buffer_size<integer_coder<sint<4>>>(a);
 }

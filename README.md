@@ -52,6 +52,7 @@ using Class = message<
 >;
 ```
 Subsequently, both serialization and deserialization become so easy to do:
+- Mode without buffer overflow control
 ```c++
 // serialization
 Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
@@ -64,6 +65,30 @@ assert(begin_diff(bufferEnd, buffer) == 45);
 
 // deserialization
 auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
+assert(yourClass["name"_f] == "class 101");
+assert(yourClass["students"_f][2]["name"_f] == "twice");
+assert(yourClass["students"_f][2]["id"_f] == 123);
+assert(yourClass["students"_f][1] == (Student{123456, "jerry"}));
+assert(yourClass == myClass);
+assert(begin_diff(bufferEnd2, bufferEnd) == 0);
+```
+- Mode with buffer overflow control (safe mode)
+```c++
+// serialization
+Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
+Class myClass {"class 101", {tom, jerry}};
+myClass["students"_f].push_back(twice);
+
+array<byte, 64> buffer{};
+auto result = message_coder<Class>::encode<safe_mode>(myClass, buffer);
+assert (result.has_value());
+const auto& bufferEnd = *result;
+assert(begin_diff(bufferEnd, buffer) == 45);
+
+// deserialization
+auto result2 = message_coder<Class>::decode<safe_mode>(buffer);
+assert (result2.has_value());
+const auto& [yourClass, bufferEnd2] = *result2;
 assert(yourClass["name"_f] == "class 101");
 assert(yourClass["students"_f][2]["name"_f] == "twice");
 assert(yourClass["students"_f][2]["id"_f] == 123);

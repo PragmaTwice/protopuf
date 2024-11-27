@@ -41,7 +41,7 @@ namespace pp {
         underlying_type v;
 
         constexpr static uint<N> from_sint(sint<N> in) {
-            return (in << 1) ^ (in >> (N * 8 - 1));
+            return static_cast<uint<N>>(in << 1) ^ static_cast<uint<N>>(in >> (N * 8 - 1));
         }
 
         constexpr static sint<N> to_sint(uint<N> in) {
@@ -121,13 +121,19 @@ namespace pp {
 
         integer_coder() = delete;
 
-        static constexpr bytes encode(T i, bytes bytes) {
-            return integer_coder<uint<N>>::encode(i.get_underlying(), bytes);
+        template<coder_mode Mode>
+        static constexpr encode_result<Mode> encode(T i, bytes bytes) {
+            return integer_coder<uint<N>>::template encode<Mode>(i.get_underlying(), bytes);
         }
 
-        static constexpr decode_result<T> decode(bytes bytes) {
-            auto p = integer_coder<uint<N>> ::decode(bytes);
-            return {T::from_uint(p.first), p.second};
+        template<coder_mode Mode>
+        static constexpr decode_result<T, Mode> decode(bytes bytes) {
+            decode_value<uint<N>> decode_v;
+            if (Mode::get_value_from_result(integer_coder<uint<N>>::template decode<Mode>(bytes), decode_v)) {
+                return Mode::template make_result<decode_result<T, Mode>>(T::from_uint(decode_v.first), decode_v.second);
+            }
+            
+            return {};
         }
     };
 
@@ -141,13 +147,19 @@ namespace pp {
 
         varint_coder() = delete;
 
-        static constexpr bytes encode(T n, bytes s) {
-            return varint_coder<uint<N>>::encode(n.get_underlying(), s);
+        template<coder_mode Mode>
+        static constexpr encode_result<Mode> encode(T n, bytes s) {
+            return varint_coder<uint<N>>::template encode<Mode>(n.get_underlying(), s);
         }
 
-        static constexpr decode_result<T> decode(bytes s) {
-            auto p = varint_coder<uint<N>>::decode(s);
-            return {T::from_uint(p.first), p.second};
+        template<coder_mode Mode>
+        static constexpr decode_result<T, Mode> decode(bytes s) {
+            decode_value<uint<N>> decode_v;
+            if (Mode::get_value_from_result(varint_coder<uint<N>>::template decode<Mode>(s), decode_v)) {
+                return Mode::template make_result<decode_result<T, Mode>>(T::from_uint(decode_v.first), decode_v.second);
+            }
+            
+            return {};
         }
     };
 }

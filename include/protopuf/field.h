@@ -308,7 +308,7 @@ namespace pp {
         }
     }
 
-    template <uint<4> V, char ... D> requires (('0' <= D <= '9') && ...)
+    template <uint<4> V, char ... D> requires ((('0' <= D) && (D <= '9')) && ...)
     constexpr auto field_literal_helper = V;
 
     template <uint<4> V, char D1, char ... Dn>

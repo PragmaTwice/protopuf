@@ -17,24 +17,38 @@
 #include <protopuf/bool.h>
 #include <array>
 
+#include "test_fixture.h"
+
 using namespace pp;
 using namespace std;
 
-GTEST_TEST(bool_coder, encode) {
+template<typename T>
+struct test_bool_coder : test_fixture<T> {};
+TYPED_TEST_SUITE(test_bool_coder, coder_mode_types, test_name_generator);
+
+TYPED_TEST(test_bool_coder, encode) {
     array<byte, 10> a{};
 
-    EXPECT_EQ(begin_diff(bool_coder::encode(true, a), a), 1);
+    bytes n;
+    ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+        bool_coder::encode<typename TestFixture::mode>(true, a), n));
+    EXPECT_EQ(begin_diff(n, a), 1);
     EXPECT_EQ(a[0], 1_b);
 
-    EXPECT_EQ(begin_diff(bool_coder::encode(false, a), a), 1);
+    ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+        bool_coder::encode<typename TestFixture::mode>(false, a), n));
+    EXPECT_EQ(begin_diff(n, a), 1);
     EXPECT_EQ(a[0], 0_b);
 }
 
-GTEST_TEST(bool_coder, decode) {
+TYPED_TEST(test_bool_coder, decode) {
     array<byte, 10> a{};
 
     {
-        auto[v, n] = bool_coder::decode(a);
+        decode_value<bool> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            bool_coder::decode<typename TestFixture::mode>(a), value));
+        auto[v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 1);
         EXPECT_EQ(v, false);
     }
@@ -42,7 +56,10 @@ GTEST_TEST(bool_coder, decode) {
     {
         a[0] = 1_b;
 
-        auto[v, n] = bool_coder::decode(a);
+        decode_value<bool> value;
+        ASSERT_TRUE(TestFixture::mode::get_value_from_result(
+            bool_coder::decode<typename TestFixture::mode>(a), value));
+        auto[v, n] = value;
         EXPECT_EQ(begin_diff(n, a), 1);
         EXPECT_EQ(v, true);
     }

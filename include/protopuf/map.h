@@ -15,6 +15,7 @@
 #ifndef PROTOPUF_MAP_H
 #define PROTOPUF_MAP_H
 
+#include <map>
 #include "message.h"
 
 namespace pp {
@@ -56,8 +57,8 @@ namespace pp {
     template <typename T1, typename T2>
     constexpr bool is_message <map_element<T1, T2>> = true;
 
-    template <typename T1, typename T2>
-    struct message_decode_map<map_element<T1, T2>> : message_decode_map<typename map_element<T1, T2>::base_type> {};
+    template <coder_mode Mode, typename T1, typename T2>
+    struct message_decode_map<Mode, map_element<T1, T2>> : message_decode_map<Mode, typename map_element<T1, T2>::base_type> {};
 
     /// Type alias for map fields
     template<basic_fixed_string S, uint<4> N, coder key_coder, coder value_coder,
