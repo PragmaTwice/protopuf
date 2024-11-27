@@ -197,7 +197,7 @@ namespace pp {
 
         static constexpr std::size_t N = sizeof(T);
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr encode_result<Mode> encode(T i, bytes b) {
             if (!Mode::check_bytes_span(b, N)) {
                 return {};
@@ -207,7 +207,7 @@ namespace pp {
             return encode_result<Mode>{b.subspan<N>()};
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_result<T, Mode> decode(bytes b) {
             if (!Mode::check_bytes_span(b, N)) {
                 return {};
@@ -224,12 +224,12 @@ namespace pp {
 
         integer_coder() = delete;
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr encode_result<Mode> encode(T i, bytes b) {
             return integer_coder<std::make_unsigned_t<T>>::template encode<Mode>(static_cast<std::make_unsigned_t<T>>(i), b);
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_result<T, Mode> decode(bytes b) {
             return integer_coder<std::make_unsigned_t<T>>::template decode<Mode>(b);
         }

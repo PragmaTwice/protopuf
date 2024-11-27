@@ -27,12 +27,12 @@ namespace pp {
 
         bool_coder() = delete;
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr encode_result<Mode> encode(bool i, bytes b) {
             return integer_coder<uint<1>>::encode<Mode>(i, b);
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_result<bool, Mode> decode(bytes b) {
             return integer_coder<uint<1>>::decode<Mode>(b);
         }

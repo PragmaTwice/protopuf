@@ -55,7 +55,7 @@ namespace pp {
     };
 
     template <typename T1, typename T2>
-    constexpr bool is_message <map_element<T1, T2>> = true;
+    constexpr inline bool is_message <map_element<T1, T2>> = true;
 
     template <coder_mode Mode, typename T1, typename T2>
     struct message_decode_map<Mode, map_element<T1, T2>> : message_decode_map<Mode, typename map_element<T1, T2>::base_type> {};

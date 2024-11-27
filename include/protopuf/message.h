@@ -28,10 +28,10 @@ namespace pp {
 
     /// Checks whether all types in the parameter list are equal
     template <typename...>
-    constexpr bool are_same = true;
+    constexpr inline bool are_same = true;
 
     template <typename T, typename... Ts>
-    constexpr bool are_same<T, Ts...> = std::conjunction_v<std::is_same<T, Ts>...>;
+    constexpr inline bool are_same<T, Ts...> = std::conjunction_v<std::is_same<T, Ts>...>;
 
     template <typename U, typename F>
     struct fold_impl {
@@ -234,10 +234,10 @@ namespace pp {
 
     /// Checks whether the type is a @ref message type
     template <typename>
-    constexpr bool is_message = false;
+    constexpr inline bool is_message = false;
 
     template <typename ...T>
-    constexpr bool is_message <message<T...>> = true;
+    constexpr inline bool is_message <message<T...>> = true;
 
     /// A concept satisfied while type `T` is a @ref message type
     template <typename T>
@@ -301,15 +301,15 @@ namespace pp {
         } {}
     };
 
-    template <coder_mode Mode = unsafe_mode>
+    template <coder_mode Mode = safe_mode>
     using message_skip_map = message_skip_map_impl<Mode, 0, 1, 2, 5>;
-    template <coder_mode Mode = unsafe_mode>
+    template <coder_mode Mode = safe_mode>
     inline const message_skip_map<Mode> skip_map;
 
-    template <coder_mode Mode = unsafe_mode>
+    template <coder_mode Mode = safe_mode>
     using message_decode_map_result = typename Mode::template result_type<std::pair<bytes, bool>>;
 
-    template <coder_mode Mode = unsafe_mode>
+    template <coder_mode Mode = safe_mode>
     using message_decode_map_function_result = typename Mode::template result_type<bytes>;
 
     template <coder_mode, message_c>
@@ -374,7 +374,7 @@ namespace pp {
 
         message_coder() = delete;
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr encode_result<Mode> encode(const T& msg, bytes b) {
             encode_result<Mode> result{b};
             msg.for_each([&result]<field_c F> (const F& f) {
@@ -410,7 +410,7 @@ namespace pp {
             return result;
         }
         
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_result<T, Mode> decode(bytes b) {
             T v;
 
@@ -466,7 +466,7 @@ namespace pp {
 
         embedded_message_coder() = delete;
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr encode_result<Mode> encode(const T& msg, bytes b) {
             auto n = skipper<message_coder<T>>::encode_skip(msg);
 
@@ -477,7 +477,7 @@ namespace pp {
             return {};
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_result<T, Mode> decode(bytes b) {
             T v;
 
@@ -518,7 +518,7 @@ namespace pp {
             return n;
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             decode_value<uint<8>> decode_len;
             if (!Mode::get_value_from_result(varint_coder<uint<8>>::decode<Mode>(b), decode_len)) {

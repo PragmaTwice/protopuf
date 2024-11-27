@@ -44,7 +44,7 @@ namespace pp {
 
         array_coder() = delete;
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr encode_result<Mode> encode(const R& con, bytes b) {
             uint<8> n = 0;
 
@@ -65,7 +65,7 @@ namespace pp {
             return encode_result<Mode>{safe_b};
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_result<R, Mode> decode(bytes b) {
             decode_value<uint<8>> decode_len;
             if (!Mode::get_value_from_result(varint_coder<uint<8>>::decode<Mode>(b), decode_len)) {
@@ -111,7 +111,7 @@ namespace pp {
             return n;
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             decode_value<uint<8>> decode_len;
             if (!Mode::get_value_from_result(varint_coder<uint<8>>::decode<Mode>(b), decode_len)) {

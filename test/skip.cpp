@@ -82,22 +82,22 @@ GTEST_TEST(skipper, decode) {
     {
         array<byte, 10> a{};
 
-        EXPECT_EQ(begin_diff(skipper<integer_coder<int>>::decode_skip(a), a), sizeof(int));
-        EXPECT_EQ(begin_diff(skipper<float_coder<float>>::decode_skip(a), a), sizeof(float));
-        EXPECT_EQ(begin_diff(skipper<varint_coder<int>>::decode_skip(a), a), 1);
+        EXPECT_EQ(begin_diff(skipper<integer_coder<int>>::decode_skip<unsafe_mode>(a), a), sizeof(int));
+        EXPECT_EQ(begin_diff(skipper<float_coder<float>>::decode_skip<unsafe_mode>(a), a), sizeof(float));
+        EXPECT_EQ(begin_diff(skipper<varint_coder<int>>::decode_skip<unsafe_mode>(a), a), 1);
     }
 
     {
         array<byte, 10> a{0x80_b, 0x80_b, 0x00_b, 0x00_b};
 
-        EXPECT_EQ(begin_diff(skipper<integer_coder<int>>::decode_skip(a), a), sizeof(int));
-        EXPECT_EQ(begin_diff(skipper<float_coder<float>>::decode_skip(a), a), sizeof(float));
-        EXPECT_EQ(begin_diff(skipper<varint_coder<int>>::decode_skip(a), a), 3);
+        EXPECT_EQ(begin_diff(skipper<integer_coder<int>>::decode_skip<unsafe_mode>(a), a), sizeof(int));
+        EXPECT_EQ(begin_diff(skipper<float_coder<float>>::decode_skip<unsafe_mode>(a), a), sizeof(float));
+        EXPECT_EQ(begin_diff(skipper<varint_coder<int>>::decode_skip<unsafe_mode>(a), a), 3);
     }
 
     {
         array<byte, 200> a{0x80_b, 0x01_b};
 
-        EXPECT_EQ(begin_diff(skipper<string_coder>::decode_skip(a), a), 2 + 128);
+        EXPECT_EQ(begin_diff(skipper<string_coder>::decode_skip<unsafe_mode>(a), a), 2 + 128);
     }
 }

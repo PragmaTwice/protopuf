@@ -80,7 +80,7 @@ namespace pp {
             return sizeof(T);
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             if (!Mode::check_bytes_span(b, sizeof(T))) {
                 return {};
@@ -98,7 +98,7 @@ namespace pp {
             return sizeof(T);
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             if (!Mode::check_bytes_span(b, sizeof(T))) {
                 return {};
@@ -122,7 +122,7 @@ namespace pp {
             return n;
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             auto iter = b.begin();
             const auto end = b.end();
@@ -150,7 +150,7 @@ namespace pp {
             return skipper<varint_coder<std::make_unsigned_t<T>>>::encode_skip(static_cast<std::make_unsigned_t<T>>(v));
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             return skipper<varint_coder<std::make_unsigned_t<T>>>::template decode_skip<Mode>(b);
         }
@@ -169,7 +169,7 @@ namespace pp {
             return skipper<varint_coder<uint<N>>>::encode_skip(v.get_underlying());
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             return skipper<varint_coder<uint<N>>>::template decode_skip<Mode>(b);
         }
@@ -185,7 +185,7 @@ namespace pp {
             return skipper<integer_coder<uint<1>>>::encode_skip(v);
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             return skipper<integer_coder<uint<1>>>::template decode_skip<Mode>(b);
         }
@@ -201,7 +201,7 @@ namespace pp {
             return skipper<varint_coder<std::underlying_type_t<T>>>::encode_skip(static_cast<std::underlying_type_t<T>>(v));
         }
 
-        template <coder_mode Mode = unsafe_mode>
+        template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
             return skipper<integer_coder<std::underlying_type_t<T>>>::template decode_skip<Mode>(b);
         }

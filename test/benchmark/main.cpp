@@ -30,7 +30,7 @@ void BM_protopuf_encode(benchmark::State& state) {
     array<byte, 64> buffer{};
 
     for(auto _ : state) {
-        message_coder<Class>::encode(myClass, buffer);
+        message_coder<Class>::encode<unsafe_mode>(myClass, buffer);
     }
 }
 BENCHMARK(BM_protopuf_encode);
@@ -81,7 +81,7 @@ array<byte, 64> decode_buffer {
 
 void BM_protopuf_decode(benchmark::State& state) {
     for(auto _ : state) {
-        auto [myClass, _2] = message_coder<Class>::decode(decode_buffer);
+        auto [myClass, _2] = message_coder<Class>::decode<unsafe_mode>(decode_buffer);
         benchmark::DoNotOptimize(myClass);
     }
 }
