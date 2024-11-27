@@ -40,9 +40,9 @@ jobs:
             type: Debug
           - os: windows-2019
             type: Release
-          - os: macos-10.15
+          - os: macos-13
             type: Debug
-          - os: macos-10.15
+          - os: macos-13
             type: Release
     
     runs-on: ${{ matrix.os }}
@@ -119,7 +119,8 @@ jobs:
         run: lcov --directory . --capture --output-file coverage.info
         if: ${{ matrix.coverage }}
       - name: upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.info
         if: ${{ matrix.coverage }}
