@@ -224,10 +224,10 @@ namespace pp {
 
     /// Checks whether the type is a field type.
     template <typename>
-    constexpr bool is_field = false;
+    constexpr inline bool is_field = false;
 
     template <basic_fixed_string S, uint<4> N, coder C, attribute A, typename Container>
-    constexpr bool is_field <field<S, N, C, A, Container>> = true;
+    constexpr inline bool is_field <field<S, N, C, A, Container>> = true;
 
     /// A concept satisfied while type `T` is a field type.
     template <typename T>
@@ -309,10 +309,10 @@ namespace pp {
     }
 
     template <uint<4> V, char ... D> requires ((('0' <= D) && (D <= '9')) && ...)
-    constexpr auto field_literal_helper = V;
+    constexpr inline auto field_literal_helper = V;
 
     template <uint<4> V, char D1, char ... Dn>
-    constexpr auto field_literal_helper<V, D1, Dn...> = field_literal_helper<V * 10 + (D1 - '0'), Dn...>;
+    constexpr inline auto field_literal_helper<V, D1, Dn...> = field_literal_helper<V * 10 + (D1 - '0'), Dn...>;
 
     /// Constant integer literals, i.e. `233_i` as `std::integral_constant<uint<4>, 233>`
     template <char ... D>

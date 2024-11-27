@@ -75,6 +75,7 @@ fabric.properties
 .vs/
 CMakeSettings.json
 .vscode/
+.cache/
 
 build/
 doxygen/

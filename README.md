@@ -10,7 +10,7 @@
 
 ## Requirements
 
-- a compiler and a standard library implementation with C++20 support 
+- a compiler and a standard library implementation with C++20 support
     - GCC 11 or above, or
     - Clang 12 or above, or
     - MSVC 14.29 (Visual Studio 2019 Version 16.9) or above
@@ -42,17 +42,16 @@ We can use *protopuf* to describe it as C++ types:
 using namespace pp;
 
 using Student = message<
-    uint32_field<"id", 1>, 
+    uint32_field<"id", 1>,
     string_field<"name", 3>
 >;
 
 using Class = message<
-    string_field<"name", 8>, 
+    string_field<"name", 8>,
     message_field<"students", 3, Student, repeated>
 >;
 ```
 Subsequently, both serialization and deserialization become so easy to do:
-- Mode without buffer overflow control
 ```c++
 // serialization
 Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
@@ -60,34 +59,14 @@ Class myClass {"class 101", {tom, jerry}};
 myClass["students"_f].push_back(twice);
 
 array<byte, 64> buffer{};
-auto bufferEnd = message_coder<Class>::encode(myClass, buffer);
-assert(begin_diff(bufferEnd, buffer) == 45);
-
-// deserialization
-auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
-assert(yourClass["name"_f] == "class 101");
-assert(yourClass["students"_f][2]["name"_f] == "twice");
-assert(yourClass["students"_f][2]["id"_f] == 123);
-assert(yourClass["students"_f][1] == (Student{123456, "jerry"}));
-assert(yourClass == myClass);
-assert(begin_diff(bufferEnd2, bufferEnd) == 0);
-```
-- Mode with buffer overflow control (safe mode)
-```c++
-// serialization
-Student twice {123, "twice"}, tom{456, "tom"}, jerry{123456, "jerry"};
-Class myClass {"class 101", {tom, jerry}};
-myClass["students"_f].push_back(twice);
-
-array<byte, 64> buffer{};
-auto result = message_coder<Class>::encode<safe_mode>(myClass, buffer);
-assert (result.has_value());
+auto result = message_coder<Class>::encode(myClass, buffer);
+assert(result.has_value());
 const auto& bufferEnd = *result;
 assert(begin_diff(bufferEnd, buffer) == 45);
 
 // deserialization
-auto result2 = message_coder<Class>::decode<safe_mode>(buffer);
-assert (result2.has_value());
+auto result2 = message_coder<Class>::decode(buffer);
+assert(result2.has_value());
 const auto& [yourClass, bufferEnd2] = *result2;
 assert(yourClass["name"_f] == "class 101");
 assert(yourClass["students"_f][2]["name"_f] == "twice");
@@ -107,7 +86,7 @@ Length-delimited| string, bytes, embedded messages, packed repeated fields
 32-bit 	| fixed32, sfixed32, float
 
 ## Known issues
-- There is [a known bug](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794) related to template parameter lists of lambda expressions in Visual Studio 2019 Version 16.8, which can produce a wrong compilation error while compiling protopuf
+- There is [a known bug](https://developercommunity2.visualstudio.com/t/Wrong-compile-error-in-MSVC:-identifier-/1270794) in Visual Studio 2019 Version 16.8 related to template parameter lists of lambda expressions, which can produce a wrong compilation error while compiling protopuf
 - Although class type in NTTP ([P0732R2](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0732r2.pdf)) is implemented in GCC 10, there is a CTAD bug ([PR96331](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96331), exists until GCC 10.2) to reject valid NTTP usage, which prevent protopuf to compile successfully
 
 ## Acknowledgement
