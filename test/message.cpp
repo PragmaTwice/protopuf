@@ -474,6 +474,13 @@ GTEST_TEST(message, merge) {
     EXPECT_EQ(merged["name"_f], "e");
     EXPECT_EQ(merged["titles"_f], (vector<string>{"b", "c", "d", "f"}));
     EXPECT_EQ(merged["age"_f], 124);
+
+    constexpr merge_mode mode{merge_mode::singular::assign_if_empty};
+    merged = merge<mode>(merged, Person{"a", {}, {}});
+    EXPECT_EQ(merged["name"_f], "e");
+
+    merged = merge<mode>(Person{{}, {}, {}}, Person{"a", {}, {}});
+    EXPECT_EQ(merged["name"_f], "a");
 }
 
 GTEST_TEST(message_coder, encode_with_insufficient_buffer_size) {

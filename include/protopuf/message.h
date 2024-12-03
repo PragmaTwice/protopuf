@@ -226,9 +226,9 @@ namespace pp {
         /// @brief Merge another message into this message, for all fields: overwrite if it is singular and non-empty, merge to end otherwise
         ///
         /// same as `merge_field(field1, other.field1), ..., merge_field(fieldN, other.fieldN)`, ref to @ref merge_field
-        template <typename M> requires std::same_as<std::remove_cvref_t<M>, message>
+        template <merge_mode mode = merge_mode{}, typename M> requires std::same_as<std::remove_cvref_t<M>, message>
         constexpr void merge(M&& other) {
-            (merge_field(static_cast<T&>(*this), static_cast<type_forward<T, M&&>>(other)), ...);
+            (merge_field<mode>(static_cast<T&>(*this), static_cast<type_forward<T, M&&>>(other)), ...);
         }
     };
 
@@ -244,13 +244,13 @@ namespace pp {
     concept message_c = is_message<T>;
 
     /// Merge multiple messages into one message, and return the merged message
-    template <typename M1, typename... MN> 
+    template <merge_mode mode = merge_mode{}, typename M1, typename... MN>
     requires message_c<std::remove_cvref_t<M1>> && 
              are_same<std::remove_cvref_t<M1>, std::remove_cvref_t<MN>...>
     constexpr auto merge(M1&& msg1, MN&& ... msgN) {
         std::remove_cvref_t<M1> res = std::forward<M1>(msg1);
 
-        (res.merge(std::forward<MN>(msgN)), ...);
+        (res.template merge<mode>(std::forward<MN>(msgN)), ...);
 
         return res;
     }
