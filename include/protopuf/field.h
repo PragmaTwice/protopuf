@@ -290,12 +290,32 @@ namespace pp {
         }
     }
 
+    struct merge_mode {
+        enum class singular {
+            override,
+            assign_if_empty,
+        } singular_mode;
+
+        enum class repeated {
+            push_back,
+        } repeated_mode;
+
+        constexpr merge_mode(singular s = singular::override, repeated r = repeated::push_back)
+          : singular_mode(s), repeated_mode(r) {}
+    };
+
     /// Merge a field into another field: overwrite if it is singular and non-empty, merge to end otherwise
-    template <field_c D, typename S> requires field_c<std::remove_cvref_t<S>>
+    template <merge_mode mode = merge_mode{}, field_c D, typename S> requires field_c<std::remove_cvref_t<S>>
     constexpr void merge_field(D& f, S&& v) {
         if constexpr (D::attr == singular) {
-            if (!empty_field(v)) {
-                f = std::forward<S>(v);
+            if constexpr (mode.singular_mode == merge_mode::singular::override) {
+                if (!empty_field(v)) {
+                    f = std::forward<S>(v);
+                }
+            } else {
+                if (!empty_field(v) && empty_field(f)) {
+                    f = std::forward<S>(v);
+                }
             }
         } else {
             auto inserter = std::inserter(f, f.end());
