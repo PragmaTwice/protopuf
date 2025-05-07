@@ -211,7 +211,7 @@ namespace pp {
     using string_field = field<S, N, string_coder, A, Container>;
 
     /// Type alias for bytes fields
-    template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<std::byte>>>
+    template <basic_fixed_string S, uint<4> N, attribute A = singular, typename Container = std::vector<std::vector<uint<1>>>>
     using bytes_field = field<S, N, bytes_coder, A, Container>;
 
     /// Type alias for boolean fields
