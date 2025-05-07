@@ -23,17 +23,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             type: Debug
             cxx: gcc
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             type: Release
             cxx: gcc
             coverage: -DCMAKE_CXX_FLAGS=--coverage
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             type: Debug
             cxx: clang
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             type: Release
             cxx: clang
           - os: windows-2019
