@@ -16,6 +16,7 @@
 #define PROTOPUF_ARRAY_H
 
 #include <ranges>
+#include <string>
 #include <vector>
 #include "coder.h"
 #include "varint.h"
