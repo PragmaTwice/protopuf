@@ -15,11 +15,13 @@ jobs:
           submodules: true
       - name: install deps
         run: |
+          sudo apt update
+          sudo apt install -y libclang-15-dev
           git clone https://github.com/doxygen/doxygen doxygen-tool
           cd doxygen-tool
           mkdir build
           cd build
-          cmake -Duse_libclang=ON ..
+          cmake -Duse_libclang=ON -DCMAKE_PREFIX_PATH=/usr/lib/llvm-15/ ..
           make -j$(nproc)
           sudo make install
           cd ../..
