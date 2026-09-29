@@ -77,7 +77,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: install compiler (Ubuntu)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
@@ -190,7 +190,7 @@ jobs:
 
       - name: upload coverage
         if: ${{ matrix.coverage }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.info
