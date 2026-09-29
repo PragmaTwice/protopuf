@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 project(protopuf)
 
 message(NOTICE "[TIP] Expected a compiler with C++20 support (i.e. GCC 11, Clang 12 or above)")
@@ -37,7 +37,7 @@ if(BUILD_TESTS)
     if(DOWNLOAD_GTEST)
         include(FetchContent)
         FetchContent_Declare(googletest
-            URL ${GTEST_REPO}/archive/refs/tags/release-1.11.0.zip
+            URL ${GTEST_REPO}/archive/refs/tags/v1.14.0.zip
         )
 
         set(BUILD_GMOCK OFF CACHE BOOL "")
