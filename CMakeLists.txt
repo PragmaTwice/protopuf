@@ -37,7 +37,7 @@ if(BUILD_TESTS)
     if(DOWNLOAD_GTEST)
         include(FetchContent)
         FetchContent_Declare(googletest
-            URL ${GTEST_REPO}/archive/refs/tags/release-1.11.0.zip
+            URL ${GTEST_REPO}/archive/refs/tags/v1.14.0.zip
         )
 
         set(BUILD_GMOCK OFF CACHE BOOL "")

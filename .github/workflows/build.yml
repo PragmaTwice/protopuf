@@ -21,106 +21,176 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
+          # Minimum supported compilers (packages available on Ubuntu 22.04)
           - os: ubuntu-22.04
             type: Debug
-            cxx: gcc
+            compiler: gcc-11
           - os: ubuntu-22.04
             type: Release
-            cxx: gcc
+            compiler: gcc-11
             coverage: -DCMAKE_CXX_FLAGS=--coverage
           - os: ubuntu-22.04
             type: Debug
-            cxx: clang
+            compiler: clang-12
           - os: ubuntu-22.04
             type: Release
-            cxx: clang
-          - os: windows-2019
+            compiler: clang-12
+
+          # Ubuntu 24.04: newer GCC / Clang from distro packages
+          - os: ubuntu-24.04
             type: Debug
-          - os: windows-2019
+            compiler: gcc-13
+          - os: ubuntu-24.04
             type: Release
-          - os: macos-13
+            compiler: gcc-13
+          - os: ubuntu-24.04
             type: Debug
-          - os: macos-13
+            compiler: gcc-14
+          - os: ubuntu-24.04
             type: Release
-    
+            compiler: gcc-14
+          - os: ubuntu-24.04
+            type: Debug
+            compiler: clang-14
+          - os: ubuntu-24.04
+            type: Release
+            compiler: clang-14
+          - os: ubuntu-24.04
+            type: Debug
+            compiler: clang-18
+          - os: ubuntu-24.04
+            type: Release
+            compiler: clang-18
+
+          # Windows / macOS
+          - os: windows-2025
+            type: Debug
+          - os: windows-2025
+            type: Release
+          - os: macos-14
+            type: Debug
+          - os: macos-14
+            type: Release
+
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - name: install build tools (gcc)
+      - uses: actions/checkout@v7
+
+      - name: install compiler (Ubuntu)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          sudo apt install g++-11 -y
-          echo "CC=gcc-11" >> $GITHUB_ENV
-          echo "CXX=g++-11" >> $GITHUB_ENV
-          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-11 90
-        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'gcc' }}
-      - name: install build tools (clang)
-        run: |
-          sudo apt install clang-12 -y
-          sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/11 /usr/include/c++/11
-          echo "CC=clang-12" >> $GITHUB_ENV
-          echo "CXX=clang++-12" >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.cxx == 'clang' }}
+          set -euo pipefail
+          sudo apt-get update
+
+          case "${{ matrix.compiler }}" in
+            gcc-11)
+              sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+              sudo apt-get update
+              sudo apt-get install -y g++-11
+              echo "CC=gcc-11" >> "$GITHUB_ENV"
+              echo "CXX=g++-11" >> "$GITHUB_ENV"
+              sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-11 90
+              ;;
+            gcc-13)
+              sudo apt-get install -y g++-13
+              echo "CC=gcc-13" >> "$GITHUB_ENV"
+              echo "CXX=g++-13" >> "$GITHUB_ENV"
+              ;;
+            gcc-14)
+              sudo apt-get install -y g++-14
+              echo "CC=gcc-14" >> "$GITHUB_ENV"
+              echo "CXX=g++-14" >> "$GITHUB_ENV"
+              ;;
+            clang-12)
+              sudo apt-get install -y clang-12
+              echo "CC=clang-12" >> "$GITHUB_ENV"
+              echo "CXX=clang++-12" >> "$GITHUB_ENV"
+              ;;
+            clang-14)
+              sudo apt-get install -y clang-14
+              echo "CC=clang-14" >> "$GITHUB_ENV"
+              echo "CXX=clang++-14" >> "$GITHUB_ENV"
+              ;;
+            clang-18)
+              sudo apt-get install -y clang-18
+              echo "CC=clang-18" >> "$GITHUB_ENV"
+              echo "CXX=clang++-18" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unknown compiler: ${{ matrix.compiler }}"
+              exit 1
+              ;;
+          esac
+
       - name: enable compatibility test (linux)
-        run: echo "COMPATIBILITY=-DENABLE_COMPATIBILITY_TEST=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: echo "COMPATIBILITY=-DENABLE_COMPATIBILITY_TEST=ON" >> "$GITHUB_ENV"
+
       - name: install protobuf for compatibility test
-        run: sudo apt install protobuf-compiler libprotobuf-dev -y
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: sudo apt-get install -y protobuf-compiler libprotobuf-dev
+
       - name: install benchmark deps
-        run: |
-          sudo apt install libbenchmark-dev -y
-          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $GITHUB_ENV
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
-      - name: install build tools (mac)
         run: |
-          echo "CC=`which gcc-11`" >> $GITHUB_ENV
-          echo "CXX=`which g++-11`" >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.os, 'macos') }}
+          sudo apt-get install -y libbenchmark-dev
+          echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> "$GITHUB_ENV"
+
       - name: install protobuf for compatibility test (mac)
-        run: brew install protobuf
         if: ${{ startsWith(matrix.os, 'macos') }}
+        run: brew install protobuf
+
       - name: install benchmark deps (mac)
-        run: |
-          brew install google-benchmark
         if: ${{ startsWith(matrix.os, 'macos') && matrix.type == 'Release' }}
+        run: brew install google-benchmark
+
       # - name: install protobuf for compatibility test (windows)
+      #   if: ${{ startsWith(matrix.os, 'windows') }}
       #   run: |
       #     vcpkg install protobuf:x64-windows
       #     echo "COMPATIBILITY=-DENABLE_COMPATIBILITY_TEST=ON" >> $Env:GITHUB_ENV
-      #   if: ${{ startsWith(matrix.os, 'windows') }}
       # - name: install benchmark deps (windows)
+      #   if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
       #   run: |
       #     vcpkg install benchmark:x64-windows
       #     echo "BENCHMARK=-DENABLE_BENCHMARK=ON" >> $Env:GITHUB_ENV
-      #   if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }} 
+
       - name: install coverage tools
-        run: sudo apt install lcov -y
         if: ${{ matrix.coverage }}
+        run: sudo apt-get install -y lcov
+
       - name: generate build script
-        run: cmake $BENCHMARK $COMPATIBILITY -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ !startsWith(matrix.os, 'windows') }}
+        run: cmake $BENCHMARK $COMPATIBILITY -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
+
       - name: generate build script
-        run: cmake $Env:BENCHMARK $Env:COMPATIBILITY -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
         if: ${{ startsWith(matrix.os, 'windows') }}
+        run: cmake $Env:BENCHMARK $Env:COMPATIBILITY -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.coverage }} .
+
       - name: build project
         run: cmake --build . --config ${{ matrix.type }}
+
       - name: run unit testing
-        run: ctest
+        run: ctest --output-on-failure -C ${{ matrix.type }}
+
       - name: run benchmark
-        run: ./test/benchmark/protopuf_benchmark
         if: ${{ startsWith(matrix.os, 'ubuntu') && matrix.type == 'Release' }}
+        run: ./test/benchmark/protopuf_benchmark
+
       # - name: run benchmark (windows)
-      #   run: .\test\benchmark\Release\protopuf_benchmark
       #   if: ${{ startsWith(matrix.os, 'windows') && matrix.type == 'Release' }}
+      #   run: .\test\benchmark\Release\protopuf_benchmark
+
       - name: capture coverage
-        run: lcov --directory . --capture --output-file coverage.info
         if: ${{ matrix.coverage }}
+        run: lcov --directory . --capture --output-file coverage.info
+
       - name: upload coverage
-        uses: codecov/codecov-action@v4
+        if: ${{ matrix.coverage }}
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.info
-        if: ${{ matrix.coverage }}
+          files: ./coverage.info

@@ -8,31 +8,35 @@ on:
 
 jobs:
   doc:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: true
+
       - name: install deps
         run: |
-          sudo apt update
-          sudo apt install -y libclang-15-dev
+          sudo apt-get update
+          sudo apt-get install -y libclang-18-dev
           git clone https://github.com/doxygen/doxygen doxygen-tool
           cd doxygen-tool
           mkdir build
           cd build
-          cmake -Duse_libclang=ON -DCMAKE_PREFIX_PATH=/usr/lib/llvm-15/ ..
+          cmake -Duse_libclang=ON -DCMAKE_PREFIX_PATH=/usr/lib/llvm-18/ ..
           make -j$(nproc)
           sudo make install
           cd ../..
           sudo npm install -g surge
+
       - name: apply patch to README
         run: |
           sed -i 's/!\[puffer\](.*)//g' README.md
           sed -i 's|\[!\[\([^(]*\)\]([^)]*)|[\1|g' README.md
           sed -i 's|```c++|```{.cpp}|g' README.md
           sed -i 's|:closed_book:.*||g' README.md
+
       - name: doxygen
         run: doxygen Doxyfile
+
       - name: upload
         run: surge ./doxygen/html protopuf.surge.sh --token ${{ secrets.SURGE_TOKEN }}
