@@ -49,8 +49,10 @@ namespace pp {
             const auto end = s.end();
 
             do {
-                if (!Mode::check_iterator(iter, end)) {
-                    return {};
+                if constexpr (Mode::need_checks) {
+                    if (!Mode::check_iterator(iter, end)) {
+                        return {};
+                    }
                 }
 
                 *iter = 0b1000'0000_b | std::byte(n);
@@ -69,8 +71,10 @@ namespace pp {
             auto iter = s.begin();
             const auto end = s.end();
 
-            if (!Mode::check_iterator(iter, end)) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_iterator(iter, end)) {
+                    return {};
+                }
             }
 
             std::size_t i = 0;
@@ -78,8 +82,10 @@ namespace pp {
                 n |= static_cast<T>(static_cast<T>(*iter & 0b0111'1111_b) << 7*i);
                 ++iter, ++i;
 
-                if (!Mode::check_iterator(iter, end)) {
-                    return {};
+                if constexpr (Mode::need_checks) {
+                    if (!Mode::check_iterator(iter, end)) {
+                        return {};
+                    }
                 }
             }
             n |= static_cast<T>(static_cast<T>(*iter++) << 7 * i);

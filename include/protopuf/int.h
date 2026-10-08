@@ -199,8 +199,10 @@ namespace pp {
 
         template <coder_mode Mode = safe_mode>
         static constexpr encode_result<Mode> encode(T i, bytes b) {
-            if (!Mode::check_bytes_span(b, N)) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_bytes_span(b, N)) {
+                    return {};
+                }
             }
             
             int_to_bytes<N>(i, b.subspan<0, N>());
@@ -209,8 +211,10 @@ namespace pp {
 
         template <coder_mode Mode = safe_mode>
         static constexpr decode_result<T, Mode> decode(bytes b) {
-            if (!Mode::check_bytes_span(b, N)) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_bytes_span(b, N)) {
+                    return {};
+                }
             }
 
             return Mode::template make_result<decode_result<T, Mode>>(bytes_to_int<N>(b.subspan<0, N>()), b.subspan<N>());

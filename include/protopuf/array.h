@@ -81,11 +81,11 @@ namespace pp {
                 con.reserve(len);
             }
 
-            const auto origin_b = b;
             decode_value<typename C::value_type> decode_v;
-            while(begin_diff(b, origin_b) < len) {
+            while(len) {
                 if (Mode::get_value_from_result(C::template decode<Mode>(b), decode_v)) {
                     std::tie(*std::inserter(con, con.end()), b) = std::move(decode_v);
+                    --len;
                 } else {
                     return {};
                 }
@@ -122,8 +122,10 @@ namespace pp {
             uint<8> n = 0;
             std::tie(n, b) = decode_len;
 
-            if (!Mode::check_bytes_span(b, n)) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_bytes_span(b, n)) {
+                    return {};
+                }
             }
 
             return Mode::template make_result<decode_skip_result<Mode>>(b.subspan(n));

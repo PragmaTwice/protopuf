@@ -73,6 +73,8 @@ namespace pp {
         template<typename T>
         using result_type = std::remove_reference_t<T>;
 
+        static constexpr bool need_checks = false;
+
         template<typename R, typename... Args>
         static constexpr R make_result(Args&&... args) {
             return R{std::forward<Args>(args)...};
@@ -97,6 +99,8 @@ namespace pp {
     struct safe_mode {
         template<typename T>
         using result_type = std::optional<std::remove_reference_t<T>>;
+
+        static constexpr bool need_checks = true;
 
         template<typename R, typename... Args>
         static constexpr R make_result(Args&&... args) {

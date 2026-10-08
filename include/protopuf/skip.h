@@ -82,8 +82,10 @@ namespace pp {
 
         template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
-            if (!Mode::check_bytes_span(b, sizeof(T))) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_bytes_span(b, sizeof(T))) {
+                    return {};
+                }
             }
             return Mode::template make_result<decode_skip_result<Mode>>(b.subspan<sizeof(T)>());
         }
@@ -100,8 +102,10 @@ namespace pp {
 
         template <coder_mode Mode = safe_mode>
         static constexpr decode_skip_result<Mode> decode_skip(bytes b) {
-            if (!Mode::check_bytes_span(b, sizeof(T))) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_bytes_span(b, sizeof(T))) {
+                    return {};
+                }
             }
             return Mode::template make_result<decode_skip_result<Mode>>(b.subspan<sizeof(T)>());
         }
@@ -127,13 +131,17 @@ namespace pp {
             auto iter = b.begin();
             const auto end = b.end();
 
-            if (!Mode::check_iterator(iter, end)) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_iterator(iter, end)) {
+                    return {};
+                }
             }
 
             while((*iter++ >> 7) == 1_b) {
-                if (!Mode::check_iterator(iter, end)) {
-                    return {};
+                if constexpr (Mode::need_checks) {
+                    if (!Mode::check_iterator(iter, end)) {
+                        return {};
+                    }
                 }
             }
 

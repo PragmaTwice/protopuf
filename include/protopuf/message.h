@@ -489,13 +489,13 @@ namespace pp {
             std::size_t len = 0;
             std::tie(len, b) = decod_len;
 
-            const auto origin_b = b;
-            while(begin_diff(b, origin_b) < len) {
+            while(len) {
                 std::pair<bytes, bool> bytes_with_next;
                 if (!Mode::get_value_from_result(decode_map<Mode, T>.decode(v, b), bytes_with_next)) {
                     return {};
                 }
 
+                --len;
                 bool next = true;
                 std::tie(b, next) = bytes_with_next;
 
@@ -528,8 +528,10 @@ namespace pp {
             uint<8> n = 0;
             std::tie(n, b) = decode_len;
 
-            if (!Mode::check_bytes_span(b, n)) {
-                return {};
+            if constexpr (Mode::need_checks) {
+                if (!Mode::check_bytes_span(b, n)) {
+                    return {};
+                }
             }
 
             return Mode::template make_result<decode_skip_result<Mode>>(b.subspan(n));
